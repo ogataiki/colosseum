@@ -32,9 +32,9 @@ class GameScene: SKScene {
     var meleeProgress: Int = 0;
     var meleeNextFlg: Bool = false;
     
-    var player_char: SKSpriteNode!;
-    var enemy_char: SKSpriteNode!;
-    var char_list: [String : SKSpriteNode] = [:];
+    var player_char: Character!;
+    var enemy_char: Character!;
+    var char_list: [String : Character] = [:];
     
     enum ZCtrl: CGFloat {
         case gauge_rise_bar = 101
@@ -69,18 +69,40 @@ class GameScene: SKScene {
         self.addChild(attack_count_lbl);
         
         
-        player_char = SKSpriteNode(imageNamed: "TestChar1");
+        player_char = Character(imageNamed: "TestChar1");
         player_char.position = CGPointMake(self.size.width*0.85, self.size.height*0.9);
+        player_char.position_base = player_char.position;
         player_char.xScale = -1.0;
         player_char.name = "player";
         self.addChild(player_char);
         char_list[player_char.name!] = player_char;
+        
+        player_char.gaugeHP = Gauge(color: UIColor.grayColor(), size: CGSizeMake(player_char.size.width, 5));
+        player_char.gaugeHP.initGauge(color: UIColor.greenColor(), direction: Gauge.Direction.horizontal, zPos:ZCtrl.gauge.rawValue);
+        player_char.gaugeHP.initGauge_lo(color: UIColor.redColor(), zPos:ZCtrl.gauge_lo.rawValue);
+        player_char.gaugeHP.resetProgress(0.0);
+        player_char.gaugeHP.changeAnchorPoint(CGPointMake(0.5, 0.5));
+        player_char.gaugeHP.changePosition(CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*0.6));
+        player_char.gaugeHP.updateProgress(100);
+        self.addChild(player_char.gaugeHP);
+        
 
-        enemy_char = SKSpriteNode(imageNamed: "TestChar2");
+        enemy_char = Character(imageNamed: "TestChar2");
         enemy_char.position = CGPointMake(self.size.width*0.15, self.size.height*0.9);
+        enemy_char.position_base = enemy_char.position;
         enemy_char.name = "enemy";
         self.addChild(enemy_char);
         char_list[enemy_char.name!] = enemy_char;
+        
+        enemy_char.gaugeHP = Gauge(color: UIColor.grayColor(), size: CGSizeMake(enemy_char.size.width, 5));
+        enemy_char.gaugeHP.initGauge(color: UIColor.greenColor(), direction: Gauge.Direction.horizontal, zPos:ZCtrl.gauge.rawValue);
+        enemy_char.gaugeHP.initGauge_lo(color: UIColor.redColor(), zPos:ZCtrl.gauge_lo.rawValue);
+        enemy_char.gaugeHP.resetProgress(0.0);
+        enemy_char.gaugeHP.changeAnchorPoint(CGPointMake(0.5, 0.5));
+        enemy_char.gaugeHP.changePosition(CGPointMake(enemy_char.position.x, enemy_char.position.y - enemy_char.size.height*0.6));
+        enemy_char.gaugeHP.updateProgress(100);
+        self.addChild(enemy_char.gaugeHP);
+
     }
     
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
@@ -115,9 +137,9 @@ class GameScene: SKScene {
                 
             case SceneStatus.melee:
                 
-                meleeEnd();
-                
-                scene_status = SceneStatus.gauge_stop;
+                //meleeEnd();
+                //scene_status = SceneStatus.gauge_stop;
+                break;
             }
 
         }
@@ -175,11 +197,21 @@ class GameScene: SKScene {
     func meleeStart() {
         
         for i in 0 ..< attack_list.count {
+            
             var data: MeleeData = MeleeData(
                 attack: (attack_list[i] < 1) ? 1 : attack_list[i]
                 , attacker_name: "player"
                 , target_name:  "enemy");
             meleeBuffer.append(data);
+            
+            if arc4random() % 3 == 0 {
+                
+                var edata: MeleeData = MeleeData(
+                    attack: 1 + CGFloat(arc4random() % 200)
+                    , attacker_name: "enemy"
+                    , target_name:  "player");
+                meleeBuffer.append(edata);
+            }
         }
         
         meleeProgress = 0;
@@ -188,7 +220,13 @@ class GameScene: SKScene {
     func meleeEnd() {
         
         // 乱戦状態のデータを初期化
-        for i in 0 ..< char_list.count {
+        let keys = Array(char_list.keys);
+        for i in 0 ..< keys.count {
+            let key = keys[i];
+            if let c = char_list[key] {
+                let move = SKAction.moveTo(c.position_base, duration: 0.2);
+                c.runAction(move);
+            }
         }
         meleeBuffer = [];
         meleeProgress = 0;
@@ -235,6 +273,8 @@ class GameScene: SKScene {
         let target = char_list[target_name];
         if target != nil {
             
+            target!.HP = target!.HP - damage;
+            
             target!.color = UIColor.redColor();
             target!.colorBlendFactor = 0.8;
             
@@ -258,6 +298,8 @@ class GameScene: SKScene {
             let f1 = SKAction.fadeAlphaTo(0.0, duration: 0.1);
             let dend = SKAction.runBlock({ () -> Void in
                 damage_lbl.removeFromParent();
+                
+                target!.gaugeHP.updateProgress(CGFloat(target!.HP) / CGFloat(target!.HP_base) * 100);
             })
             damage_lbl.runAction(SKAction.sequence([m1, f1, dend]));
         }
