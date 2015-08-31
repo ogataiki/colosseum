@@ -3,10 +3,11 @@ import SpriteKit
 class GameScene: SKScene {
     
     enum SceneStatus: Int {
-        case gauge_stop = 1
-        case melee = 2
+        case stock = 1
+        case tactical = 2
+        case melee = 3
     }
-    var scene_status = SceneStatus.gauge_stop;
+    var scene_status = SceneStatus.stock;
     
     var gauge: Gauge!;
     var reach_base: CGFloat = 200;
@@ -68,7 +69,12 @@ class GameScene: SKScene {
         attack_count_lbl.position = CGPointMake(gauge.position.x, gauge.position.y - gauge.size.height*0.65);
         self.addChild(attack_count_lbl);
         
+        playerInit();
         
+        enemyInit();
+    }
+    
+    func playerInit() {
         player_char = Character(imageNamed: "TestChar1");
         player_char.position = CGPointMake(self.size.width*0.85, self.size.height*0.9);
         player_char.position_base = player_char.position;
@@ -84,9 +90,66 @@ class GameScene: SKScene {
         player_char.gaugeHP.changeAnchorPoint(CGPointMake(0.5, 0.5));
         player_char.gaugeHP.changePosition(CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*0.6));
         player_char.gaugeHP.updateProgress(100);
-        self.addChild(player_char.gaugeHP);
         
+        self.addChild(player_char.gaugeHP);
 
+        var act_1 = Character.Action();
+        act_1.name = "攻撃";
+        act_1.action.type = CharBtlAction.ActType.atk;
+        act_1.action.atkEnable = true;
+        var atk_1 = CharBtlAction.Atk();
+        atk_1.atkPower = 2.0;
+        atk_1.atkCount = 2;
+        act_1.action.atk.append(atk_1);
+        player_char.Actions.append(act_1);
+
+        var act_2 = Character.Action();
+        act_2.name = "防御";
+        act_2.action.type = CharBtlAction.ActType.def;
+        act_2.action.defEnable = true;
+        act_2.action.def.defPower = 30.0;
+        player_char.Actions.append(act_2);
+
+        var act_3 = Character.Action();
+        act_3.name = "強化";
+        act_3.action.type = CharBtlAction.ActType.enh;
+        act_3.action.enhEnable = true;
+        var enh_1 = CharBtlAction.Enh();
+        enh_1.enhAtkPowerAdd = 100.0;
+        act_3.action.enh.append(enh_1);
+        player_char.Actions.append(act_3);
+
+        var act_4 = Character.Action();
+        act_4.name = "妨害";
+        act_4.action.type = CharBtlAction.ActType.jam;
+        act_4.action.jamEnable = true;
+        var jam_1 = CharBtlAction.Jam();
+        jam_1.type = CharBtlAction.JamType.poison;
+        jam_1.seedType = CharBtlAction.Jam.JamSeedType.atkNow;
+        jam_1.power = 0.5;
+        jam_1.turn = 3;
+        act_4.action.jam.append(jam_1);
+        player_char.Actions.append(act_4);
+
+        var act_5 = Character.Action();
+        act_5.name = "特技";
+        act_5.action.type = CharBtlAction.ActType.atk;
+        act_5.action.atkEnable = true;
+        var atk_5 = CharBtlAction.Atk();
+        atk_5.atkPower = 50.0;
+        atk_5.atkCount = 4;
+        act_5.action.atk.append(atk_5);
+        act_5.action.jamEnable = true;
+        var jam_5 = CharBtlAction.Jam();
+        jam_5.type = CharBtlAction.JamType.paralysis;
+        jam_5.seedType = CharBtlAction.Jam.JamSeedType.atkBase;
+        jam_5.power = 50.0;
+        jam_5.turn = 2;
+        act_5.action.jam.append(jam_5);
+        player_char.Actions.append(act_5);
+    }
+    
+    func enemyInit() {
         enemy_char = Character(imageNamed: "TestChar2");
         enemy_char.position = CGPointMake(self.size.width*0.15, self.size.height*0.9);
         enemy_char.position_base = enemy_char.position;
@@ -102,7 +165,61 @@ class GameScene: SKScene {
         enemy_char.gaugeHP.changePosition(CGPointMake(enemy_char.position.x, enemy_char.position.y - enemy_char.size.height*0.6));
         enemy_char.gaugeHP.updateProgress(100);
         self.addChild(enemy_char.gaugeHP);
-
+        
+        var act_1 = Character.Action();
+        act_1.name = "攻撃";
+        act_1.action.type = CharBtlAction.ActType.atk;
+        act_1.action.atkEnable = true;
+        var atk_1 = CharBtlAction.Atk();
+        atk_1.atkPower = 2.0;
+        atk_1.atkCount = 2;
+        act_1.action.atk.append(atk_1);
+        enemy_char.Actions.append(act_1);
+        
+        var act_2 = Character.Action();
+        act_2.name = "防御";
+        act_2.action.type = CharBtlAction.ActType.def;
+        act_2.action.defEnable = true;
+        act_2.action.def.defPower = 30.0;
+        enemy_char.Actions.append(act_2);
+        
+        var act_3 = Character.Action();
+        act_3.name = "強化";
+        act_3.action.type = CharBtlAction.ActType.enh;
+        act_3.action.enhEnable = true;
+        var enh_1 = CharBtlAction.Enh();
+        enh_1.enhAtkPowerAdd = 100.0;
+        act_3.action.enh.append(enh_1);
+        enemy_char.Actions.append(act_3);
+        
+        var act_4 = Character.Action();
+        act_4.name = "妨害";
+        act_4.action.type = CharBtlAction.ActType.jam;
+        act_4.action.jamEnable = true;
+        var jam_1 = CharBtlAction.Jam();
+        jam_1.type = CharBtlAction.JamType.poison;
+        jam_1.seedType = CharBtlAction.Jam.JamSeedType.atkNow;
+        jam_1.power = 0.5;
+        jam_1.turn = 3;
+        act_4.action.jam.append(jam_1);
+        enemy_char.Actions.append(act_4);
+        
+        var act_5 = Character.Action();
+        act_5.name = "特技";
+        act_5.action.type = CharBtlAction.ActType.atk;
+        act_5.action.atkEnable = true;
+        var atk_5 = CharBtlAction.Atk();
+        atk_5.atkPower = 50.0;
+        atk_5.atkCount = 4;
+        act_5.action.atk.append(atk_5);
+        act_5.action.jamEnable = true;
+        var jam_5 = CharBtlAction.Jam();
+        jam_5.type = CharBtlAction.JamType.paralysis;
+        jam_5.seedType = CharBtlAction.Jam.JamSeedType.atkBase;
+        jam_5.power = 50.0;
+        jam_5.turn = 2;
+        act_5.action.jam.append(jam_5);
+        enemy_char.Actions.append(act_5);
     }
     
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
@@ -113,7 +230,7 @@ class GameScene: SKScene {
 
             switch(scene_status) {
                 
-            case SceneStatus.gauge_stop:
+            case SceneStatus.stock:
                 
                 println(rise_frame);
                 
@@ -134,11 +251,13 @@ class GameScene: SKScene {
                 
                 rise_frame = 0;
                 
+            case SceneStatus.tactical:
+                break;
                 
             case SceneStatus.melee:
                 
                 //meleeEnd();
-                //scene_status = SceneStatus.gauge_stop;
+                //scene_status = SceneStatus.stock;
                 break;
             }
 
@@ -149,14 +268,16 @@ class GameScene: SKScene {
         /* Called before each frame is rendered */
         
         switch(scene_status) {
-        case SceneStatus.gauge_stop:
-            updateGaugeStop();
+        case SceneStatus.stock:
+            updateStock();
+        case SceneStatus.tactical:
+            updateTactical();
         case SceneStatus.melee:
             updateMelee();
         }
     }
     
-    func updateGaugeStop() {
+    func updateStock() {
         
         if rise_reset_flg {
             rise_frame = 0;
@@ -177,13 +298,17 @@ class GameScene: SKScene {
         rise_bar.position = CGPointMake(gauge.position.x, bar_pos);
     }
     
+    func updateTactical() {
+        
+    }
+    
     func updateMelee() {
         
         if meleeNextFlg {
             meleeNextFlg = false;
             if meleeProgress >= meleeBuffer.count {
                 meleeEnd();
-                scene_status = SceneStatus.gauge_stop;
+                scene_status = SceneStatus.stock;
             }
             else {
                 meleeAction_Attack(meleeBuffer[meleeProgress].attacker_name

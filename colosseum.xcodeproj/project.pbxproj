@@ -18,6 +18,7 @@
 		500175821B8E876A00567C73 /* Gauge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500175811B8E876A00567C73 /* Gauge.swift */; };
 		50121F5D1B901AA80071F8EC /* SKActionEx.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50121F5C1B901AA80071F8EC /* SKActionEx.swift */; };
 		503972E51B9050A9009AB94F /* Character.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503972E41B9050A9009AB94F /* Character.swift */; };
+		50483EE91B940EC2001638CE /* CharBtlAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50483EE81B940EC2001638CE /* CharBtlAction.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +47,7 @@
 		500175811B8E876A00567C73 /* Gauge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Gauge.swift; sourceTree = "<group>"; };
 		50121F5C1B901AA80071F8EC /* SKActionEx.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKActionEx.swift; sourceTree = "<group>"; };
 		503972E41B9050A9009AB94F /* Character.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Character.swift; sourceTree = "<group>"; };
+		50483EE81B940EC2001638CE /* CharBtlAction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharBtlAction.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,6 +95,7 @@
 				500175631B8E86BB00567C73 /* GameViewController.swift */,
 				500175811B8E876A00567C73 /* Gauge.swift */,
 				503972E41B9050A9009AB94F /* Character.swift */,
+				50483EE81B940EC2001638CE /* CharBtlAction.swift */,
 				50121F5C1B901AA80071F8EC /* SKActionEx.swift */,
 				500175651B8E86BB00567C73 /* Main.storyboard */,
 				500175681B8E86BB00567C73 /* Images.xcassets */,
@@ -229,6 +232,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				500175621B8E86BB00567C73 /* GameScene.swift in Sources */,
+				50483EE91B940EC2001638CE /* CharBtlAction.swift in Sources */,
 				50121F5D1B901AA80071F8EC /* SKActionEx.swift in Sources */,
 				500175641B8E86BB00567C73 /* GameViewController.swift in Sources */,
 				503972E51B9050A9009AB94F /* Character.swift in Sources */,

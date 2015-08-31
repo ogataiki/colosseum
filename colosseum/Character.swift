@@ -13,4 +13,10 @@ class Character : SKSpriteNode {
     var gaugeHP: Gauge!;
     
     var position_base: CGPoint = CGPointZero;
+    
+    struct Action {
+        var name: String = "";
+        var action = CharBtlAction();
+    }
+    var Actions: [Action] = [];
 }
