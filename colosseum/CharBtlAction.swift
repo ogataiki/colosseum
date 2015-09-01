@@ -24,6 +24,7 @@ class CharBtlAction {
         var atkCount: Int = 1;
     }
     var atk: [Atk] = [];
+    var atkCost: Int = 1;
     
     // def
     var defEnable: Bool = false;
@@ -33,6 +34,7 @@ class CharBtlAction {
         var defCounterAttack: CGFloat = 0.0;    // 0.0 ~
     }
     var def = Def();
+    var defCost: Int = 1;
     
     // enh
     var enhEnable: Bool = false;
@@ -41,8 +43,10 @@ class CharBtlAction {
         var enhAtkCountAdd: Int = 0;            // count 0 ~
         var enhDefPowerAdd: CGFloat = 0.0;      // Ratio %
         var enhAvoidedAdd: CGFloat = 0.0;       // %
+        var cost: Int = 2;
     }
     var enh: [Enh] = [];
+    var enhCost: Int = 2;
     
     // jam
     var jamEnable: Bool = false;
@@ -74,7 +78,9 @@ class CharBtlAction {
         
         var power: CGFloat = 100.0;         // Ratio % for seedtype
         var turn: Int = 1;                  // Continue turn;
+        var cost: Int = 2;
     }
     var jam: [Jam] = [];
+    var jamCost: Int = 2;
     
 }

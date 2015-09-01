@@ -40,6 +40,7 @@ class GameScene: SKScene {
     //------
     // UI系
     var ui_playerLastStock: SKLabelNode!;
+    var ui_tacticalCommandLbl: SKLabelNode!;
     var ui_tacticalAtk: UIButton!;
     var ui_tacticalDef: UIButton!;
     var ui_tacticalEnh: UIButton!;
@@ -109,10 +110,16 @@ class GameScene: SKScene {
     }
     
     func tacticalUIInit() {
+        
         ui_playerLastStock = SKLabelNode(text: "\(attack_list.count)");
         ui_playerLastStock.position = CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*0.9);
         ui_playerLastStock.fontSize = 16;
         self.addChild(ui_playerLastStock);
+        
+        ui_tacticalCommandLbl = SKLabelNode(text: "");
+        ui_tacticalCommandLbl.position = CGPointMake(self.size.width*0.5, self.size.height*0.75);
+        ui_tacticalCommandLbl.fontSize = 16;
+        self.addChild(ui_tacticalCommandLbl);
         
         // UI系のy座標は上下逆
         
@@ -180,6 +187,9 @@ class GameScene: SKScene {
         if let ui = ui_playerLastStock {
             ui.removeFromParent();
         }
+        if let ui = ui_tacticalCommandLbl {
+            ui.removeFromParent();
+        }
         if let ui = ui_tacticalAtk {
             ui.removeFromSuperview();
         }
@@ -218,6 +228,10 @@ class GameScene: SKScene {
         player_char.gaugeHP.updateProgress(100);
         
         self.addChild(player_char.gaugeHP);
+
+        var non = Character.Action();
+        non.action.type = CharBtlAction.ActType.non;
+        player_char.Actions.append(non);
 
         var act_1 = Character.Action();
         act_1.name = "攻撃";
@@ -295,6 +309,10 @@ class GameScene: SKScene {
         enemy_char.gaugeHP.updateProgress(100);
         self.addChild(enemy_char.gaugeHP);
         
+        var non = Character.Action();
+        non.action.type = CharBtlAction.ActType.non;
+        enemy_char.Actions.append(non);
+
         var act_1 = Character.Action();
         act_1.name = "攻撃";
         act_1.action.type = CharBtlAction.ActType.atk;
@@ -430,6 +448,7 @@ class GameScene: SKScene {
     
     func updateTactical() {
         // 処理は各UIのハンドラに任せる
+        tacticalCommandLabelUpdate();
     }
     
     func updateMelee() {
@@ -453,35 +472,48 @@ class GameScene: SKScene {
         gaugeRemove();
         tacticalUIInit();
         
+        tc_list = [];
         tc_lastStock = attack_list.count;
         ui_playerLastStock.text = "\(tc_lastStock)";
     }
     func tacticalAtk() {
-        if tc_lastStock > 0 {
+        let cost = player_char.Actions[CharBtlAction.ActType.atk.rawValue].action.atkCost;
+        if tc_lastStock >= cost {
             tc_list.append(TacticalCommand.atk);
-            tc_lastStock--;
+            tc_lastStock = tc_lastStock - cost;
             ui_playerLastStock.text = "\(tc_lastStock)";
+            tacticalStockExpendEffect(cost, pos: ui_tacticalAtk.layer.position, size: ui_tacticalAtk.frame.size);
+            tacticalStockExpendEffect_ui(cost, frame: ui_playerLastStock.frame);
         }
     }
     func tacticalDef() {
-        if tc_lastStock > 0 {
+        let cost = player_char.Actions[CharBtlAction.ActType.def.rawValue].action.defCost;
+        if tc_lastStock >= cost {
             tc_list.append(TacticalCommand.def);
-            tc_lastStock--;
+            tc_lastStock = tc_lastStock - cost;
             ui_playerLastStock.text = "\(tc_lastStock)";
+            tacticalStockExpendEffect(cost, pos: ui_tacticalDef.layer.position, size: ui_tacticalDef.frame.size);
+            tacticalStockExpendEffect_ui(cost, frame: ui_playerLastStock.frame);
         }
     }
     func tacticalEnh() {
-        if tc_lastStock > 0 {
+        let cost = player_char.Actions[CharBtlAction.ActType.enh.rawValue].action.enhCost;
+        if tc_lastStock >= cost {
             tc_list.append(TacticalCommand.enh);
-            tc_lastStock--;
+            tc_lastStock = tc_lastStock - cost;
             ui_playerLastStock.text = "\(tc_lastStock)";
+            tacticalStockExpendEffect(cost, pos: ui_tacticalEnh.layer.position, size: ui_tacticalEnh.frame.size);
+            tacticalStockExpendEffect_ui(cost, frame: ui_playerLastStock.frame);
         }
     }
     func tacticalJam() {
-        if tc_lastStock > 0 {
+        let cost = player_char.Actions[CharBtlAction.ActType.jam.rawValue].action.jamCost;
+        if tc_lastStock >= cost {
             tc_list.append(TacticalCommand.jam);
-            tc_lastStock--;
+            tc_lastStock = tc_lastStock - cost;
             ui_playerLastStock.text = "\(tc_lastStock)";
+            tacticalStockExpendEffect(cost, pos: ui_tacticalJam.layer.position, size: ui_tacticalJam.frame.size);
+            tacticalStockExpendEffect_ui(cost, frame: ui_playerLastStock.frame);
         }
     }
     func tacticalEnter() {
@@ -494,6 +526,58 @@ class GameScene: SKScene {
         ui_playerLastStock.text = "\(tc_lastStock)";
         
         tc_list = [];
+    }
+    
+    func tacticalStockExpendEffect(cost: Int, pos: CGPoint, size: CGSize) {
+        var expend = SKLabelNode(text: "-\(cost)");
+        expend.position = pos;
+        expend.fontSize = 16;
+        self.addChild(expend);
+        
+        let move = SKAction.moveTo(CGPointMake(pos.x, pos.y + size.height*0.6), duration: 0.3);
+        let fade1 = SKAction.fadeAlphaTo(0.5, duration: 0.1);
+        let fade2 = SKAction.fadeAlphaTo(1.0, duration: 0.1);
+        let fade3 = SKAction.fadeAlphaTo(0.0, duration: 0.1);
+        let fadeseq = SKAction.sequence([fade1, fade2, fade1, fade2, fade3]);
+        let group = SKAction.group([move, fadeseq]);
+        let endfunc = SKAction.runBlock { () -> Void in
+            expend.removeFromParent();
+        }
+        expend.runAction(SKAction.sequence([group, endfunc]));
+    }
+    func tacticalStockExpendEffect_ui(cost: Int, frame: CGRect) {
+        var expend = UILabel(frame: CGRectMake(frame.origin.x + frame.size.width*0.5, frame.origin.y - frame.size.height*0.5
+            , frame.size.width, frame.size.height));
+        expend.text = "-\(cost)";
+        expend.textAlignment = NSTextAlignment.Center;
+        self.view!.addSubview(expend);
+        
+        UIView.animateWithDuration(0.5, // アニメーションの時間
+            animations: {() -> Void  in
+                expend.frame.origin.y = expend.frame.origin.y - frame.size.height*0.6;
+                expend.alpha = 0.0;
+            }, completion: {(Bool) -> Void in
+                // アニメーション終了後の処理
+                expend.removeFromSuperview();
+        })
+    }
+
+    func tacticalCommandLabelUpdate() {
+        if let lbl = ui_tacticalCommandLbl {
+            lbl.text = "command:"
+            for i in 0 ..< tc_list.count {
+                switch tc_list[i] {
+                case TacticalCommand.atk:
+                    lbl.text += "atk,"
+                case TacticalCommand.def:
+                    lbl.text += "def,"
+                case TacticalCommand.enh:
+                    lbl.text += "enh,"
+                case TacticalCommand.jam:
+                    lbl.text += "jam,"
+                }
+            }
+        }
     }
 
     
