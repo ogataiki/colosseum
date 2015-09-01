@@ -10,6 +10,9 @@ class Character : SKSpriteNode {
     var ATK: Int = 100;
     var DEF: Int = 100;
     
+    var gaugeLangeth: CGFloat = 200.0;
+    var gaugeAcceleration: CGFloat = 20.0;
+    
     var gaugeHP: Gauge!;
     
     var position_base: CGPoint = CGPointZero;

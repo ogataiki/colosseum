@@ -47,12 +47,19 @@ class CharBtlAction {
     // jam
     var jamEnable: Bool = false;
     enum JamType: Int {
-        case poison = 1
-        case paralysis = 2
+        case recover = 0
+        case enhAtk = 1
+        case enhDef = 2
+        case enhAvoid = 3
+        case weakenAtk = 4
+        case weakenDef = 5
+        case weakenAvoid = 6
+        case poison = 7
+        case paralysis = 8
     }
     struct Jam {
         
-        var type = JamType.poison;
+        var type = JamType.recover;
         
         enum JamSeedType: Int {
             case atkNow = 10

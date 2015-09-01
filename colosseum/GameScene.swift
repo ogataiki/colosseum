@@ -37,6 +37,21 @@ class GameScene: SKScene {
     var enemy_char: Character!;
     var char_list: [String : Character] = [:];
     
+    //------
+    // UI系
+    var ui_playerLastStock: SKLabelNode!;
+    var ui_tacticalAtk: UIButton!;
+    var ui_tacticalDef: UIButton!;
+    var ui_tacticalEnh: UIButton!;
+    var ui_tacticalJam: UIButton!;
+    var ui_tacticalEnter: UIButton!;
+    var ui_tacticalReset: UIButton!;
+    enum TacticalCommand: Int {
+        case atk = 1, def, enh, jam
+    }
+    var tc_lastStock: Int = 0;
+    var tc_list: [TacticalCommand] = [];
+    
     enum ZCtrl: CGFloat {
         case gauge_rise_bar = 101
         case gauge = 100
@@ -50,12 +65,24 @@ class GameScene: SKScene {
         // これしないと孫要素の表示順がおかしくなる
         view.ignoresSiblingOrder = false;
 
-        gauge = Gauge(color: UIColor.grayColor(), size: CGSizeMake(30, 200));
+        playerInit();
+        
+        enemyInit();
+        
+        // debug
+        player_char.gaugeLangeth = 300;
+        player_char.gaugeAcceleration = 30;
+        
+        gaugeInit();
+    }
+    
+    func gaugeInit() {
+        gauge = Gauge(color: UIColor.grayColor(), size: CGSizeMake(30, player_char.gaugeLangeth));
         gauge.initGauge(color: UIColor.greenColor(), direction: Gauge.Direction.vertical, zPos:ZCtrl.gauge.rawValue);
         gauge.initGauge_lo(color: UIColor.redColor(), zPos:ZCtrl.gauge_lo.rawValue);
         gauge.resetProgress(0.0);
         gauge.changeAnchorPoint(CGPointMake(0.5, 0.5));
-        gauge.changePosition(view.center);
+        gauge.changePosition(self.view!.center);
         gauge.updateProgress(100);
         self.addChild(gauge);
         
@@ -68,10 +95,109 @@ class GameScene: SKScene {
         attack_count_lbl = SKLabelNode(text: "0");
         attack_count_lbl.position = CGPointMake(gauge.position.x, gauge.position.y - gauge.size.height*0.65);
         self.addChild(attack_count_lbl);
+    }
+    func gaugeRemove() {
+        if let ui = gauge {
+            ui.removeFromParent();
+        }
+        if let ui = rise_bar {
+            ui.removeFromParent();
+        }
+        if let ui = attack_count_lbl {
+            ui.removeFromParent();
+        }
+    }
+    
+    func tacticalUIInit() {
+        ui_playerLastStock = SKLabelNode(text: "\(attack_list.count)");
+        ui_playerLastStock.position = CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*0.9);
+        ui_playerLastStock.fontSize = 16;
+        self.addChild(ui_playerLastStock);
         
-        playerInit();
+        // UI系のy座標は上下逆
         
-        enemyInit();
+        ui_tacticalAtk = UIButton(frame: CGRectMake(0,0, self.view!.frame.size.width*0.3, self.view!.frame.size.height*0.1));
+        ui_tacticalAtk.layer.position = CGPointMake(self.size.width*0.25, self.size.height*0.4);
+        ui_tacticalAtk.backgroundColor = UIColor.brownColor();
+        ui_tacticalAtk.setTitle("atk", forState: UIControlState.Normal)
+        ui_tacticalAtk.setTitleColor(UIColor.blackColor(), forState: UIControlState.Normal)
+        ui_tacticalAtk.setTitle("atk", forState: UIControlState.Highlighted)
+        ui_tacticalAtk.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Highlighted)
+        ui_tacticalAtk.addTarget(self, action: "tacticalAtk", forControlEvents: UIControlEvents.TouchUpInside);
+        self.view!.addSubview(ui_tacticalAtk);
+        
+        ui_tacticalDef = UIButton(frame: CGRectMake(0,0, ui_tacticalAtk.frame.size.width, ui_tacticalAtk.frame.size.height));
+        ui_tacticalDef.layer.position = CGPointMake(self.size.width*0.75, self.size.height*0.4);
+        ui_tacticalDef.backgroundColor = UIColor.brownColor();
+        ui_tacticalDef.setTitle("def", forState: UIControlState.Normal)
+        ui_tacticalDef.setTitleColor(UIColor.blackColor(), forState: UIControlState.Normal)
+        ui_tacticalDef.setTitle("def", forState: UIControlState.Highlighted)
+        ui_tacticalDef.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Highlighted)
+        ui_tacticalDef.addTarget(self, action: "tacticalDef", forControlEvents: UIControlEvents.TouchUpInside);
+        self.view!.addSubview(ui_tacticalDef);
+        
+        ui_tacticalEnh = UIButton(frame: CGRectMake(0,0, ui_tacticalAtk.frame.size.width, ui_tacticalAtk.frame.size.height));
+        ui_tacticalEnh.layer.position = CGPointMake(self.size.width*0.25, self.size.height*0.55);
+        ui_tacticalEnh.backgroundColor = UIColor.brownColor();
+        ui_tacticalEnh.setTitle("enh", forState: UIControlState.Normal)
+        ui_tacticalEnh.setTitleColor(UIColor.blackColor(), forState: UIControlState.Normal)
+        ui_tacticalEnh.setTitle("enh", forState: UIControlState.Highlighted)
+        ui_tacticalEnh.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Highlighted)
+        ui_tacticalEnh.addTarget(self, action: "tacticalEnh", forControlEvents: UIControlEvents.TouchUpInside);
+        self.view!.addSubview(ui_tacticalEnh);
+        
+        ui_tacticalJam = UIButton(frame: CGRectMake(0,0, ui_tacticalAtk.frame.size.width, ui_tacticalAtk.frame.size.height));
+        ui_tacticalJam.layer.position = CGPointMake(self.size.width*0.75, self.size.height*0.55);
+        ui_tacticalJam.backgroundColor = UIColor.brownColor();
+        ui_tacticalJam.setTitle("jam", forState: UIControlState.Normal)
+        ui_tacticalJam.setTitleColor(UIColor.blackColor(), forState: UIControlState.Normal)
+        ui_tacticalJam.setTitle("jam", forState: UIControlState.Highlighted)
+        ui_tacticalJam.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Highlighted)
+        ui_tacticalJam.addTarget(self, action: "tacticalJam", forControlEvents: UIControlEvents.TouchUpInside);
+        self.view!.addSubview(ui_tacticalJam);
+        
+        ui_tacticalEnter = UIButton(frame: CGRectMake(0,0, self.view!.frame.size.width*0.4, self.view!.frame.size.height*0.1));
+        ui_tacticalEnter.layer.position = CGPointMake(self.size.width*0.25, self.size.height*0.7);
+        ui_tacticalEnter.backgroundColor = UIColor.greenColor();
+        ui_tacticalEnter.setTitle("enter", forState: UIControlState.Normal)
+        ui_tacticalEnter.setTitleColor(UIColor.blackColor(), forState: UIControlState.Normal)
+        ui_tacticalEnter.setTitle("enter", forState: UIControlState.Highlighted)
+        ui_tacticalEnter.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Highlighted)
+        ui_tacticalEnter.addTarget(self, action: "tacticalEnter", forControlEvents: UIControlEvents.TouchUpInside);
+        self.view!.addSubview(ui_tacticalEnter);
+        
+        ui_tacticalReset = UIButton(frame: CGRectMake(0,0, self.view!.frame.size.width*0.4, self.view!.frame.size.height*0.1));
+        ui_tacticalReset.layer.position = CGPointMake(self.size.width*0.75, self.size.height*0.7);
+        ui_tacticalReset.backgroundColor = UIColor.orangeColor();
+        ui_tacticalReset.setTitle("reset", forState: UIControlState.Normal)
+        ui_tacticalReset.setTitleColor(UIColor.blackColor(), forState: UIControlState.Normal)
+        ui_tacticalReset.setTitle("reset", forState: UIControlState.Highlighted)
+        ui_tacticalReset.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Highlighted)
+        ui_tacticalReset.addTarget(self, action: "tacticalReset", forControlEvents: UIControlEvents.TouchUpInside);
+        self.view!.addSubview(ui_tacticalReset);
+    }
+    func tacticalUIRemove() {
+        if let ui = ui_playerLastStock {
+            ui.removeFromParent();
+        }
+        if let ui = ui_tacticalAtk {
+            ui.removeFromSuperview();
+        }
+        if let ui = ui_tacticalDef {
+            ui.removeFromSuperview();
+        }
+        if let ui = ui_tacticalEnh {
+            ui.removeFromSuperview();
+        }
+        if let ui = ui_tacticalJam {
+            ui.removeFromSuperview();
+        }
+        if let ui = ui_tacticalEnter {
+            ui.removeFromSuperview();
+        }
+        if let ui = ui_tacticalReset {
+            ui.removeFromSuperview();
+        }
     }
     
     func playerInit() {
@@ -147,6 +273,9 @@ class GameScene: SKScene {
         jam_5.turn = 2;
         act_5.action.jam.append(jam_5);
         player_char.Actions.append(act_5);
+        
+        // ゲージの長さをプレイヤーキャラ依存に
+        reach_base = player_char.gaugeLangeth;
     }
     
     func enemyInit() {
@@ -236,8 +365,8 @@ class GameScene: SKScene {
                 
                 if reach_frame < rise_frame {
                     
-                    meleeStart();
-                    scene_status = SceneStatus.melee;
+                    tacticalStart();
+                    scene_status = SceneStatus.tactical;
                 }
                 else {
                     reach_frame = rise_frame;
@@ -252,6 +381,7 @@ class GameScene: SKScene {
                 rise_frame = 0;
                 
             case SceneStatus.tactical:
+                // 各UIのハンドラに任せる
                 break;
                 
             case SceneStatus.melee:
@@ -284,7 +414,7 @@ class GameScene: SKScene {
             rise_reset_flg = false;
         }
         else {
-            var speed = rise_speed + (rise_frame / 20);
+            var speed = rise_speed + (rise_frame / player_char.gaugeAcceleration);
             rise_frame += speed;
             
             if rise_frame > reach_base {
@@ -299,7 +429,7 @@ class GameScene: SKScene {
     }
     
     func updateTactical() {
-        
+        // 処理は各UIのハンドラに任せる
     }
     
     func updateMelee() {
@@ -318,6 +448,54 @@ class GameScene: SKScene {
         }
     }
     
+    func tacticalStart() {
+        // ui入れ替え
+        gaugeRemove();
+        tacticalUIInit();
+        
+        tc_lastStock = attack_list.count;
+        ui_playerLastStock.text = "\(tc_lastStock)";
+    }
+    func tacticalAtk() {
+        if tc_lastStock > 0 {
+            tc_list.append(TacticalCommand.atk);
+            tc_lastStock--;
+            ui_playerLastStock.text = "\(tc_lastStock)";
+        }
+    }
+    func tacticalDef() {
+        if tc_lastStock > 0 {
+            tc_list.append(TacticalCommand.def);
+            tc_lastStock--;
+            ui_playerLastStock.text = "\(tc_lastStock)";
+        }
+    }
+    func tacticalEnh() {
+        if tc_lastStock > 0 {
+            tc_list.append(TacticalCommand.enh);
+            tc_lastStock--;
+            ui_playerLastStock.text = "\(tc_lastStock)";
+        }
+    }
+    func tacticalJam() {
+        if tc_lastStock > 0 {
+            tc_list.append(TacticalCommand.jam);
+            tc_lastStock--;
+            ui_playerLastStock.text = "\(tc_lastStock)";
+        }
+    }
+    func tacticalEnter() {
+        tacticalUIRemove();
+        meleeStart();
+        scene_status = SceneStatus.melee;
+    }
+    func tacticalReset() {
+        tc_lastStock = attack_list.count;
+        ui_playerLastStock.text = "\(tc_lastStock)";
+        
+        tc_list = [];
+    }
+
     
     func meleeStart() {
         
@@ -357,6 +535,7 @@ class GameScene: SKScene {
         meleeProgress = 0;
         
         // ゲージを初期化
+        gaugeInit();
         reach_frame = reach_base;
         rise_speed = rise_speed_base;
         gauge.updateProgress(100);
