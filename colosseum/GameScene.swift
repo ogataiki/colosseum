@@ -107,8 +107,8 @@ class GameScene: SKScene {
     
     func tacticalUIInit() {
         
-        ui_playerLastStock = SKLabelNode(text: "\(attack_list.count)");
-        ui_playerLastStock.position = CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*0.9);
+        ui_playerLastStock = SKLabelNode(text: "lastStock:\(attack_list.count)");
+        ui_playerLastStock.position = CGPointMake(self.size.width*0.5, self.size.height*0.85);
         ui_playerLastStock.fontSize = 16;
         self.addChild(ui_playerLastStock);
         
@@ -234,8 +234,33 @@ class GameScene: SKScene {
         player_char.gaugeHP.changeAnchorPoint(CGPointMake(0.5, 0.5));
         player_char.gaugeHP.changePosition(CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*0.6));
         player_char.gaugeHP.updateProgress(100);
-        
         self.addChild(player_char.gaugeHP);
+
+        
+        player_char.labelHP = SKLabelNode(text: "HP:\(player_char.HP)");
+        player_char.labelATK = SKLabelNode(text: "ATK:\(player_char.ATK)");
+        player_char.labelDEF = SKLabelNode(text: "DEF:\(player_char.DEF)");
+        player_char.labelHIT = SKLabelNode(text: "HIT:\(player_char.HIT)");
+        player_char.labelAVD = SKLabelNode(text: "ADV:\(player_char.AVD)");
+        
+        player_char.labelHP.position = CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*0.8);
+        player_char.labelATK.position = CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*1.0);
+        player_char.labelDEF.position = CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*1.2);
+        player_char.labelHIT.position = CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*1.4);
+        player_char.labelAVD.position = CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*1.6);
+        
+        player_char.labelHP.fontSize = 12;
+        player_char.labelATK.fontSize = 12;
+        player_char.labelDEF.fontSize = 12;
+        player_char.labelHIT.fontSize = 12;
+        player_char.labelAVD.fontSize = 12;
+        
+        self.addChild(player_char.labelHP);
+        self.addChild(player_char.labelATK);
+        self.addChild(player_char.labelDEF);
+        self.addChild(player_char.labelHIT);
+        self.addChild(player_char.labelAVD);
+        
 
         var non = Character.Action();
         non.action.type = CharBtlAction.ActType.non;
@@ -323,6 +348,32 @@ class GameScene: SKScene {
         enemy_char.gaugeHP.updateProgress(100);
         self.addChild(enemy_char.gaugeHP);
         
+        
+        enemy_char.labelHP = SKLabelNode(text: "HP:\(enemy_char.HP)");
+        enemy_char.labelATK = SKLabelNode(text: "ATK:\(enemy_char.ATK)");
+        enemy_char.labelDEF = SKLabelNode(text: "DEF:\(enemy_char.DEF)");
+        enemy_char.labelHIT = SKLabelNode(text: "HIT:\(enemy_char.HIT)");
+        enemy_char.labelAVD = SKLabelNode(text: "ADV:\(enemy_char.AVD)");
+        
+        enemy_char.labelHP.position = CGPointMake(enemy_char.position.x, enemy_char.position.y - enemy_char.size.height*1.0);
+        enemy_char.labelATK.position = CGPointMake(enemy_char.position.x, enemy_char.position.y - enemy_char.size.height*1.3);
+        enemy_char.labelDEF.position = CGPointMake(enemy_char.position.x, enemy_char.position.y - enemy_char.size.height*1.6);
+        enemy_char.labelHIT.position = CGPointMake(enemy_char.position.x, enemy_char.position.y - enemy_char.size.height*1.9);
+        enemy_char.labelAVD.position = CGPointMake(enemy_char.position.x, enemy_char.position.y - enemy_char.size.height*2.2);
+        
+        enemy_char.labelHP.fontSize = 12;
+        enemy_char.labelATK.fontSize = 12;
+        enemy_char.labelDEF.fontSize = 12;
+        enemy_char.labelHIT.fontSize = 12;
+        enemy_char.labelAVD.fontSize = 12;
+        
+        self.addChild(enemy_char.labelHP);
+        self.addChild(enemy_char.labelATK);
+        self.addChild(enemy_char.labelDEF);
+        self.addChild(enemy_char.labelHIT);
+        self.addChild(enemy_char.labelAVD);
+        
+
         var non = Character.Action();
         non.action.type = CharBtlAction.ActType.non;
         enemy_char.actions.append(non);
@@ -488,14 +539,14 @@ class GameScene: SKScene {
         
         tc_list = [];
         tc_lastStock = attack_list.count;
-        ui_playerLastStock.text = "\(tc_lastStock)";
+        ui_playerLastStock.text = "lastStock:\(tc_lastStock)";
     }
     func tacticalAtk() {
         let cost = player_char.actions[CharBtlAction.ActType.atk.rawValue].action.atkCost;
         if tc_lastStock >= cost {
             tc_list.append(CharBtlAction.ActType.atk);
             tc_lastStock = tc_lastStock - cost;
-            ui_playerLastStock.text = "\(tc_lastStock)";
+            ui_playerLastStock.text = "lastStock:\(tc_lastStock)";
             tacticalStockExpendEffect(cost, pos: ui_playerLastStock.position, size: ui_playerLastStock.frame.size);
             tacticalStockExpendEffect_ui(cost, frame: ui_tacticalAtk.frame);
         }
@@ -505,7 +556,7 @@ class GameScene: SKScene {
         if tc_lastStock >= cost {
             tc_list.append(CharBtlAction.ActType.def);
             tc_lastStock = tc_lastStock - cost;
-            ui_playerLastStock.text = "\(tc_lastStock)";
+            ui_playerLastStock.text = "lastStock:\(tc_lastStock)";
             tacticalStockExpendEffect(cost, pos: ui_playerLastStock.position, size: ui_playerLastStock.frame.size);
             tacticalStockExpendEffect_ui(cost, frame: ui_tacticalDef.frame);
         }
@@ -515,7 +566,7 @@ class GameScene: SKScene {
         if tc_lastStock >= cost {
             tc_list.append(CharBtlAction.ActType.enh);
             tc_lastStock = tc_lastStock - cost;
-            ui_playerLastStock.text = "\(tc_lastStock)";
+            ui_playerLastStock.text = "lastStock:\(tc_lastStock)";
             tacticalStockExpendEffect(cost, pos: ui_playerLastStock.position, size: ui_playerLastStock.frame.size);
             tacticalStockExpendEffect_ui(cost, frame: ui_tacticalEnh.frame);
         }
@@ -525,7 +576,7 @@ class GameScene: SKScene {
         if tc_lastStock >= cost {
             tc_list.append(CharBtlAction.ActType.jam);
             tc_lastStock = tc_lastStock - cost;
-            ui_playerLastStock.text = "\(tc_lastStock)";
+            ui_playerLastStock.text = "lastStock:\(tc_lastStock)";
             tacticalStockExpendEffect(cost, pos: ui_playerLastStock.position, size: ui_playerLastStock.frame.size);
             tacticalStockExpendEffect_ui(cost, frame: ui_tacticalJam.frame);
         }
@@ -537,7 +588,7 @@ class GameScene: SKScene {
     }
     func tacticalReset() {
         tc_lastStock = attack_list.count;
-        ui_playerLastStock.text = "\(tc_lastStock)";
+        ui_playerLastStock.text = "lastStock:\(tc_lastStock)";
         
         tc_list = [];
     }
@@ -705,6 +756,9 @@ class GameScene: SKScene {
         
         player_char.turnEnd();
         enemy_char.turnEnd();
+        
+        player_char.refleshStatus();
+        enemy_char.refleshStatus();
         
         scene_status = SceneStatus.stock;
     }
@@ -1079,7 +1133,7 @@ class GameScene: SKScene {
             let dend = SKAction.runBlock({ () -> Void in
                 damage_lbl.removeFromParent();
                 
-                target!.gaugeHP.updateProgress(CGFloat(target!.HP) / CGFloat(target!.HP_base) * 100);
+                target!.refleshStatus();
 
                 callback();
             })
@@ -1180,6 +1234,7 @@ class GameScene: SKScene {
                 for enh in action.action.enh {
                     target.addEnhanced(enh);
                 }
+                target.refleshStatus();
             }
         }
     }
@@ -1189,6 +1244,7 @@ class GameScene: SKScene {
                 for jam in action.action.jam {
                     target.addJamming(jam);
                 }
+                target.refleshStatus();
             }
         }
     }
