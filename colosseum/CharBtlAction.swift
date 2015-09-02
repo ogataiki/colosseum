@@ -24,7 +24,7 @@ class CharBtlAction {
         var atkCount: Int = 1;
     }
     var atk: [Atk] = [];
-    var atkCost: Int = 1;
+    var atkCost: Int = 2;
     
     // def
     var defEnable: Bool = false;
@@ -34,19 +34,23 @@ class CharBtlAction {
         var defCounterAttack: CGFloat = 0.0;    // 0.0 ~
     }
     var def = Def();
-    var defCost: Int = 1;
+    var defCost: Int = 2;
     
     // enh
     var enhEnable: Bool = false;
     struct Enh {
+        
+        var seedType = SeedType.atkNow;
+
         var enhAtkPowerAdd: CGFloat = 200.0;    // Ratio %
         var enhAtkCountAdd: Int = 0;            // count 0 ~
         var enhDefPowerAdd: CGFloat = 0.0;      // Ratio %
         var enhAvoidedAdd: CGFloat = 0.0;       // %
-        var cost: Int = 2;
+        
+        var turn: Int = 2;                      // Continue turn;
     }
     var enh: [Enh] = [];
-    var enhCost: Int = 2;
+    var enhCost: Int = 3;
     
     // jam
     var jamEnable: Bool = false;
@@ -65,22 +69,22 @@ class CharBtlAction {
         
         var type = JamType.recover;
         
-        enum JamSeedType: Int {
-            case atkNow = 10
-            case atkBase = 11
-            case lasthp = 20
-            case subhp = 21
-            case maxhp = 22
-            case defNow = 30
-            case defBase = 31
-        }
-        var seedType = JamSeedType.atkNow;
+        var seedType = SeedType.atkNow;
         
         var power: CGFloat = 100.0;         // Ratio % for seedtype
         var turn: Int = 1;                  // Continue turn;
-        var cost: Int = 2;
     }
     var jam: [Jam] = [];
-    var jamCost: Int = 2;
+    var jamCost: Int = 3;
     
+    enum SeedType: Int {
+        case atkNow = 10
+        case atkBase = 11
+        case lasthp = 20
+        case subhp = 21
+        case maxhp = 22
+        case defNow = 30
+        case defBase = 31
+    }
+
 }

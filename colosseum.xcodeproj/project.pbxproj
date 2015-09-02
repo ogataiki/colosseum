@@ -17,6 +17,9 @@
 		500175781B8E86BB00567C73 /* colosseumTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500175771B8E86BB00567C73 /* colosseumTests.swift */; };
 		500175821B8E876A00567C73 /* Gauge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 500175811B8E876A00567C73 /* Gauge.swift */; };
 		50121F5D1B901AA80071F8EC /* SKActionEx.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50121F5C1B901AA80071F8EC /* SKActionEx.swift */; };
+		503885A21B96881F001CE8B3 /* spark.png in Resources */ = {isa = PBXBuildFile; fileRef = 503885A01B96881F001CE8B3 /* spark.png */; };
+		503885A41B969E96001CE8B3 /* Enhanced.sks in Resources */ = {isa = PBXBuildFile; fileRef = 503885A31B969E96001CE8B3 /* Enhanced.sks */; };
+		503885A61B96A704001CE8B3 /* sparkline.png in Resources */ = {isa = PBXBuildFile; fileRef = 503885A51B96A704001CE8B3 /* sparkline.png */; };
 		503972E51B9050A9009AB94F /* Character.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503972E41B9050A9009AB94F /* Character.swift */; };
 		50483EE91B940EC2001638CE /* CharBtlAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50483EE81B940EC2001638CE /* CharBtlAction.swift */; };
 /* End PBXBuildFile section */
@@ -46,6 +49,9 @@
 		500175771B8E86BB00567C73 /* colosseumTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = colosseumTests.swift; sourceTree = "<group>"; };
 		500175811B8E876A00567C73 /* Gauge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Gauge.swift; sourceTree = "<group>"; };
 		50121F5C1B901AA80071F8EC /* SKActionEx.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKActionEx.swift; sourceTree = "<group>"; };
+		503885A01B96881F001CE8B3 /* spark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = spark.png; path = Particles/spark.png; sourceTree = "<group>"; };
+		503885A31B969E96001CE8B3 /* Enhanced.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Enhanced.sks; sourceTree = "<group>"; };
+		503885A51B96A704001CE8B3 /* sparkline.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = sparkline.png; path = Particles/sparkline.png; sourceTree = "<group>"; };
 		503972E41B9050A9009AB94F /* Character.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Character.swift; sourceTree = "<group>"; };
 		50483EE81B940EC2001638CE /* CharBtlAction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharBtlAction.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -101,6 +107,7 @@
 				500175681B8E86BB00567C73 /* Images.xcassets */,
 				5001756A1B8E86BB00567C73 /* LaunchScreen.xib */,
 				5001755B1B8E86BB00567C73 /* Supporting Files */,
+				503885991B9687F5001CE8B3 /* Effects */,
 			);
 			path = colosseum;
 			sourceTree = "<group>";
@@ -128,6 +135,24 @@
 				500175761B8E86BB00567C73 /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		503885991B9687F5001CE8B3 /* Effects */ = {
+			isa = PBXGroup;
+			children = (
+				503885A01B96881F001CE8B3 /* spark.png */,
+				503885A51B96A704001CE8B3 /* sparkline.png */,
+				5038859A1B9687F5001CE8B3 /* Particles */,
+			);
+			path = Effects;
+			sourceTree = "<group>";
+		};
+		5038859A1B9687F5001CE8B3 /* Particles */ = {
+			isa = PBXGroup;
+			children = (
+				503885A31B969E96001CE8B3 /* Enhanced.sks */,
+			);
+			path = Particles;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -211,9 +236,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				5001756C1B8E86BB00567C73 /* LaunchScreen.xib in Resources */,
+				503885A21B96881F001CE8B3 /* spark.png in Resources */,
 				500175691B8E86BB00567C73 /* Images.xcassets in Resources */,
 				500175601B8E86BB00567C73 /* GameScene.sks in Resources */,
 				500175671B8E86BB00567C73 /* Main.storyboard in Resources */,
+				503885A41B969E96001CE8B3 /* Enhanced.sks in Resources */,
+				503885A61B96A704001CE8B3 /* sparkline.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
