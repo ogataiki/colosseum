@@ -29,8 +29,11 @@ class CharBtlAction {
     // def
     var defEnable: Bool = false;
     struct Def {
-        var defPower: CGFloat = 1.0;            // 0.0 ~ 100.0 100.0 = Avoided
-        var defCount: Int = 1;                  // enable turn
+        
+        var seedType = SeedType.atkNow;
+
+        var defPower: CGFloat = 50.0;           // 0.0 ~ 100.0 100.0 = Avoided
+        var defCount: Int = 1;                  // this turn enable count
         var defCounterAttack: CGFloat = 0.0;    // 0.0 ~
     }
     var def = Def();

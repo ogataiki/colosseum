@@ -104,6 +104,27 @@ class Character : SKSpriteNode {
     }
     var actions: [Action] = [];
     
+    struct Defenced {
+        var content = CharBtlAction.Def();
+        var addDef: Int = 0;
+        var lastCount: Int = 0;
+    }
+    var defenceds: [Defenced] = [];
+    func addDefenced(def: CharBtlAction.Def) {
+        var defence = Defenced();
+        defence.content = def;
+        defence.lastCount = def.defCount
+        
+        // 強さ取得
+        let (power_TypeRatio: Int, power_TypeConst: Int) = calcPower(Int(def.defPower), seedType: def.seedType, char: self);
+        defence.addDef = power_TypeRatio;
+
+        defenceds.append(defence);
+        
+        // 以降、相手の攻撃を受けるタイミングで消費
+        // ターンで消費しない
+    }
+
     struct Enhanced {
         var content = CharBtlAction.Enh();
         var addHP: Int = 0;
@@ -121,26 +142,9 @@ class Character : SKSpriteNode {
         enhance.lastTrun = enh.turn;
         
         // 強さ取得
-        let power_TypeConst = Int(enh.power);
-        let power_TypeRatio: Int;
-        switch enhance.content.seedType {
-        case CharBtlAction.SeedType.atkNow:
-            power_TypeRatio = (ATK * Int(enh.power) / 100);
-        case CharBtlAction.SeedType.atkBase:
-            power_TypeRatio = (ATK_base * Int(enh.power) / 100);
-        case CharBtlAction.SeedType.defNow:
-            power_TypeRatio = (DEF * Int(enh.power) / 100);
-        case CharBtlAction.SeedType.defBase:
-            power_TypeRatio = (DEF_base * Int(enh.power) / 100);
-        case CharBtlAction.SeedType.lasthp:
-            power_TypeRatio = (HP * Int(enh.power) / 100);
-        case CharBtlAction.SeedType.maxhp:
-            power_TypeRatio = (HP_base * Int(enh.power) / 100);
-        case CharBtlAction.SeedType.subhp:
-            power_TypeRatio = ((HP_base - HP) * Int(enh.power) / 100);
-        }
+        let (power_TypeRatio: Int, power_TypeConst: Int) = calcPower(Int(enh.power), seedType: enh.seedType, char: self);
 
-        switch enhance.content.type {
+        switch enh.type {
         case CharBtlAction.EnhType.atk:
             enhance.addATK = power_TypeRatio;
         case CharBtlAction.EnhType.def:
@@ -186,26 +190,9 @@ class Character : SKSpriteNode {
         jamming.lastTrun = jam.turn;
         
         // 強さ取得
-        let power_TypeConst = Int(jam.power);
-        let power_TypeRatio: Int;
-        switch jamming.content.seedType {
-        case CharBtlAction.SeedType.atkNow:
-            power_TypeRatio = (executor.ATK * Int(jam.power) / 100);
-        case CharBtlAction.SeedType.atkBase:
-            power_TypeRatio = (executor.ATK_base * Int(jam.power) / 100);
-        case CharBtlAction.SeedType.defNow:
-            power_TypeRatio = (executor.DEF * Int(jam.power) / 100);
-        case CharBtlAction.SeedType.defBase:
-            power_TypeRatio = (executor.DEF_base * Int(jam.power) / 100);
-        case CharBtlAction.SeedType.lasthp:
-            power_TypeRatio = (executor.HP * Int(jam.power) / 100);
-        case CharBtlAction.SeedType.maxhp:
-            power_TypeRatio = (executor.HP_base * Int(jam.power) / 100);
-        case CharBtlAction.SeedType.subhp:
-            power_TypeRatio = ((executor.HP_base - executor.HP) * Int(jam.power) / 100);
-        }
-
-        switch jamming.content.type {
+        let (power_TypeRatio: Int, power_TypeConst: Int) = calcPower(Int(jam.power), seedType: jam.seedType, char: executor);
+        
+        switch jam.type {
         case CharBtlAction.JamType.recover:
             jamming.recover = power_TypeRatio;
         case CharBtlAction.JamType.enhAtk:
@@ -246,6 +233,28 @@ class Character : SKSpriteNode {
             AVD += jamming.addAVD;
             ATK_CNT += jamming.addATKCNT;
         }
+    }
+    
+    func calcPower(power: Int, seedType: CharBtlAction.SeedType, char: Character) -> (ratioValue:Int, constValue:Int) {
+        let power_TypeConst = Int(power);
+        let power_TypeRatio: Int;
+        switch seedType {
+        case CharBtlAction.SeedType.atkNow:
+            power_TypeRatio = (char.ATK * Int(power) / 100);
+        case CharBtlAction.SeedType.atkBase:
+            power_TypeRatio = (char.ATK_base * Int(power) / 100);
+        case CharBtlAction.SeedType.defNow:
+            power_TypeRatio = (char.DEF * Int(power) / 100);
+        case CharBtlAction.SeedType.defBase:
+            power_TypeRatio = (char.DEF_base * Int(power) / 100);
+        case CharBtlAction.SeedType.lasthp:
+            power_TypeRatio = (char.HP * Int(power) / 100);
+        case CharBtlAction.SeedType.maxhp:
+            power_TypeRatio = (char.HP_base * Int(power) / 100);
+        case CharBtlAction.SeedType.subhp:
+            power_TypeRatio = ((char.HP_base - char.HP) * Int(power) / 100);
+        }
+        return (power_TypeRatio, power_TypeConst);
     }
     
     func turnEnd() {

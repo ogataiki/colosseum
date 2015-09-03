@@ -768,6 +768,13 @@ class GameScene: SKScene {
     //------------
     // 行動順優先順 def > atk > enh > jam
     //------------
+    // 有利不利
+    // def > atk
+    // enh > def
+    // jam > enh
+    // atk > jam
+    // 有利行動をとった場合はそのターン相手の次回以降の行動が終了する
+    //------------
     
     //------------
     // player atk
