@@ -38,16 +38,21 @@ class CharBtlAction {
     
     // enh
     var enhEnable: Bool = false;
+    enum EnhType: Int {
+        case atk = 1
+        case def = 2
+        case avd = 3
+        case hit = 4
+        case atkcnt = 5
+    }
     struct Enh {
         
+        var type = EnhType.atk;
         var seedType = SeedType.atkNow;
 
-        var enhAtkPowerAdd: CGFloat = 200.0;    // Ratio %
-        var enhAtkCountAdd: Int = 0;            // count 0 ~
-        var enhDefPowerAdd: CGFloat = 0.0;      // Ratio %
-        var enhAvoidedAdd: CGFloat = 0.0;       // %
-        
+        var power: CGFloat = 100.0;
         var turn: Int = 2;                      // Continue turn;
+        var execTiming = ExecTiming.jastNow;
     }
     var enh: [Enh] = [];
     var enhCost: Int = 3;
@@ -59,11 +64,13 @@ class CharBtlAction {
         case enhAtk = 1
         case enhDef = 2
         case enhAvoid = 3
-        case weakenAtk = 4
-        case weakenDef = 5
-        case weakenAvoid = 6
-        case poison = 7
-        case paralysis = 8
+        case enhAtkCnt = 4
+        case weakenAtk = 5
+        case weakenDef = 6
+        case weakenAvoid = 7
+        case weakenAtkCnt = 8
+        case poison = 9
+        case paralysis = 10
     }
     struct Jam {
         
@@ -73,6 +80,7 @@ class CharBtlAction {
         
         var power: CGFloat = 100.0;         // Ratio % for seedtype
         var turn: Int = 1;                  // Continue turn;
+        var execTiming = ExecTiming.jastNow;
     }
     var jam: [Jam] = [];
     var jamCost: Int = 3;
@@ -85,6 +93,11 @@ class CharBtlAction {
         case maxhp = 22
         case defNow = 30
         case defBase = 31
+    }
+    
+    enum ExecTiming: Int {
+        case jastNow = 0
+        case turnEnd = 1
     }
 
 }

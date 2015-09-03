@@ -35,18 +35,63 @@ class Character : SKSpriteNode {
         }
         if let label = labelATK {
             labelATK.text = "ATK:\(ATK)";
+            if ATK < ATK_base {
+                labelATK.fontColor = UIColor.blueColor();
+            }
+            else if ATK > ATK_base {
+                labelATK.fontColor = UIColor.orangeColor();
+            }
+            else {
+                labelATK.fontColor = UIColor.whiteColor();
+            }
         }
         if let label = labelDEF {
             labelDEF.text = "DEF:\(DEF)";
+            if DEF < DEF_base {
+                labelDEF.fontColor = UIColor.blueColor();
+            }
+            else if DEF > DEF_base {
+                labelDEF.fontColor = UIColor.orangeColor();
+            }
+            else {
+                labelDEF.fontColor = UIColor.whiteColor();
+            }
         }
         if let label = labelHIT {
             labelHIT.text = "HIT:\(HIT)";
+            if HIT < HIT_base {
+                labelHIT.fontColor = UIColor.blueColor();
+            }
+            else if HIT > HIT_base {
+                labelHIT.fontColor = UIColor.orangeColor();
+            }
+            else {
+                labelHIT.fontColor = UIColor.whiteColor();
+            }
         }
         if let label = labelAVD {
             labelAVD.text = "AVD:\(AVD)";
+            if AVD < AVD_base {
+                labelAVD.fontColor = UIColor.blueColor();
+            }
+            else if AVD > AVD_base {
+                labelAVD.fontColor = UIColor.orangeColor();
+            }
+            else {
+                labelAVD.fontColor = UIColor.whiteColor();
+            }
         }
         if let label = labelATKCNT {
             labelATKCNT.text = "ATK:\(ATK_CNT)";
+            if ATK_CNT < ATK_CNT_base {
+                labelATKCNT.fontColor = UIColor.blueColor();
+            }
+            else if ATK_CNT > ATK_CNT_base {
+                labelATKCNT.fontColor = UIColor.orangeColor();
+            }
+            else {
+                labelATKCNT.fontColor = UIColor.whiteColor();
+            }
         }
     }
     
@@ -75,58 +120,143 @@ class Character : SKSpriteNode {
         enhance.content = enh;
         enhance.lastTrun = enh.turn;
         
+        // 強さ取得
+        let power_TypeConst = Int(enh.power);
+        let power_TypeRatio: Int;
         switch enhance.content.seedType {
         case CharBtlAction.SeedType.atkNow:
-            enhance.addATK = (ATK * Int(enhance.content.enhAtkPowerAdd) / 100);
-            enhance.addDEF = (ATK * Int(enhance.content.enhDefPowerAdd) / 100);
+            power_TypeRatio = (ATK * Int(enh.power) / 100);
         case CharBtlAction.SeedType.atkBase:
-            enhance.addATK = (ATK_base * Int(enhance.content.enhAtkPowerAdd) / 100);
-            enhance.addDEF = (ATK_base * Int(enhance.content.enhDefPowerAdd) / 100);
+            power_TypeRatio = (ATK_base * Int(enh.power) / 100);
         case CharBtlAction.SeedType.defNow:
-            enhance.addATK = (DEF * Int(enhance.content.enhAtkPowerAdd) / 100);
-            enhance.addDEF = (DEF * Int(enhance.content.enhDefPowerAdd) / 100);
+            power_TypeRatio = (DEF * Int(enh.power) / 100);
         case CharBtlAction.SeedType.defBase:
-            enhance.addATK = (DEF_base * Int(enhance.content.enhAtkPowerAdd) / 100);
-            enhance.addDEF = (DEF_base * Int(enhance.content.enhDefPowerAdd) / 100);
+            power_TypeRatio = (DEF_base * Int(enh.power) / 100);
         case CharBtlAction.SeedType.lasthp:
-            enhance.addATK = (HP * Int(enhance.content.enhAtkPowerAdd) / 100);
-            enhance.addDEF = (HP * Int(enhance.content.enhDefPowerAdd) / 100);
+            power_TypeRatio = (HP * Int(enh.power) / 100);
         case CharBtlAction.SeedType.maxhp:
-            enhance.addATK = (HP_base * Int(enhance.content.enhAtkPowerAdd) / 100);
-            enhance.addDEF = (HP_base * Int(enhance.content.enhDefPowerAdd) / 100);
+            power_TypeRatio = (HP_base * Int(enh.power) / 100);
         case CharBtlAction.SeedType.subhp:
-            enhance.addATK = ((HP_base - HP) * Int(enhance.content.enhAtkPowerAdd) / 100);
-            enhance.addDEF = ((HP_base - HP) * Int(enhance.content.enhDefPowerAdd) / 100);
+            power_TypeRatio = ((HP_base - HP) * Int(enh.power) / 100);
         }
-        enhance.addAVD = Int(enhance.content.enhAvoidedAdd);
-        enhance.addATKCNT = enhance.content.enhAtkCountAdd;
-        
+
+        switch enhance.content.type {
+        case CharBtlAction.EnhType.atk:
+            enhance.addATK = power_TypeRatio;
+        case CharBtlAction.EnhType.def:
+            enhance.addDEF = power_TypeRatio;
+        case CharBtlAction.EnhType.avd:
+            enhance.addAVD = power_TypeConst;
+        case CharBtlAction.EnhType.hit:
+            enhance.addHIT = power_TypeConst;
+        case CharBtlAction.EnhType.atkcnt:
+            enhance.addATKCNT = power_TypeConst;
+        }
+
         enhances.append(enhance);
 
         // ステータスに反映
-        HP += enhance.addHP;
-        ATK += enhance.addATK;
-        DEF += enhance.addDEF;
-        HIT += enhance.addHIT;
-        AVD += enhance.addAVD;
-        ATK_CNT += enhance.addATKCNT;
+        if enhance.content.execTiming == CharBtlAction.ExecTiming.jastNow {
+            HP += enhance.addHP;
+            ATK += enhance.addATK;
+            DEF += enhance.addDEF;
+            HIT += enhance.addHIT;
+            AVD += enhance.addAVD;
+            ATK_CNT += enhance.addATKCNT;
+        }
     }
     
     struct Jamming {
         var content = CharBtlAction.Jam();
+        var recover: Int = 0;
+        var addHP: Int = 0;
+        var addATK: Int = 0;
+        var addDEF: Int = 0;
+        var addHIT: Int = 0;
+        var addAVD: Int = 0;
+        var addATKCNT: Int = 0;
+        var poisonDamage: Int = 0;
+        var paralysisAVD: Int = 0;
         var lastTrun: Int = 0;
     }
     var jammings: [Jamming] = [];
-    func addJamming(jam: CharBtlAction.Jam) {
-        var jamming = Jamming(content: jam, lastTrun: jam.turn);
+    func addJamming(jam: CharBtlAction.Jam, executor: Character) {
+        var jamming = Jamming();
+        jamming.content = jam;
+        jamming.lastTrun = jam.turn;
+        
+        // 強さ取得
+        let power_TypeConst = Int(jam.power);
+        let power_TypeRatio: Int;
+        switch jamming.content.seedType {
+        case CharBtlAction.SeedType.atkNow:
+            power_TypeRatio = (executor.ATK * Int(jam.power) / 100);
+        case CharBtlAction.SeedType.atkBase:
+            power_TypeRatio = (executor.ATK_base * Int(jam.power) / 100);
+        case CharBtlAction.SeedType.defNow:
+            power_TypeRatio = (executor.DEF * Int(jam.power) / 100);
+        case CharBtlAction.SeedType.defBase:
+            power_TypeRatio = (executor.DEF_base * Int(jam.power) / 100);
+        case CharBtlAction.SeedType.lasthp:
+            power_TypeRatio = (executor.HP * Int(jam.power) / 100);
+        case CharBtlAction.SeedType.maxhp:
+            power_TypeRatio = (executor.HP_base * Int(jam.power) / 100);
+        case CharBtlAction.SeedType.subhp:
+            power_TypeRatio = ((executor.HP_base - executor.HP) * Int(jam.power) / 100);
+        }
+
+        switch jamming.content.type {
+        case CharBtlAction.JamType.recover:
+            jamming.recover = power_TypeRatio;
+        case CharBtlAction.JamType.enhAtk:
+            jamming.addATK = power_TypeRatio;
+        case CharBtlAction.JamType.enhDef:
+            jamming.addDEF = power_TypeRatio;
+        case CharBtlAction.JamType.enhAvoid:
+            jamming.addAVD = power_TypeRatio;
+        case CharBtlAction.JamType.enhAtkCnt:
+            jamming.addATKCNT = power_TypeConst;
+        case CharBtlAction.JamType.weakenAtk:
+            jamming.addATK = 0 - power_TypeRatio;
+        case CharBtlAction.JamType.weakenDef:
+            jamming.addDEF = 0 - power_TypeRatio;
+        case CharBtlAction.JamType.weakenAvoid:
+            jamming.addAVD = 0 - power_TypeConst;
+        case CharBtlAction.JamType.weakenAtkCnt:
+            jamming.addATKCNT = 0 - power_TypeConst;
+        case CharBtlAction.JamType.poison:
+            jamming.poisonDamage = power_TypeRatio;
+        case CharBtlAction.JamType.paralysis:
+            jamming.paralysisAVD = power_TypeConst;
+        }
         jammings.append(jamming);
+        
+        // ステータスに反映
+        if jamming.content.execTiming == CharBtlAction.ExecTiming.jastNow {
+            if HP + jamming.recover > HP_base {
+                HP = HP_base;
+            }
+            else {
+                HP += jamming.recover;
+            }
+            HP += jamming.addHP;
+            ATK += jamming.addATK;
+            DEF += jamming.addDEF;
+            HIT += jamming.addHIT;
+            AVD += jamming.addAVD;
+            ATK_CNT += jamming.addATKCNT;
+        }
     }
     
     func turnEnd() {
         
-        // ターン切れ強化を削除
         for var i = enhances.count-1; i >= 0; --i {
+            
+            // TODO:ターン終了アクションを実行
+            
             enhances[i].lastTrun--;
+            
+            // ターン切れ強化を削除
             if enhances[i].lastTrun == 0 {
                 
                 // ステータスに反映
@@ -142,102 +272,37 @@ class Character : SKSpriteNode {
             }
         }
         
-        // ターン切れ妨害を削除
         for var i = jammings.count-1; i >= 0; --i {
+
+            // TODO:ターン終了アクションを実行
+
             jammings[i].lastTrun--;
+
+            // ターン切れ妨害を削除
             if jammings[i].lastTrun == 0 {
+                
+                // ステータスに反映
+                let jamming = jammings[i];
+                HP -= jamming.addHP;
+                ATK -= jamming.addATK;
+                DEF -= jamming.addDEF;
+                HIT -= jamming.addHIT;
+                AVD -= jamming.addAVD;
+                ATK_CNT -= jamming.addATKCNT;
+
                 jammings.removeAtIndex(i);
             }
         }
     }
     
     func calcATK() -> Int {
-        var atk = ATK;
         // エンハンス時にステータスの値変更したのでそのまま使う
-        /*
-        for enh in enhances {
-            switch enh.content.seedType {
-            case CharBtlAction.SeedType.atkNow:
-                atk += (ATK * Int(enh.content.enhAtkPowerAdd) / 100);
-            case CharBtlAction.SeedType.atkBase:
-                atk += (ATK_base * Int(enh.content.enhAtkPowerAdd) / 100);
-            case CharBtlAction.SeedType.defNow:
-                atk += (DEF * Int(enh.content.enhAtkPowerAdd) / 100);
-            case CharBtlAction.SeedType.defBase:
-                atk += (DEF_base * Int(enh.content.enhAtkPowerAdd) / 100);
-            case CharBtlAction.SeedType.lasthp:
-                atk += (HP * Int(enh.content.enhAtkPowerAdd) / 100);
-            case CharBtlAction.SeedType.maxhp:
-                atk += (HP_base * Int(enh.content.enhAtkPowerAdd) / 100);
-            case CharBtlAction.SeedType.subhp:
-                atk += ((HP_base - HP) * Int(enh.content.enhAtkPowerAdd) / 100);
-            }
-        }
-        */
-        for jam in jammings {
-            if jam.content.type == CharBtlAction.JamType.weakenAtk {
-                switch jam.content.seedType {
-                case CharBtlAction.SeedType.atkNow:
-                    atk -= (ATK * Int(jam.content.power) / 100);
-                case CharBtlAction.SeedType.atkBase:
-                    atk -= (ATK_base * Int(jam.content.power) / 100);
-                case CharBtlAction.SeedType.defNow:
-                    atk -= (DEF * Int(jam.content.power) / 100);
-                case CharBtlAction.SeedType.defBase:
-                    atk -= (DEF_base * Int(jam.content.power) / 100);
-                case CharBtlAction.SeedType.lasthp:
-                    atk -= (HP * Int(jam.content.power) / 100);
-                case CharBtlAction.SeedType.maxhp:
-                    atk -= (HP_base * Int(jam.content.power) / 100);
-                case CharBtlAction.SeedType.subhp:
-                    atk -= ((HP_base - HP) * Int(jam.content.power) / 100);
-                }
-            }
-        }
-        return atk;
+        return ATK;
     }
     
     func calcDEF() -> Int {
-        var def = DEF;
-        for enh in enhances {
-            switch enh.content.seedType {
-            case CharBtlAction.SeedType.atkNow:
-                def += (ATK * Int(enh.content.enhDefPowerAdd) / 100);
-            case CharBtlAction.SeedType.atkBase:
-                def += (ATK_base * Int(enh.content.enhDefPowerAdd) / 100);
-            case CharBtlAction.SeedType.defNow:
-                def += (DEF * Int(enh.content.enhDefPowerAdd) / 100);
-            case CharBtlAction.SeedType.defBase:
-                def += (DEF_base * Int(enh.content.enhDefPowerAdd) / 100);
-            case CharBtlAction.SeedType.lasthp:
-                def += (HP * Int(enh.content.enhDefPowerAdd) / 100);
-            case CharBtlAction.SeedType.maxhp:
-                def += (HP_base * Int(enh.content.enhDefPowerAdd) / 100);
-            case CharBtlAction.SeedType.subhp:
-                def += ((HP_base - HP) * Int(enh.content.enhDefPowerAdd) / 100);
-            }
-        }
-        for jam in jammings {
-            if jam.content.type == CharBtlAction.JamType.weakenDef {
-                switch jam.content.seedType {
-                case CharBtlAction.SeedType.atkNow:
-                    def -= (ATK * Int(jam.content.power) / 100);
-                case CharBtlAction.SeedType.atkBase:
-                    def -= (ATK_base * Int(jam.content.power) / 100);
-                case CharBtlAction.SeedType.defNow:
-                    def -= (DEF * Int(jam.content.power) / 100);
-                case CharBtlAction.SeedType.defBase:
-                    def -= (DEF_base * Int(jam.content.power) / 100);
-                case CharBtlAction.SeedType.lasthp:
-                    def -= (HP * Int(jam.content.power) / 100);
-                case CharBtlAction.SeedType.maxhp:
-                    def -= (HP_base * Int(jam.content.power) / 100);
-                case CharBtlAction.SeedType.subhp:
-                    def -= ((HP_base - HP) * Int(jam.content.power) / 100);
-                }
-            }
-        }
-        return def;
+        // エンハンス時にステータスの値変更したのでそのまま使う
+        return DEF;
     }
 
 }
