@@ -46,7 +46,7 @@ class Character : SKSpriteNode {
             }
         }
         if let label = labelDEF {
-            labelDEF.text = "DEF:\(DEF)";
+            labelDEF.text = "DEF:\(DEF)+\(defenceds.count)";
             if DEF < DEF_base {
                 labelDEF.fontColor = UIColor.blueColor();
             }
@@ -309,9 +309,17 @@ class Character : SKSpriteNode {
         return ATK;
     }
     
-    func calcDEF() -> Int {
-        // エンハンス時にステータスの値変更したのでそのまま使う
-        return DEF;
+    func calcDEF(consumeDefenceds: Bool = false) -> Int {
+        var def = DEF;
+        if defenceds.count > 0 {
+            var defence = defenceds[defenceds.count-1];
+            def += defence.addDef;
+            defence.lastCount--;
+            if defence.lastCount <= 0 {
+                defenceds.removeLast();
+            }
+        }
+        return def;
     }
 
 }

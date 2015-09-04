@@ -281,7 +281,8 @@ class GameScene: SKScene {
         act_2.name = "防御";
         act_2.action.type = CharBtlAction.ActType.def;
         act_2.action.defEnable = true;
-        act_2.action.def.defPower = 30.0;
+        act_2.action.def.seedType = CharBtlAction.SeedType.atkNow;
+        act_2.action.def.defPower = 100.0;
         act_2.cost = act_2.action.defCost;
         player_char.actions.append(act_2);
 
@@ -394,6 +395,7 @@ class GameScene: SKScene {
         act_2.name = "防御";
         act_2.action.type = CharBtlAction.ActType.def;
         act_2.action.defEnable = true;
+        act_2.action.def.seedType = CharBtlAction.SeedType.atkNow;
         act_2.action.def.defPower = 30.0;
         act_2.cost = act_2.action.defCost;
         enemy_char.actions.append(act_2);
@@ -766,14 +768,16 @@ class GameScene: SKScene {
     }
     
     //------------
-    // 行動順優先順 def > atk > enh > jam
+    // 行動優先順
+    // 有利不利がある場合 : 有利 > 不利
+    // 有利不利がない場合 : atk > その他
     //------------
     // 有利不利
     // def > atk
     // enh > def
     // jam > enh
     // atk > jam
-    // 有利行動をとった場合はそのターン相手の次回以降の行動が終了する
+    // 有利行動をとった場合はそのターンの相手行動がキャンセルされる
     //------------
     
     //------------
@@ -787,9 +791,9 @@ class GameScene: SKScene {
             , callback: { () -> Void in
                 
                 self.meleeNextFlg[0] = true;
+                
+                self.meleeNextFlg[1] = true;
         });
-        
-        self.meleeNextFlg[1] = true;
     }
 
     func melee_atk_atk(#pAct: Character.Action, eAct: Character.Action) {
@@ -814,15 +818,24 @@ class GameScene: SKScene {
     func melee_atk_def(#pAct: Character.Action, eAct: Character.Action) {
         
         // 不利
-        meleeAction_Atk(attacker: player_char, target: enemy_char
-            , unilaterally: true
-            , damage: calcDamage(player_char, target: enemy_char)
+        meleeAction_Def(target: enemy_char
+            , content: eAct.action.def
+            , left: false
             , callback: { () -> Void in
                 
-                self.meleeNextFlg[0] = true;
-        });
-        
-        self.meleeNextFlg[1] = true;
+                self.addDef(self.enemy_char, action: eAct);
+                self.meleeNextFlg[1] = true;
+                
+                self.meleeAction_Atk(attacker: self.player_char, target: self.enemy_char
+                    , unilaterally: true
+                    , damage: self.calcDamage(self.player_char, target: self.enemy_char)
+                    , callback: { () -> Void in
+                        
+                        self.meleeNextFlg[0] = true;
+                        
+                });
+
+        })
     }
 
     func melee_atk_enh(#pAct: Character.Action, eAct: Character.Action) {
@@ -855,7 +868,10 @@ class GameScene: SKScene {
                 
                 self.meleeNextFlg[0] = true;
                 
-                self.meleeAction_Jam(target: self.player_char, content: eAct.action.jam, callback: { () -> Void in
+                self.meleeAction_Jam(target: self.player_char
+                    , content: eAct.action.jam
+                    , callback: { () -> Void in
+                        
                     self.addJam(self.player_char, executor: self.enemy_char, action: eAct);
                     self.meleeNextFlg[1] = true;
                 })
@@ -867,51 +883,100 @@ class GameScene: SKScene {
 
     func melee_def_non(#pAct: Character.Action) {
         
-        self.meleeNextFlg[0] = true;
-        self.meleeNextFlg[1] = true;
+        meleeAction_Def(target: player_char
+            , content: pAct.action.def
+            , left: true
+            , callback: { () -> Void in
+                
+                self.addDef(self.player_char, action: pAct);
+                self.meleeNextFlg[0] = true;
+                
+                self.meleeNextFlg[1] = true;
+        })
     }
 
     func melee_def_atk(#pAct: Character.Action, eAct: Character.Action) {
         // 有利
         
-        self.meleeNextFlg[0] = true;
-
-        meleeAction_Atk(attacker: enemy_char, target: player_char
-            , unilaterally: true
-            , damage: calcDamage(enemy_char, target: player_char)
+        meleeAction_Def(target: player_char
+            , content: pAct.action.def
+            , left: true
             , callback: { () -> Void in
                 
-                self.meleeNextFlg[1] = true;
-        });
+                self.addDef(self.player_char, action: pAct);
+                self.meleeNextFlg[0] = true;
+                
+                self.meleeAction_Atk(attacker: self.enemy_char, target: self.player_char
+                    , unilaterally: true
+                    , damage: self.calcDamage(self.enemy_char, target: self.player_char)
+                    , callback: { () -> Void in
+                        
+                        self.meleeNextFlg[1] = true;
+                });
+        })
+
     }
 
     func melee_def_def(#pAct: Character.Action, eAct: Character.Action) {
         
-        self.meleeNextFlg[0] = true;
-        self.meleeNextFlg[1] = true;
+        meleeAction_Def(target: player_char
+            , content: pAct.action.def
+            , left: true
+            , callback: { () -> Void in
+                
+                self.addDef(self.player_char, action: pAct);
+                self.meleeNextFlg[0] = true;
+        })
+
+        meleeAction_Def(target: enemy_char
+            , content: eAct.action.def
+            , left: false
+            , callback: { () -> Void in
+                
+                self.addDef(self.enemy_char, action: eAct);
+                self.meleeNextFlg[1] = true;
+        })
     }
 
     func melee_def_enh(#pAct: Character.Action, eAct: Character.Action) {
         // 不利
         
-        meleeNextFlg[0] = true;
-        
-        self.meleeAction_Enh(target: self.enemy_char
+        meleeAction_Enh(target: enemy_char
             , content: eAct.action.enh
             , callback: { () -> Void in
                 
                 self.addEnh(self.enemy_char, action: eAct);
                 self.meleeNextFlg[1] = true;
+                
+                self.meleeAction_Def(target: self.player_char
+                    , content: pAct.action.def
+                    , left: true
+                    , callback: { () -> Void in
+                        
+                        self.addDef(self.player_char, action: pAct);
+                        self.meleeNextFlg[0] = true;
+                })
         })
+
     }
 
     func melee_def_jam(#pAct: Character.Action, eAct: Character.Action) {
         
-        self.meleeNextFlg[0] = true;
+        meleeAction_Def(target: player_char
+            , content: pAct.action.def
+            , left: true
+            , callback: { () -> Void in
+                
+                self.addDef(self.player_char, action: pAct);
+                self.meleeNextFlg[0] = true;
+        })
         
-        self.meleeAction_Jam(target: self.player_char, content: eAct.action.jam, callback: { () -> Void in
-            self.addJam(self.player_char, executor: self.enemy_char, action: eAct);
-            self.meleeNextFlg[1] = true;
+        meleeAction_Jam(target: player_char
+            , content: eAct.action.jam
+            , callback: { () -> Void in
+                
+                self.addJam(self.player_char, executor: self.enemy_char, action: eAct);
+                self.meleeNextFlg[1] = true;
         })
     }
 
@@ -920,7 +985,7 @@ class GameScene: SKScene {
 
     func melee_enh_non(#pAct: Character.Action) {
         
-        self.meleeAction_Enh(target: self.player_char
+        meleeAction_Enh(target: player_char
             , content: pAct.action.enh
             , callback: { () -> Void in
             
@@ -953,20 +1018,27 @@ class GameScene: SKScene {
     func melee_enh_def(#pAct: Character.Action, eAct: Character.Action) {
         // 有利
         
-        self.meleeAction_Enh(target: self.player_char
+        meleeAction_Enh(target: player_char
             , content: pAct.action.enh
             , callback: { () -> Void in
             
             self.addEnh(self.player_char, action: pAct);
             self.meleeNextFlg[0] = true;
+                
+            self.meleeAction_Def(target: self.enemy_char
+                , content: eAct.action.def
+                , left: false
+                , callback: { () -> Void in
+                        
+                    self.addDef(self.enemy_char, action: eAct);
+                    self.meleeNextFlg[1] = true;
+            })
         })
-        
-        self.meleeNextFlg[1] = true;
     }
 
     func melee_enh_enh(#pAct: Character.Action, eAct: Character.Action) {
         
-        self.meleeAction_Enh(target: self.player_char
+        meleeAction_Enh(target: player_char
             , content: pAct.action.enh
             , callback: { () -> Void in
                 
@@ -974,7 +1046,7 @@ class GameScene: SKScene {
                 self.meleeNextFlg[0] = true;
         })
         
-        self.meleeAction_Enh(target: self.enemy_char
+        meleeAction_Enh(target: enemy_char
             , content: eAct.action.enh
             , callback: { () -> Void in
                 
@@ -986,18 +1058,22 @@ class GameScene: SKScene {
     func melee_enh_jam(#pAct: Character.Action, eAct: Character.Action) {
         // 不利
         
-        self.meleeAction_Enh(target: self.player_char
-            , content: pAct.action.enh
+        meleeAction_Jam(target: player_char
+            , content: eAct.action.jam
             , callback: { () -> Void in
                 
-                self.addEnh(self.player_char, action: pAct);
-                self.meleeNextFlg[0] = true;
-                
-                self.meleeAction_Jam(target: self.player_char, content: eAct.action.jam, callback: { () -> Void in
-                    self.addJam(self.player_char, executor: self.enemy_char, action: eAct);
-                    self.meleeNextFlg[1] = true;
-                })
+            self.addJam(self.player_char, executor: self.enemy_char, action: eAct);
+            self.meleeNextFlg[1] = true;
+            
+            self.meleeAction_Enh(target: self.player_char
+                , content: pAct.action.enh
+                , callback: { () -> Void in
+                    
+                    self.addEnh(self.player_char, action: pAct);
+                    self.meleeNextFlg[0] = true;
+            })
         })
+
     }
 
     //------------
@@ -1005,7 +1081,10 @@ class GameScene: SKScene {
     
     func melee_jam_non(#pAct: Character.Action) {
         
-        self.meleeAction_Jam(target: self.enemy_char, content: pAct.action.jam, callback: { () -> Void in
+        meleeAction_Jam(target: enemy_char
+            , content: pAct.action.jam
+            , callback: { () -> Void in
+                
             self.addJam(self.enemy_char, executor: self.player_char, action: pAct);
             self.meleeNextFlg[0] = true;
         })
@@ -1032,29 +1111,44 @@ class GameScene: SKScene {
 
     func melee_jam_def(#pAct: Character.Action, eAct: Character.Action) {
         
-        self.meleeAction_Jam(target: self.enemy_char, content: pAct.action.jam, callback: { () -> Void in
+        meleeAction_Jam(target: enemy_char
+            , content: pAct.action.jam
+            , callback: { () -> Void in
+                
             self.addJam(self.enemy_char, executor: self.player_char, action: pAct);
             self.meleeNextFlg[0] = true;
+            
         })
         
-        self.meleeNextFlg[1] = true;
+        meleeAction_Def(target: enemy_char
+            , content: eAct.action.def
+            , left: false
+            , callback: { () -> Void in
+                
+                self.addDef(self.enemy_char, action: eAct);
+                self.meleeNextFlg[1] = true;
+        })
     }
 
     func melee_jam_enh(#pAct: Character.Action, eAct: Character.Action) {
         // 有利
         
-        self.meleeAction_Enh(target: self.enemy_char
-            , content: eAct.action.enh
+        meleeAction_Jam(target: enemy_char
+            , content: pAct.action.jam
             , callback: { () -> Void in
                 
-                self.addEnh(self.enemy_char, action: eAct);
-                self.meleeNextFlg[1] = true;
-                
-                self.meleeAction_Jam(target: self.enemy_char, content: pAct.action.jam, callback: { () -> Void in
-                    self.addJam(self.enemy_char, executor: self.player_char, action: pAct);
-                    self.meleeNextFlg[0] = true;
-                })
+            self.addJam(self.enemy_char, executor: self.player_char, action: pAct);
+            self.meleeNextFlg[0] = true;
+            
+            self.meleeAction_Enh(target: self.enemy_char
+                , content: eAct.action.enh
+                , callback: { () -> Void in
+                    
+                    self.addEnh(self.enemy_char, action: eAct);
+                    self.meleeNextFlg[1] = true;
+            })
         })
+
     }
 
     func melee_jam_jam(#pAct: Character.Action, eAct: Character.Action) {
@@ -1089,7 +1183,15 @@ class GameScene: SKScene {
     func melee_non_def(#eAct: Character.Action) {
         
         self.meleeNextFlg[0] = true;
-        self.meleeNextFlg[1] = true;
+        
+        meleeAction_Def(target: enemy_char
+            , content: eAct.action.def
+            , left: false
+            , callback: { () -> Void in
+                
+                self.addDef(self.enemy_char, action: eAct);
+                self.meleeNextFlg[1] = true;
+        })
     }
     
     func melee_non_enh(#eAct: Character.Action) {
@@ -1190,6 +1292,48 @@ class GameScene: SKScene {
         }
     }
     
+    func meleeAction_Def(#target: Character
+        , content: CharBtlAction.Def
+        , left: Bool = false
+        , callback: () -> Void)
+    {
+        for i in 0 ..< 10 {
+            let delay = SKAction.waitForDuration(NSTimeInterval(createRandom(Min: 0.0, Max: 0.3)));
+            let move = SKAction.moveToX(target.position.x + ((left) ? target.size.width*0.6*(-1) : target.size.width*0.6), duration: 0.5);
+            let scale = SKAction.scaleYTo(0.9, duration: 0.5);
+            let group = SKAction.group([move, scale]);
+            for j in 0 ..< 2 {
+                var line = SKSpriteNode(imageNamed: "Sparkline");
+                line.blendMode = (j % 2 == 0) ? SKBlendMode.Add : SKBlendMode.Alpha;
+                line.position.x = target.position.x;
+                line.position.y = target.position.y;
+                line.xScale = 0.15;
+                line.yScale = 0.6;
+                line.color = UIColor.yellowColor();
+                line.colorBlendFactor = 0.5;
+                self.addChild(line);
+                
+                let endfunc = SKAction.runBlock { () -> Void in
+                    line.removeFromParent();
+                }
+                line.runAction(SKAction.sequence([delay, group, endfunc]));
+            }
+        }
+        
+        target.color = UIColor.yellowColor();
+        target.colorBlendFactor = 0.3;
+        target.runAction(SKAction.sequence([
+            SKActionEx.jumpTo(startPoint: target.position, targetPoint: target.position, height: target.size.height*0.2, duration: 0.2)
+            , SKActionEx.jumpTo(startPoint: target.position, targetPoint: target.position, height: target.size.height*0.2, duration: 0.2)
+            , SKAction.waitForDuration(0.6)
+            , SKAction.runBlock({ () -> Void in
+                target.color = UIColor.clearColor();
+                target.colorBlendFactor = 0.0;
+                callback();
+            })
+            ]));
+    }
+
     func meleeAction_Enh(#target: Character
         , content: [CharBtlAction.Enh]
         , callback: () -> Void)
@@ -1315,9 +1459,18 @@ class GameScene: SKScene {
     }
 
     func calcDamage(attacker: Character, target: Character) -> Int {
-        var damage = attacker.calcATK() - target.calcDEF();
+        var damage = attacker.calcATK() - target.calcDEF(consumeDefenceds: true);
         damage = (damage < 0) ? 1 : damage;
         return damage
+    }
+    
+    func addDef(executor: Character, action: Character.Action) {
+        if action.action.type == CharBtlAction.ActType.def {
+            if action.action.defEnable {
+                executor.addDefenced(action.action.def);
+                executor.refleshStatus();
+            }
+        }
     }
     
     func addEnh(target: Character, action: Character.Action) {
