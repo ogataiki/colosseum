@@ -456,8 +456,6 @@ class GameScene: SKScene {
                 
             case SceneStatus.stock:
                 
-                println(rise_frame);
-                
                 if reach_frame < rise_frame {
                     
                     tacticalStart();
@@ -799,6 +797,7 @@ class GameScene: SKScene {
         
         meleeAction_Atk(attacker: player_char, target: enemy_char
             , unilaterally: true
+            , left: true
             , damage: calcDamage(player_char, target: enemy_char)
             , callback: { () -> Void in
                 
@@ -812,6 +811,7 @@ class GameScene: SKScene {
         
         meleeAction_Atk(attacker: player_char, target: enemy_char
             , unilaterally: false
+            , left: true
             , damage: calcDamage(player_char, target: enemy_char)
             , callback: { () -> Void in
                 
@@ -820,6 +820,7 @@ class GameScene: SKScene {
         
         meleeAction_Atk(attacker: enemy_char, target: player_char
             , unilaterally: false
+            , left: false
             , damage: calcDamage(enemy_char, target: player_char)
             , callback: { () -> Void in
                 
@@ -836,6 +837,7 @@ class GameScene: SKScene {
         });
         self.meleeAction_Atk(attacker: self.enemy_char, target: self.player_char
             , unilaterally: true
+            , left: false
             , damage: self.calcDamage(self.player_char, target: self.enemy_char) * Int(eAct.action.def.defCounterAttack)
             , callback: { () -> Void in
                 
@@ -867,6 +869,7 @@ class GameScene: SKScene {
     
         meleeAction_Atk(attacker: player_char, target: enemy_char
             , unilaterally: true
+            , left: true
             , damage: calcDamage(player_char, target: enemy_char)
             , callback: { () -> Void in
                 
@@ -888,6 +891,7 @@ class GameScene: SKScene {
 
         meleeAction_Atk(attacker: player_char, target: enemy_char
             , unilaterally: true
+            , left: true
             , damage: calcDamage(player_char, target: enemy_char)
             , callback: { () -> Void in
                 
@@ -937,6 +941,7 @@ class GameScene: SKScene {
         });
         self.meleeAction_Atk(attacker: self.player_char, target: self.enemy_char
             , unilaterally: true
+            , left: true
             , damage: self.calcDamage(self.enemy_char, target: self.player_char) * Int(pAct.action.def.defCounterAttack)
             , callback: { () -> Void in
                 
@@ -1054,6 +1059,7 @@ class GameScene: SKScene {
         
         meleeAction_Atk(attacker: enemy_char, target: player_char
             , unilaterally: true
+            , left: false
             , damage: calcDamage(enemy_char, target: player_char)
             , callback: { () -> Void in
                 
@@ -1167,6 +1173,7 @@ class GameScene: SKScene {
         
         meleeAction_Atk(attacker: enemy_char, target: player_char
             , unilaterally: true
+            , left: false
             , damage: calcDamage(enemy_char, target: player_char)
             , callback: { () -> Void in
                 
@@ -1267,6 +1274,7 @@ class GameScene: SKScene {
         
         meleeAction_Atk(attacker: enemy_char, target: player_char
             , unilaterally: true
+            , left: false
             , damage: calcDamage(enemy_char, target: player_char)
             , callback: { () -> Void in
                 
@@ -1464,6 +1472,7 @@ class GameScene: SKScene {
 
     func meleeAction_Atk(#attacker: Character, target: Character
         , unilaterally: Bool = true
+        , left: Bool = false
         , damage: Int
         , callback: () -> Void)
     {
@@ -1471,7 +1480,12 @@ class GameScene: SKScene {
         let basePos = attacker.position;
         let movePos: CGPoint;
         if unilaterally {
-            movePos = CGPointMake(target.position.x, target.position.y);
+            if left {
+                movePos = CGPointMake(target.position.x + target.size.width*0.4, target.position.y);
+            }
+            else {
+                movePos = CGPointMake(target.position.x - target.size.width*0.4, target.position.y);
+            }
         }
         else {
             movePos = CGPointMake(self.size.width*0.5 - ((self.size.width*0.5 - attacker.position.x) * 0.05), attacker.position.y);
@@ -1479,10 +1493,40 @@ class GameScene: SKScene {
         let move = SKAction.moveTo(movePos, duration: 0.1);
         let attack_effect = SKAction.runBlock { () -> Void in
 
-            // TODO:攻撃エフェクトにパターン欲しい
-            
-            self.meleeAction_Damage(target.name!, damage: damage, callback: { () -> Void in
-            })
+            for i in 0 ..< 2 {
+                var startPos: CGPoint, endPos: CGPoint;
+                if left {
+                    startPos = CGPointMake(target.position.x + target.size.width*0.6, target.position.y + target.size.height*0.6);
+                    endPos = CGPointMake(target.position.x - target.size.width*0.4, target.position.y - target.size.height*0.4);
+                }
+                else {
+                    startPos = CGPointMake(target.position.x - target.size.width*0.6, target.position.y + target.size.height*0.6);
+                    endPos = CGPointMake(target.position.x + target.size.width*0.4, target.position.y - target.size.height*0.4);
+                }
+                var atkEffect = SKSpriteNode(imageNamed: "Sparkline");
+                atkEffect.blendMode = (i % 2 == 0) ? SKBlendMode.Add : SKBlendMode.Alpha;
+                atkEffect.alpha = 0.6;
+                atkEffect.position = startPos;
+                atkEffect.zPosition = target.zPosition;
+                atkEffect.setScale(0.0);
+                self.addChild(atkEffect);
+                
+                let atkScale1 = SKAction.scaleTo(0.0, duration: 0.0);
+                let radian = atan2(endPos.x - startPos.x, endPos.y - startPos.y);
+                let atkRote = SKAction.rotateToAngle(radian*(-1), duration: 0.0);
+                let atkMove = SKAction.moveTo(endPos, duration: 0.1);
+                let atkScale2 = SKAction.group([SKAction.scaleXTo(0.7, duration: 0.05), SKAction.scaleYTo(1.0, duration: 0.1)]);
+                let atkScale3 = SKAction.scaleXTo(0.0, duration: 0.05);
+                let atkScaleSeq = SKAction.sequence([atkScale2, atkScale3]);
+                let atkEFunc = SKAction.runBlock({ () -> Void in
+                    if i == 0 {
+                        self.meleeAction_Damage(target.name!, damage: damage, callback: { () -> Void in
+                        })
+                    }
+                    atkEffect.removeFromParent();
+                })
+                atkEffect.runAction(SKAction.sequence([atkScale1, atkRote, SKAction.group([atkMove, atkScaleSeq]), atkEFunc]));
+            }
         }
         let wait = SKAction.waitForDuration(0.5);
         let recoil = SKActionEx.jumpTo(startPoint: movePos
