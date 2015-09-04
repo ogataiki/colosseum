@@ -293,7 +293,7 @@ class GameScene: SKScene {
         var enh_1 = CharBtlAction.Enh();
         enh_1.type = CharBtlAction.EnhType.atk;
         enh_1.seedType = CharBtlAction.SeedType.atkNow;
-        enh_1.power = 30.0;
+        enh_1.power = 70.0;
         act_3.action.enh.append(enh_1);
         act_3.cost = act_3.action.enhCost;
         player_char.actions.append(act_3);
@@ -657,15 +657,20 @@ class GameScene: SKScene {
         scene_status = SceneStatus.melee;
 
         meleeBuffer = [];
-        for i in 0 ..< tc_list.count {
+        let enemyActs = arc4random() % 10;
+        let roop = max(tc_list.count, Int(enemyActs));
+        for i in 0 ..< roop {
+            
             let enemy_act: CharBtlAction.ActType;
-            if arc4random()%3 == 0 {enemy_act = CharBtlAction.ActType.atk}
+            if tc_list.count > Int(enemyActs) {enemy_act = CharBtlAction.ActType.non}
             else if arc4random()%3 == 0 {enemy_act = CharBtlAction.ActType.def}
             else if arc4random()%3 == 0 {enemy_act = CharBtlAction.ActType.enh}
             else if arc4random()%3 == 0 {enemy_act = CharBtlAction.ActType.jam}
-            else {enemy_act = CharBtlAction.ActType.non}
+            else {enemy_act = CharBtlAction.ActType.atk}
+            
+            let player_act = (i < tc_list.count) ? tc_list[i] : CharBtlAction.ActType.non;
     
-            var data: MeleeData = MeleeData(player_action: tc_list[i], enemy_action: enemy_act);
+            var data: MeleeData = MeleeData(player_action: player_act, enemy_action: enemy_act);
             meleeBuffer.append(data);
         }
         
@@ -776,11 +781,11 @@ class GameScene: SKScene {
     // 有利不利がない場合 : atk > その他
     //------------
     // 有利不利
-    // def > atk
-    // enh > def
-    // jam > enh
-    // atk > jam
-    // 有利行動をとった場合はそのターンの相手行動がキャンセルされる
+    // def > atk 攻撃失敗 & 有利側カウンターアタック
+    // enh > def 防御失敗 & 不利側防御全破壊
+    // jam > enh 強化失敗 & 不利側強化全解除
+    // atk > jam 妨害失敗 & 有利側被妨害効果全解除
+    // さらに不利行動をとったキャラはそのターンの行動キャンセル
     //------------
     
     //------------
@@ -819,8 +824,9 @@ class GameScene: SKScene {
     }
 
     func melee_atk_def(#pAct: Character.Action, eAct: Character.Action) {
-        
-        // 不利
+        // player不利
+        // def > atk 攻撃失敗 & 有利側カウンターアタック
+
         meleeAction_Def(target: enemy_char
             , content: eAct.action.def
             , left: false
@@ -834,8 +840,8 @@ class GameScene: SKScene {
                     , damage: self.calcDamage(self.player_char, target: self.enemy_char)
                     , callback: { () -> Void in
                         
-                        self.meleeNextFlg[0] = true;
                         
+                        self.meleeNextFlg[0] = true;
                 });
 
         })
@@ -862,8 +868,9 @@ class GameScene: SKScene {
     }
 
     func melee_atk_jam(#pAct: Character.Action, eAct: Character.Action) {
-        // 有利
-        
+        // player有利
+        // atk > jam 妨害失敗 & 有利側被妨害効果全解除
+
         meleeAction_Atk(attacker: player_char, target: enemy_char
             , unilaterally: true
             , damage: calcDamage(player_char, target: enemy_char)
@@ -875,8 +882,8 @@ class GameScene: SKScene {
                     , content: eAct.action.jam
                     , callback: { () -> Void in
                         
-                    self.addJam(self.player_char, executor: self.enemy_char, action: eAct);
-                    self.meleeNextFlg[1] = true;
+                        self.addJam(self.player_char, executor: self.enemy_char, action: eAct);
+                        self.meleeNextFlg[1] = true;
                 })
         });
     }
@@ -899,7 +906,8 @@ class GameScene: SKScene {
     }
 
     func melee_def_atk(#pAct: Character.Action, eAct: Character.Action) {
-        // 有利
+        // player有利
+        // def > atk 攻撃失敗 & 有利側カウンターアタック
         
         meleeAction_Def(target: player_char
             , content: pAct.action.def
@@ -942,7 +950,8 @@ class GameScene: SKScene {
     }
 
     func melee_def_enh(#pAct: Character.Action, eAct: Character.Action) {
-        // 不利
+        // player不利
+        // enh > def 防御失敗 & 不利側防御全破壊
         
         meleeAction_Enh(target: enemy_char
             , content: eAct.action.enh
@@ -992,8 +1001,8 @@ class GameScene: SKScene {
             , content: pAct.action.enh
             , callback: { () -> Void in
             
-            self.addEnh(self.player_char, action: pAct);
-            self.meleeNextFlg[0] = true;
+                self.addEnh(self.player_char, action: pAct);
+                self.meleeNextFlg[0] = true;
         })
         
         self.meleeNextFlg[1] = true;
@@ -1019,7 +1028,8 @@ class GameScene: SKScene {
     }
     
     func melee_enh_def(#pAct: Character.Action, eAct: Character.Action) {
-        // 有利
+        // player有利
+        // enh > def 防御失敗 & 不利側防御全破壊
         
         meleeAction_Enh(target: player_char
             , content: pAct.action.enh
@@ -1059,7 +1069,8 @@ class GameScene: SKScene {
     }
 
     func melee_enh_jam(#pAct: Character.Action, eAct: Character.Action) {
-        // 不利
+        // player不利
+        // jam > enh 強化失敗 & 不利側強化全解除
         
         meleeAction_Jam(target: player_char
             , content: eAct.action.jam
@@ -1088,15 +1099,16 @@ class GameScene: SKScene {
             , content: pAct.action.jam
             , callback: { () -> Void in
                 
-            self.addJam(self.enemy_char, executor: self.player_char, action: pAct);
-            self.meleeNextFlg[0] = true;
+                self.addJam(self.enemy_char, executor: self.player_char, action: pAct);
+                self.meleeNextFlg[0] = true;
         })
 
         self.meleeNextFlg[1] = true;
     }
 
     func melee_jam_atk(#pAct: Character.Action, eAct: Character.Action) {
-        // 不利
+        // player不利
+        // atk > jam 妨害失敗 & 有利側被妨害効果全解除
         
         meleeAction_Atk(attacker: enemy_char, target: player_char
             , unilaterally: true
@@ -1105,9 +1117,12 @@ class GameScene: SKScene {
                 
                 self.meleeNextFlg[1] = true;
                 
-                self.meleeAction_Jam(target: self.enemy_char, content: pAct.action.jam, callback: { () -> Void in
-                    self.addJam(self.enemy_char, executor: self.player_char, action: pAct);
-                    self.meleeNextFlg[0] = true;
+                self.meleeAction_Jam(target: self.enemy_char
+                    , content: pAct.action.jam
+                    , callback: { () -> Void in
+                        
+                        self.addJam(self.enemy_char, executor: self.player_char, action: pAct);
+                        self.meleeNextFlg[0] = true;
                 })
         });
     }
@@ -1118,9 +1133,8 @@ class GameScene: SKScene {
             , content: pAct.action.jam
             , callback: { () -> Void in
                 
-            self.addJam(self.enemy_char, executor: self.player_char, action: pAct);
-            self.meleeNextFlg[0] = true;
-            
+                self.addJam(self.enemy_char, executor: self.player_char, action: pAct);
+                self.meleeNextFlg[0] = true;
         })
         
         meleeAction_Def(target: enemy_char
@@ -1134,36 +1148,43 @@ class GameScene: SKScene {
     }
 
     func melee_jam_enh(#pAct: Character.Action, eAct: Character.Action) {
-        // 有利
-        
+        // player有利
+        // jam > enh 強化失敗 & 不利側強化全解除
+
         meleeAction_Jam(target: enemy_char
             , content: pAct.action.jam
             , callback: { () -> Void in
                 
-            self.addJam(self.enemy_char, executor: self.player_char, action: pAct);
-            self.meleeNextFlg[0] = true;
+                self.addJam(self.enemy_char, executor: self.player_char, action: pAct);
+                self.meleeNextFlg[0] = true;
             
-            self.meleeAction_Enh(target: self.enemy_char
-                , content: eAct.action.enh
-                , callback: { () -> Void in
+                self.meleeAction_Enh(target: self.enemy_char
+                    , content: eAct.action.enh
+                    , callback: { () -> Void in
                     
-                    self.addEnh(self.enemy_char, action: eAct);
-                    self.meleeNextFlg[1] = true;
-            })
+                        self.addEnh(self.enemy_char, action: eAct);
+                        self.meleeNextFlg[1] = true;
+                })
         })
 
     }
 
     func melee_jam_jam(#pAct: Character.Action, eAct: Character.Action) {
         
-        self.meleeAction_Jam(target: self.enemy_char, content: pAct.action.jam, callback: { () -> Void in
-            self.addJam(self.enemy_char, executor: self.player_char, action: pAct);
-            self.meleeNextFlg[0] = true;
+        self.meleeAction_Jam(target: self.enemy_char
+            , content: pAct.action.jam
+            , callback: { () -> Void in
+                
+                self.addJam(self.enemy_char, executor: self.player_char, action: pAct);
+                self.meleeNextFlg[0] = true;
         })
         
-        self.meleeAction_Jam(target: self.player_char, content: eAct.action.jam, callback: { () -> Void in
-            self.addJam(self.player_char, executor: self.enemy_char, action: eAct);
-            self.meleeNextFlg[1] = true;
+        self.meleeAction_Jam(target: self.player_char
+            , content: eAct.action.jam
+            , callback: { () -> Void in
+                
+                self.addJam(self.player_char, executor: self.enemy_char, action: eAct);
+                self.meleeNextFlg[1] = true;
         })
     }
 
@@ -1214,9 +1235,12 @@ class GameScene: SKScene {
         
         self.meleeNextFlg[0] = true;
         
-        self.meleeAction_Jam(target: self.player_char, content: eAct.action.jam, callback: { () -> Void in
-            self.addJam(self.player_char, executor: self.enemy_char, action: eAct);
-            self.meleeNextFlg[1] = true;
+        self.meleeAction_Jam(target: self.player_char
+            , content: eAct.action.jam
+            , callback: { () -> Void in
+                
+                self.addJam(self.player_char, executor: self.enemy_char, action: eAct);
+                self.meleeNextFlg[1] = true;
         })
     }
 

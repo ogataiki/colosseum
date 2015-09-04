@@ -169,6 +169,19 @@ class Character : SKSpriteNode {
             ATK_CNT += enhance.addATKCNT;
         }
     }
+    func allCancelEnhanced() {
+        for enh in enhances {
+            
+            // ステータスに反映
+            HP -= enh.addHP;
+            ATK -= enh.addATK;
+            DEF -= enh.addDEF;
+            HIT -= enh.addHIT;
+            AVD -= enh.addAVD;
+            ATK_CNT -= enh.addATKCNT;
+        }
+        enhances = [];
+    }
     
     struct Jamming {
         var content = CharBtlAction.Jam();
