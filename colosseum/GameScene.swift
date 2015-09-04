@@ -690,6 +690,9 @@ class GameScene: SKScene {
         let playerAction = player_char.actions[meleeData.player_action.rawValue];
         let enemyAction = enemy_char.actions[meleeData.enemy_action.rawValue];
         
+        meleeAction_Pre(pAct: meleeData.player_action, eAct: meleeData.enemy_action) { () -> Void in
+        };
+        
         switch meleeData.player_action {
         case CharBtlAction.ActType.atk:
             switch meleeData.enemy_action {
@@ -1222,6 +1225,62 @@ class GameScene: SKScene {
         self.meleeNextFlg[1] = true;
     }
 
+    func meleeAction_Pre(#pAct: CharBtlAction.ActType, eAct: CharBtlAction.ActType
+        , callback: () -> Void)
+    {
+        if pAct != CharBtlAction.ActType.non {
+
+            var playerCutin = SKSpriteNode(color: UIColor.greenColor(), size: CGSizeMake(self.size.width*0.2, self.size.width*0.1));
+            playerCutin.anchorPoint = CGPointMake(1.0, 1.0);
+            playerCutin.position = CGPointMake(self.size.width + playerCutin.size.width, self.size.height);
+            self.addChild(playerCutin);
+            
+            var pActLbl = SKLabelNode(text: CharBtlAction.getActTypeName(pAct));
+            pActLbl.position = CGPointMake(playerCutin.size.width*0.5*(-1), playerCutin.size.height*0.5*(-1));
+            pActLbl.fontSize = 18;
+            pActLbl.fontColor = UIColor.blackColor();
+            pActLbl.verticalAlignmentMode = SKLabelVerticalAlignmentMode.Center;
+            pActLbl.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Center;
+            playerCutin.addChild(pActLbl);
+            
+            let move1 = SKAction.moveToX(self.size.width, duration: 0.2);
+            let wait = SKAction.waitForDuration(0.7);
+            let move2 = SKAction.moveToX(self.size.width + playerCutin.size.width, duration: 0.2);
+            let endfunc = SKAction.runBlock({ () -> Void in
+                playerCutin.removeAllChildren();
+                playerCutin.removeFromParent();
+            });
+            playerCutin.runAction(SKAction.sequence([move1, wait, move2, endfunc]));
+        }
+
+        if eAct != CharBtlAction.ActType.non {
+            
+            var enemyCutin = SKSpriteNode(color: UIColor.orangeColor(), size: CGSizeMake(self.size.width*0.2, self.size.width*0.1));
+            enemyCutin.anchorPoint = CGPointMake(0.0, 1.0);
+            enemyCutin.position = CGPointMake(0 - enemyCutin.size.width, self.size.height);
+            self.addChild(enemyCutin);
+            
+            var eActLbl = SKLabelNode(text: CharBtlAction.getActTypeName(eAct));
+            eActLbl.position = CGPointMake(enemyCutin.size.width*0.5, enemyCutin.size.height*0.5*(-1));
+            eActLbl.fontSize = 18;
+            eActLbl.fontColor = UIColor.blackColor();
+            eActLbl.verticalAlignmentMode = SKLabelVerticalAlignmentMode.Center;
+            eActLbl.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Center;
+            enemyCutin.addChild(eActLbl);
+            
+            let move1 = SKAction.moveToX(0, duration: 0.2);
+            let wait = SKAction.waitForDuration(0.7);
+            let move2 = SKAction.moveToX(0 - enemyCutin.size.width, duration: 0.2);
+            let endfunc = SKAction.runBlock({ () -> Void in
+                enemyCutin.removeAllChildren();
+                enemyCutin.removeFromParent();
+            });
+            enemyCutin.runAction(SKAction.sequence([move1, wait, move2, endfunc]));
+        }
+    
+        callback();
+    }
+    
     func meleeAction_Atk(#attacker: Character, target: Character
         , unilaterally: Bool = true
         , damage: Int

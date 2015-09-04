@@ -12,6 +12,20 @@ class CharBtlAction {
         case jam = 4
     }
     var type = ActType.non;
+    static func getActTypeName(type: ActType) -> String {
+        switch type {
+        case ActType.atk:
+            return "攻撃";
+        case ActType.def:
+            return "防御";
+        case ActType.enh:
+            return "強化";
+        case ActType.jam:
+            return "妨害";
+        default: break;
+        }
+        return "";
+    }
     
     // ---
     // 攻撃のタイプと内容
