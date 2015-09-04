@@ -1,7 +1,7 @@
 import SpriteKit
 
 class Character : SKSpriteNode {
-
+    
     var HP_base: Int = 3000;
     var ATK_base: Int = 100;
     var DEF_base: Int = 50;
@@ -123,6 +123,9 @@ class Character : SKSpriteNode {
         
         // 以降、相手の攻撃を受けるタイミングで消費
         // ターンで消費しない
+    }
+    func allCancelDefenced() {
+        defenceds = [];
     }
 
     struct Enhanced {
@@ -247,7 +250,20 @@ class Character : SKSpriteNode {
             ATK_CNT += jamming.addATKCNT;
         }
     }
-    
+    func allCancelJammings() {
+        for jam in jammings {
+            
+            // ステータスに反映
+            HP += jam.addHP;
+            ATK += jam.addATK;
+            DEF += jam.addDEF;
+            HIT += jam.addHIT;
+            AVD += jam.addAVD;
+            ATK_CNT += jam.addATKCNT;
+        }
+        jammings = [];
+    }
+
     func calcPower(power: Int, seedType: CharBtlAction.SeedType, char: Character) -> (ratioValue:Int, constValue:Int) {
         let power_TypeConst = Int(power);
         let power_TypeRatio: Int;

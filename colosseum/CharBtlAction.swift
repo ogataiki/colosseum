@@ -26,6 +26,40 @@ class CharBtlAction {
         }
         return "";
     }
+    static func judgeAdvantage(type: ActType, comp: ActType) -> (Bool, Bool) {
+        switch type {
+        case ActType.atk:
+            if comp == ActType.jam {
+                return (true, false);
+            }
+            else if comp == ActType.def {
+                return (false, true);
+            }
+        case ActType.def:
+            if comp == ActType.atk {
+                return (true, false);
+            }
+            else if comp == ActType.enh {
+                return (false, true);
+            }
+        case ActType.enh:
+            if comp == ActType.def {
+                return (true, false);
+            }
+            else if comp == ActType.jam {
+                return (false, true);
+            }
+        case ActType.jam:
+            if comp == ActType.enh {
+                return (true, false);
+            }
+            else if comp == ActType.atk {
+                return (false, true);
+            }
+        default: break;
+        }
+        return (false, false);
+    }
     
     // ---
     // 攻撃のタイプと内容

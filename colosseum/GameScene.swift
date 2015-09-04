@@ -283,6 +283,7 @@ class GameScene: SKScene {
         act_2.action.defEnable = true;
         act_2.action.def.seedType = CharBtlAction.SeedType.atkNow;
         act_2.action.def.defPower = 100.0;
+        act_2.action.def.defCounterAttack = 2.0;
         act_2.cost = act_2.action.defCost;
         player_char.actions.append(act_2);
 
@@ -397,6 +398,7 @@ class GameScene: SKScene {
         act_2.action.defEnable = true;
         act_2.action.def.seedType = CharBtlAction.SeedType.atkNow;
         act_2.action.def.defPower = 30.0;
+        act_2.action.def.defCounterAttack = 2.0;
         act_2.cost = act_2.action.defCost;
         enemy_char.actions.append(act_2);
         
@@ -657,7 +659,7 @@ class GameScene: SKScene {
         scene_status = SceneStatus.melee;
 
         meleeBuffer = [];
-        let enemyActs = arc4random() % 10;
+        let enemyActs = arc4random() % 6;
         let roop = max(tc_list.count, Int(enemyActs));
         for i in 0 ..< roop {
             
@@ -696,8 +698,10 @@ class GameScene: SKScene {
         let enemyAction = enemy_char.actions[meleeData.enemy_action.rawValue];
         
         meleeAction_Pre(pAct: meleeData.player_action, eAct: meleeData.enemy_action) { () -> Void in
+            self.meleeNextActionExec(meleeData, playerAction: playerAction, enemyAction: enemyAction);
         };
-        
+    }
+    func meleeNextActionExec(meleeData: MeleeData, playerAction: Character.Action, enemyAction: Character.Action) {
         switch meleeData.player_action {
         case CharBtlAction.ActType.atk:
             switch meleeData.enemy_action {
@@ -825,25 +829,37 @@ class GameScene: SKScene {
 
     func melee_atk_def(#pAct: Character.Action, eAct: Character.Action) {
         // player不利
-        // def > atk 攻撃失敗 & 有利側カウンターアタック
 
-        meleeAction_Def(target: enemy_char
-            , content: eAct.action.def
-            , left: false
+        // 攻撃失敗 & 有利側カウンターアタック
+        self.meleeCancelAllAction(player: true, enemy: false, index: self.meleeProgress);
+        self.meleeAction_ActTitleDisplay(player: "", enemy: "カウンター", callback: { () -> Void in
+        });
+        self.meleeAction_Atk(attacker: self.enemy_char, target: self.player_char
+            , unilaterally: true
+            , damage: self.calcDamage(self.player_char, target: self.enemy_char) * Int(eAct.action.def.defCounterAttack)
             , callback: { () -> Void in
                 
-                self.addDef(self.enemy_char, action: eAct);
-                self.meleeNextFlg[1] = true;
+                self.meleeNextFlg[0] = true;
                 
-                self.meleeAction_Atk(attacker: self.player_char, target: self.enemy_char
-                    , unilaterally: true
-                    , damage: self.calcDamage(self.player_char, target: self.enemy_char)
+                self.meleeAction_Def(target: self.enemy_char
+                    , content: eAct.action.def
+                    , left: false
                     , callback: { () -> Void in
                         
+                        self.addDef(self.enemy_char, action: eAct);
+                        self.meleeNextFlg[1] = true;
                         
-                        self.meleeNextFlg[0] = true;
-                });
-
+                        /*
+                        self.meleeAction_Atk(attacker: self.player_char, target: self.enemy_char
+                            , unilaterally: true
+                            , damage: self.calcDamage(self.player_char, target: self.enemy_char)
+                            , callback: { () -> Void in
+                    
+                                self.meleeNextFlg[0] = true;
+                        });
+                        */
+                        
+                })
         })
     }
 
@@ -869,7 +885,6 @@ class GameScene: SKScene {
 
     func melee_atk_jam(#pAct: Character.Action, eAct: Character.Action) {
         // player有利
-        // atk > jam 妨害失敗 & 有利側被妨害効果全解除
 
         meleeAction_Atk(attacker: player_char, target: enemy_char
             , unilaterally: true
@@ -878,6 +893,13 @@ class GameScene: SKScene {
                 
                 self.meleeNextFlg[0] = true;
                 
+                // atk > jam 妨害失敗 & 有利側被妨害効果全解除
+                self.meleeCancelAllAction(player: false, enemy: true, index: self.meleeProgress);
+                self.meleeCancelAllStatus(self.player_char, cancelType: CharBtlAction.ActType.jam);
+                self.player_char.refleshStatus();
+                self.meleeNextFlg[1] = true;
+
+                /*
                 self.meleeAction_Jam(target: self.player_char
                     , content: eAct.action.jam
                     , callback: { () -> Void in
@@ -885,6 +907,7 @@ class GameScene: SKScene {
                         self.addJam(self.player_char, executor: self.enemy_char, action: eAct);
                         self.meleeNextFlg[1] = true;
                 })
+                */
         });
     }
 
@@ -907,25 +930,37 @@ class GameScene: SKScene {
 
     func melee_def_atk(#pAct: Character.Action, eAct: Character.Action) {
         // player有利
-        // def > atk 攻撃失敗 & 有利側カウンターアタック
         
-        meleeAction_Def(target: player_char
-            , content: pAct.action.def
-            , left: true
+        // def > atk 攻撃失敗 & 有利側カウンターアタック
+        self.meleeCancelAllAction(player: false, enemy: true, index: self.meleeProgress);
+        self.meleeAction_ActTitleDisplay(player: "カウンター", enemy: "", callback: { () -> Void in
+        });
+        self.meleeAction_Atk(attacker: self.player_char, target: self.enemy_char
+            , unilaterally: true
+            , damage: self.calcDamage(self.enemy_char, target: self.player_char) * Int(pAct.action.def.defCounterAttack)
             , callback: { () -> Void in
                 
-                self.addDef(self.player_char, action: pAct);
-                self.meleeNextFlg[0] = true;
+                self.meleeNextFlg[1] = true;
                 
-                self.meleeAction_Atk(attacker: self.enemy_char, target: self.player_char
-                    , unilaterally: true
-                    , damage: self.calcDamage(self.enemy_char, target: self.player_char)
+                self.meleeAction_Def(target: self.player_char
+                    , content: pAct.action.def
+                    , left: true
                     , callback: { () -> Void in
                         
-                        self.meleeNextFlg[1] = true;
-                });
+                        self.addDef(self.player_char, action: pAct);
+                        self.meleeNextFlg[0] = true;
+                        
+                        /*
+                        self.meleeAction_Atk(attacker: self.enemy_char, target: self.player_char
+                            , unilaterally: true
+                            , damage: self.calcDamage(self.enemy_char, target: self.player_char)
+                            , callback: { () -> Void in
+                        
+                                self.meleeNextFlg[1] = true;
+                        });
+                        */
+                })
         })
-
     }
 
     func melee_def_def(#pAct: Character.Action, eAct: Character.Action) {
@@ -951,7 +986,6 @@ class GameScene: SKScene {
 
     func melee_def_enh(#pAct: Character.Action, eAct: Character.Action) {
         // player不利
-        // enh > def 防御失敗 & 不利側防御全破壊
         
         meleeAction_Enh(target: enemy_char
             , content: eAct.action.enh
@@ -960,6 +994,13 @@ class GameScene: SKScene {
                 self.addEnh(self.enemy_char, action: eAct);
                 self.meleeNextFlg[1] = true;
                 
+                // enh > def 防御失敗 & 不利側防御全破壊
+                self.meleeCancelAllAction(player: true, enemy: false, index: self.meleeProgress);
+                self.meleeCancelAllStatus(self.player_char, cancelType: CharBtlAction.ActType.def);
+                self.player_char.refleshStatus();
+                self.meleeNextFlg[0] = true;
+
+                /*
                 self.meleeAction_Def(target: self.player_char
                     , content: pAct.action.def
                     , left: true
@@ -968,6 +1009,7 @@ class GameScene: SKScene {
                         self.addDef(self.player_char, action: pAct);
                         self.meleeNextFlg[0] = true;
                 })
+                */
         })
 
     }
@@ -1029,23 +1071,30 @@ class GameScene: SKScene {
     
     func melee_enh_def(#pAct: Character.Action, eAct: Character.Action) {
         // player有利
-        // enh > def 防御失敗 & 不利側防御全破壊
         
         meleeAction_Enh(target: player_char
             , content: pAct.action.enh
             , callback: { () -> Void in
             
-            self.addEnh(self.player_char, action: pAct);
-            self.meleeNextFlg[0] = true;
+                self.addEnh(self.player_char, action: pAct);
+                self.meleeNextFlg[0] = true;
                 
-            self.meleeAction_Def(target: self.enemy_char
-                , content: eAct.action.def
-                , left: false
-                , callback: { () -> Void in
+                // enh > def 防御失敗 & 不利側防御全破壊
+                self.meleeCancelAllAction(player: false, enemy: true, index: self.meleeProgress);
+                self.meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.def);
+                self.enemy_char.refleshStatus();
+                self.meleeNextFlg[1] = true;
+
+                /*
+                self.meleeAction_Def(target: self.enemy_char
+                    , content: eAct.action.def
+                    , left: false
+                    , callback: { () -> Void in
                         
-                    self.addDef(self.enemy_char, action: eAct);
-                    self.meleeNextFlg[1] = true;
-            })
+                        self.addDef(self.enemy_char, action: eAct);
+                        self.meleeNextFlg[1] = true;
+                })
+                */
         })
     }
 
@@ -1070,22 +1119,29 @@ class GameScene: SKScene {
 
     func melee_enh_jam(#pAct: Character.Action, eAct: Character.Action) {
         // player不利
-        // jam > enh 強化失敗 & 不利側強化全解除
         
         meleeAction_Jam(target: player_char
             , content: eAct.action.jam
             , callback: { () -> Void in
                 
-            self.addJam(self.player_char, executor: self.enemy_char, action: eAct);
-            self.meleeNextFlg[1] = true;
+                self.addJam(self.player_char, executor: self.enemy_char, action: eAct);
+                self.meleeNextFlg[1] = true;
             
-            self.meleeAction_Enh(target: self.player_char
-                , content: pAct.action.enh
-                , callback: { () -> Void in
+                // jam > enh 強化失敗 & 不利側強化全解除
+                self.meleeCancelAllAction(player: true, enemy: false, index: self.meleeProgress);
+                self.meleeCancelAllStatus(self.player_char, cancelType: CharBtlAction.ActType.enh);
+                self.player_char.refleshStatus();
+                self.meleeNextFlg[0] = true;
+
+                /*
+                self.meleeAction_Enh(target: self.player_char
+                    , content: pAct.action.enh
+                    , callback: { () -> Void in
                     
-                    self.addEnh(self.player_char, action: pAct);
-                    self.meleeNextFlg[0] = true;
-            })
+                        self.addEnh(self.player_char, action: pAct);
+                        self.meleeNextFlg[0] = true;
+                })
+                */
         })
 
     }
@@ -1108,7 +1164,6 @@ class GameScene: SKScene {
 
     func melee_jam_atk(#pAct: Character.Action, eAct: Character.Action) {
         // player不利
-        // atk > jam 妨害失敗 & 有利側被妨害効果全解除
         
         meleeAction_Atk(attacker: enemy_char, target: player_char
             , unilaterally: true
@@ -1117,6 +1172,13 @@ class GameScene: SKScene {
                 
                 self.meleeNextFlg[1] = true;
                 
+                // atk > jam 妨害失敗 & 有利側被妨害効果全解除
+                self.meleeCancelAllAction(player: true, enemy: false, index: self.meleeProgress);
+                self.meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.jam);
+                self.enemy_char.refleshStatus();
+                self.meleeNextFlg[0] = true;
+
+                /*
                 self.meleeAction_Jam(target: self.enemy_char
                     , content: pAct.action.jam
                     , callback: { () -> Void in
@@ -1124,6 +1186,7 @@ class GameScene: SKScene {
                         self.addJam(self.enemy_char, executor: self.player_char, action: pAct);
                         self.meleeNextFlg[0] = true;
                 })
+                */
         });
     }
 
@@ -1149,7 +1212,6 @@ class GameScene: SKScene {
 
     func melee_jam_enh(#pAct: Character.Action, eAct: Character.Action) {
         // player有利
-        // jam > enh 強化失敗 & 不利側強化全解除
 
         meleeAction_Jam(target: enemy_char
             , content: pAct.action.jam
@@ -1158,6 +1220,13 @@ class GameScene: SKScene {
                 self.addJam(self.enemy_char, executor: self.player_char, action: pAct);
                 self.meleeNextFlg[0] = true;
             
+                // jam > enh 強化失敗 & 不利側強化全解除
+                self.meleeCancelAllAction(player: false, enemy: true, index: self.meleeProgress);
+                self.meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.enh);
+                self.enemy_char.refleshStatus();
+                self.meleeNextFlg[1] = true;
+
+                /*
                 self.meleeAction_Enh(target: self.enemy_char
                     , content: eAct.action.enh
                     , callback: { () -> Void in
@@ -1165,6 +1234,7 @@ class GameScene: SKScene {
                         self.addEnh(self.enemy_char, action: eAct);
                         self.meleeNextFlg[1] = true;
                 })
+                */
         })
 
     }
@@ -1249,17 +1319,45 @@ class GameScene: SKScene {
         self.meleeNextFlg[1] = true;
     }
 
-    func meleeAction_Pre(#pAct: CharBtlAction.ActType, eAct: CharBtlAction.ActType
-        , callback: () -> Void)
+    func meleeAction_Pre(#pAct: CharBtlAction.ActType, eAct: CharBtlAction.ActType, callback: () -> Void)
     {
         if pAct != CharBtlAction.ActType.non {
+            meleeAction_ActTitleDisplay(player: CharBtlAction.getActTypeName(pAct), enemy: "", callback: { () -> Void in
+            });
+        }
 
-            var playerCutin = SKSpriteNode(color: UIColor.greenColor(), size: CGSizeMake(self.size.width*0.2, self.size.width*0.1));
+        if eAct != CharBtlAction.ActType.non {
+            meleeAction_ActTitleDisplay(player: "", enemy: CharBtlAction.getActTypeName(eAct), callback: { () -> Void in
+            });
+        }
+        
+        let advantage: (p:Bool, e:Bool) = CharBtlAction.judgeAdvantage(pAct, comp: eAct);
+        if advantage.p {
+            // enemyが不利のためブレイク
+            meleeAction_Break(breakAct: pAct, advantageChar: player_char, breakChar: enemy_char, callback: { () -> Void in
+                callback();
+            })
+        }
+        else if advantage.e {
+            // playerが不利のためブレイク
+            meleeAction_Break(breakAct: eAct, advantageChar: enemy_char, breakChar: player_char, callback: { () -> Void in
+                callback();
+            })
+        }
+        else {
+            callback();
+        }
+    }
+    
+    func meleeAction_ActTitleDisplay(#player: String, enemy: String, callback: () -> Void) {
+        if player != "" {
+            
+            var playerCutin = SKSpriteNode(color: UIColor.greenColor(), size: CGSizeMake(self.size.width*0.3, self.size.width*0.1));
             playerCutin.anchorPoint = CGPointMake(1.0, 1.0);
             playerCutin.position = CGPointMake(self.size.width + playerCutin.size.width, self.size.height);
             self.addChild(playerCutin);
             
-            var pActLbl = SKLabelNode(text: CharBtlAction.getActTypeName(pAct));
+            var pActLbl = SKLabelNode(text: player);
             pActLbl.position = CGPointMake(playerCutin.size.width*0.5*(-1), playerCutin.size.height*0.5*(-1));
             pActLbl.fontSize = 18;
             pActLbl.fontColor = UIColor.blackColor();
@@ -1276,15 +1374,15 @@ class GameScene: SKScene {
             });
             playerCutin.runAction(SKAction.sequence([move1, wait, move2, endfunc]));
         }
-
-        if eAct != CharBtlAction.ActType.non {
+        
+        if enemy != "" {
             
-            var enemyCutin = SKSpriteNode(color: UIColor.orangeColor(), size: CGSizeMake(self.size.width*0.2, self.size.width*0.1));
+            var enemyCutin = SKSpriteNode(color: UIColor.orangeColor(), size: CGSizeMake(self.size.width*0.3, self.size.width*0.1));
             enemyCutin.anchorPoint = CGPointMake(0.0, 1.0);
             enemyCutin.position = CGPointMake(0 - enemyCutin.size.width, self.size.height);
             self.addChild(enemyCutin);
             
-            var eActLbl = SKLabelNode(text: CharBtlAction.getActTypeName(eAct));
+            var eActLbl = SKLabelNode(text: enemy);
             eActLbl.position = CGPointMake(enemyCutin.size.width*0.5, enemyCutin.size.height*0.5*(-1));
             eActLbl.fontSize = 18;
             eActLbl.fontColor = UIColor.blackColor();
@@ -1301,10 +1399,69 @@ class GameScene: SKScene {
             });
             enemyCutin.runAction(SKAction.sequence([move1, wait, move2, endfunc]));
         }
-    
-        callback();
     }
-    
+
+    func meleeAction_Break(#breakAct: CharBtlAction.ActType
+        , advantageChar: Character, breakChar: Character
+        , callback: () -> Void)
+    {
+        var cutin = SKSpriteNode(color: UIColor.greenColor(), size: CGSizeMake(self.size.width, self.size.height*0.2));
+        cutin.position = CGPointMake(self.size.width*0.5, self.size.height*0.5);
+        self.addChild(cutin);
+        
+        var contentText1 = "\(advantageChar.name!)の有利行動";
+        var contentText2 = "\(breakChar.name!)は体勢を崩した！";
+        let contentText3: String;
+        switch breakAct {
+        case CharBtlAction.ActType.atk:
+            contentText3 = "さらに\(advantageChar.name!)への妨害効果がすべて解除！";
+        case CharBtlAction.ActType.def:
+            contentText3 = "さらに\(breakChar.name!)へカウンター！";
+        case CharBtlAction.ActType.enh:
+            contentText3 = "さらに\(breakChar.name!)の防御効果がすべて解除！";
+        case CharBtlAction.ActType.jam:
+            contentText3 = "さらに\(breakChar.name!)の強化効果がすべて解除！";
+        default:
+            contentText3 = "";
+        }
+        var contentLbl1 = SKLabelNode(text: contentText1);
+        contentLbl1.position = CGPointMake(0, cutin.size.height*0.25);
+        contentLbl1.fontSize = 17;
+        contentLbl1.fontColor = UIColor.blackColor();
+        contentLbl1.verticalAlignmentMode = SKLabelVerticalAlignmentMode.Center;
+        contentLbl1.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Center;
+        cutin.addChild(contentLbl1);
+        var contentLbl2 = SKLabelNode(text: contentText2);
+        contentLbl2.position = CGPointMake(0, cutin.size.height*0.05*(-1));
+        contentLbl2.fontSize = 16;
+        contentLbl2.fontColor = UIColor.blackColor();
+        contentLbl2.verticalAlignmentMode = SKLabelVerticalAlignmentMode.Center;
+        contentLbl2.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Center;
+        cutin.addChild(contentLbl2);
+        var contentLbl3 = SKLabelNode(text: contentText3);
+        contentLbl3.position = CGPointMake(0, cutin.size.height*0.2*(-1));
+        contentLbl3.fontSize = 16;
+        contentLbl3.fontColor = UIColor.blackColor();
+        contentLbl3.verticalAlignmentMode = SKLabelVerticalAlignmentMode.Center;
+        contentLbl3.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Center;
+        cutin.addChild(contentLbl3);
+        
+        let scale1 = SKAction.scaleYTo(0.0, duration: 0.0);
+        let scale2 = SKAction.scaleYTo(1.0, duration: 0.2);
+        let wait = SKAction.waitForDuration(2.5);
+        let scale3 = SKAction.scaleYTo(0.0, duration: 0.2);
+        
+        let endfunc = SKAction.runBlock({ () -> Void in
+            cutin.removeAllChildren();
+            cutin.removeFromParent();
+            callback();
+        });
+        cutin.runAction(SKAction.sequence([scale1, scale2, wait, scale3, endfunc]));
+        
+        let jump = SKActionEx.jumpTo(startPoint: advantageChar.position, targetPoint: advantageChar.position, height: advantageChar.size.height*0.2, duration: 0.2);
+        advantageChar.runAction(SKAction.sequence([jump, jump]));
+    }
+
     func meleeAction_Atk(#attacker: Character, target: Character
         , unilaterally: Bool = true
         , damage: Int
@@ -1327,6 +1484,7 @@ class GameScene: SKScene {
             self.meleeAction_Damage(target.name!, damage: damage, callback: { () -> Void in
             })
         }
+        let wait = SKAction.waitForDuration(0.5);
         let recoil = SKActionEx.jumpTo(startPoint: movePos
             , targetPoint: basePos
             , height: attacker.size.height
@@ -1334,7 +1492,7 @@ class GameScene: SKScene {
         let attack_end = SKAction.runBlock { () -> Void in
             callback();
         }
-        attacker.runAction(SKAction.sequence([move, attack_effect, recoil, attack_end]));
+        attacker.runAction(SKAction.sequence([move, attack_effect, wait, recoil, attack_end]));
     }
     
     func meleeAction_Damage(target_name: String, damage: Int, callback: () -> Void) {
@@ -1539,6 +1697,30 @@ class GameScene: SKScene {
                 callback();
             })
         ]));
+    }
+
+    func meleeCancelAllAction(player: Bool = false, enemy: Bool = false, index: Int = 0) {
+        for var i = meleeProgress; i < meleeBuffer.count; ++i {
+            if player {
+                meleeBuffer[i].player_action = CharBtlAction.ActType.non;
+            }
+            if enemy {
+                meleeBuffer[i].enemy_action = CharBtlAction.ActType.non;
+            }
+        }
+    }
+    func meleeCancelAllStatus(target: Character, cancelType: CharBtlAction.ActType) {
+        switch cancelType {
+        case CharBtlAction.ActType.atk:
+            break;
+        case CharBtlAction.ActType.def:
+            target.allCancelDefenced();
+        case CharBtlAction.ActType.enh:
+            target.allCancelEnhanced();
+        case CharBtlAction.ActType.jam:
+            target.allCancelJammings();
+        default: break;
+        }
     }
 
     func calcDamage(attacker: Character, target: Character) -> Int {
