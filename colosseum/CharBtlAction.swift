@@ -113,14 +113,16 @@ class CharBtlAction {
         case recover = 0
         case enhAtk = 1
         case enhDef = 2
-        case enhAvoid = 3
-        case enhAtkCnt = 4
-        case weakenAtk = 5
-        case weakenDef = 6
-        case weakenAvoid = 7
-        case weakenAtkCnt = 8
-        case poison = 9
-        case paralysis = 10
+        case enhHit = 3
+        case enhAvoid = 4
+        case enhAtkCnt = 5
+        case weakenAtk = 6
+        case weakenDef = 7
+        case weakenHit = 8
+        case weakenAvoid = 9
+        case weakenAtkCnt = 10
+        case poison = 11
+        case paralysis = 12
     }
     struct Jam {
         
@@ -136,6 +138,7 @@ class CharBtlAction {
     var jamCost: Int = 3;
     
     enum SeedType: Int {
+        case constant = 0
         case atkNow = 10
         case atkBase = 11
         case lasthp = 20

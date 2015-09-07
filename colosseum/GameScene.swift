@@ -656,9 +656,22 @@ class GameScene: SKScene {
 
     func melee_atk_atk(#pAct: Character.Action, eAct: Character.Action) {
 
+        var unilaterally: ([Bool], [Bool]) = ([], []);
+        let count = max(pAct.action.atk.count, eAct.action.atk.count);
+        for i in 0 ..< count {
+            if i < pAct.action.atk.count && i < eAct.action.atk.count {
+                unilaterally.0.append(false);
+                unilaterally.1.append(false);
+            }
+            else {
+                unilaterally.0.append(true);
+                unilaterally.1.append(true);
+            }
+        }
+        
         meleeAction_Atk(attacker: player_char, target: enemy_char
             , damage: calcDamages(pAct, attacker: player_char, target: enemy_char)
-            , unilaterally: false
+            , unilaterally: unilaterally.0
             , left: true
             , callback: { () -> Void in
                 
@@ -667,7 +680,7 @@ class GameScene: SKScene {
         
         meleeAction_Atk(attacker: enemy_char, target: player_char
             , damage: calcDamages(eAct, attacker: enemy_char, target: player_char)
-            , unilaterally: false
+            , unilaterally: unilaterally.1
             , left: false
             , callback: { () -> Void in
                 
@@ -684,6 +697,7 @@ class GameScene: SKScene {
         });
         self.meleeAction_Atk(attacker: self.enemy_char, target: self.player_char
             , damage: [self.calcDamage(Int(eAct.action.def.defCounterAttack), attacker: self.player_char, target: self.enemy_char)]
+            , counter: true
             , left: false
             , callback: { () -> Void in
                 
@@ -696,17 +710,6 @@ class GameScene: SKScene {
                         
                         self.addDef(self.enemy_char, action: eAct);
                         self.meleeNextFlg[1] = true;
-                        
-                        /*
-                        self.meleeAction_Atk(attacker: self.player_char, target: self.enemy_char
-                            , unilaterally: true
-                            , damage: self.calcDamage(self.player_char, target: self.enemy_char)
-                            , callback: { () -> Void in
-                    
-                                self.meleeNextFlg[0] = true;
-                        });
-                        */
-                        
                 })
         })
     }
@@ -785,6 +788,7 @@ class GameScene: SKScene {
         });
         self.meleeAction_Atk(attacker: self.player_char, target: self.enemy_char
             , damage: [self.calcDamage(Int(pAct.action.def.defCounterAttack), attacker: self.enemy_char, target: self.player_char)]
+            , counter: true
             , left: true
             , callback: { () -> Void in
                 
@@ -797,16 +801,6 @@ class GameScene: SKScene {
                         
                         self.addDef(self.player_char, action: pAct);
                         self.meleeNextFlg[0] = true;
-                        
-                        /*
-                        self.meleeAction_Atk(attacker: self.enemy_char, target: self.player_char
-                            , unilaterally: true
-                            , damage: self.calcDamage(self.enemy_char, target: self.player_char)
-                            , callback: { () -> Void in
-                        
-                                self.meleeNextFlg[1] = true;
-                        });
-                        */
                 })
         })
     }
@@ -847,17 +841,6 @@ class GameScene: SKScene {
                 self.meleeCancelAllStatus(self.player_char, cancelType: CharBtlAction.ActType.def);
                 self.player_char.refleshStatus();
                 self.meleeNextFlg[0] = true;
-
-                /*
-                self.meleeAction_Def(target: self.player_char
-                    , content: pAct.action.def
-                    , left: true
-                    , callback: { () -> Void in
-                        
-                        self.addDef(self.player_char, action: pAct);
-                        self.meleeNextFlg[0] = true;
-                })
-                */
         })
 
     }
@@ -932,17 +915,6 @@ class GameScene: SKScene {
                 self.meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.def);
                 self.enemy_char.refleshStatus();
                 self.meleeNextFlg[1] = true;
-
-                /*
-                self.meleeAction_Def(target: self.enemy_char
-                    , content: eAct.action.def
-                    , left: false
-                    , callback: { () -> Void in
-                        
-                        self.addDef(self.enemy_char, action: eAct);
-                        self.meleeNextFlg[1] = true;
-                })
-                */
         })
     }
 
@@ -980,16 +952,6 @@ class GameScene: SKScene {
                 self.meleeCancelAllStatus(self.player_char, cancelType: CharBtlAction.ActType.enh);
                 self.player_char.refleshStatus();
                 self.meleeNextFlg[0] = true;
-
-                /*
-                self.meleeAction_Enh(target: self.player_char
-                    , content: pAct.action.enh
-                    , callback: { () -> Void in
-                    
-                        self.addEnh(self.player_char, action: pAct);
-                        self.meleeNextFlg[0] = true;
-                })
-                */
         })
 
     }
@@ -1025,16 +987,6 @@ class GameScene: SKScene {
                 self.meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.jam);
                 self.enemy_char.refleshStatus();
                 self.meleeNextFlg[0] = true;
-
-                /*
-                self.meleeAction_Jam(target: self.enemy_char
-                    , content: pAct.action.jam
-                    , callback: { () -> Void in
-                        
-                        self.addJam(self.enemy_char, executor: self.player_char, action: pAct);
-                        self.meleeNextFlg[0] = true;
-                })
-                */
         });
     }
 
@@ -1073,16 +1025,6 @@ class GameScene: SKScene {
                 self.meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.enh);
                 self.enemy_char.refleshStatus();
                 self.meleeNextFlg[1] = true;
-
-                /*
-                self.meleeAction_Enh(target: self.enemy_char
-                    , content: eAct.action.enh
-                    , callback: { () -> Void in
-                    
-                        self.addEnh(self.enemy_char, action: eAct);
-                        self.meleeNextFlg[1] = true;
-                })
-                */
         })
 
     }
@@ -1312,7 +1254,8 @@ class GameScene: SKScene {
 
     func meleeAction_Atk(#attacker: Character, target: Character
         , damage: [Int] = []
-        , unilaterally: Bool = true
+        , unilaterally: [Bool] = []
+        , counter: Bool = false
         , left: Bool = false
         , callback: () -> Void)
     {
@@ -1322,26 +1265,28 @@ class GameScene: SKScene {
         }
         var actions: [SKAction] = [];
 
-        let basePos = attacker.position;
-        let movePos: CGPoint;
-        if unilaterally {
-            if left {
-                movePos = CGPointMake(target.position.x + target.size.width*0.4, target.position.y);
+        for i in 0 ..< damage.count {
+            let first = (i == 0) ? true : false;
+            let last = (i == damage.count-1) ? true : false;
+            let basePos = attacker.position;
+            let movePos: CGPoint;
+            if i >= unilaterally.count || unilaterally[i] {
+                if left {
+                    movePos = CGPointMake(target.position.x + target.size.width*0.4, target.position.y);
+                }
+                else {
+                    movePos = CGPointMake(target.position.x - target.size.width*0.4, target.position.y);
+                }
             }
             else {
-                movePos = CGPointMake(target.position.x - target.size.width*0.4, target.position.y);
+                movePos = CGPointMake(self.size.width*0.5 - ((self.size.width*0.5 - attacker.position.x) * 0.05), attacker.position.y);
             }
-        }
-        else {
-            movePos = CGPointMake(self.size.width*0.5 - ((self.size.width*0.5 - attacker.position.x) * 0.05), attacker.position.y);
-        }
-        let move = SKAction.moveTo(movePos, duration: 0.1);
-        actions.append(move);
-        
-        for i in 0 ..< damage.count {
+            let move = SKAction.moveTo(movePos, duration: 0.1);
+            actions.append(move);
+            
             let attack_effect = SKAction.runBlock { () -> Void in
                 
-                for i in 0 ..< 2 {
+                for i2 in 0 ..< 2 {
                     var startPos: CGPoint, endPos: CGPoint;
                     if left {
                         startPos = CGPointMake(target.position.x + target.size.width*0.6, target.position.y + target.size.height*0.6);
@@ -1352,7 +1297,7 @@ class GameScene: SKScene {
                         endPos = CGPointMake(target.position.x + target.size.width*0.4, target.position.y - target.size.height*0.4);
                     }
                     var atkEffect = SKSpriteNode(imageNamed: "Sparkline");
-                    atkEffect.blendMode = (i % 2 == 0) ? SKBlendMode.Add : SKBlendMode.Alpha;
+                    atkEffect.blendMode = (i2 % 2 == 0) ? SKBlendMode.Add : SKBlendMode.Alpha;
                     atkEffect.alpha = 0.6;
                     atkEffect.position = startPos;
                     atkEffect.zPosition = target.zPosition;
@@ -1367,28 +1312,39 @@ class GameScene: SKScene {
                     let atkScale3 = SKAction.scaleXTo(0.0, duration: 0.05);
                     let atkScaleSeq = SKAction.sequence([atkScale2, atkScale3]);
                     let atkEFunc = SKAction.runBlock({ () -> Void in
-                        if i == 0 {
-                            self.meleeAction_Damage(target.name!, damage: damage[i], callback: { () -> Void in
-                            })
+                        if i2 == 0 {
+                            if self.judgeHit(attacker: attacker, target: target, counter: counter) {
+                                self.meleeAction_Damage(target.name!, damage: damage[i], callback: { () -> Void in
+                                })
+                            }
+                            else {
+                                self.meleeAction_Miss(target.name!, callback: { () -> Void in
+                                })
+                            }
                         }
                         atkEffect.removeFromParent();
                     })
                     atkEffect.runAction(SKAction.sequence([atkScale1, atkRote, SKAction.group([atkMove, atkScaleSeq]), atkEFunc]));
                 }
             }
-            let wait = SKAction.waitForDuration(1.0);
             actions.append(attack_effect);
+            
+            var waitTime = (last) ? 1.0 : 0.3;
+            let wait = SKAction.waitForDuration(waitTime);
             actions.append(wait);
+            
+            let recoil = SKActionEx.jumpTo(startPoint: movePos
+                , targetPoint: basePos
+                , height: attacker.size.height
+                , duration: 0.5);
+            actions.append(recoil);
+            let attack_end = SKAction.runBlock { () -> Void in
+                if last {
+                    callback();
+                }
+            }
+            actions.append(attack_end);
         }
-        let recoil = SKActionEx.jumpTo(startPoint: movePos
-            , targetPoint: basePos
-            , height: attacker.size.height
-            , duration: 0.5);
-        actions.append(recoil);
-        let attack_end = SKAction.runBlock { () -> Void in
-            callback();
-        }
-        actions.append(attack_end);
         
         attacker.runAction(SKAction.sequence(actions));
     }
@@ -1430,7 +1386,31 @@ class GameScene: SKScene {
             damage_lbl.runAction(SKAction.sequence([m1, f1, dend]));
         }
     }
-    
+
+    func meleeAction_Miss(target_name: String, callback: () -> Void) {
+        let target = char_list[target_name];
+        if target != nil {
+            
+            let basePos = target!.position;
+            
+            let miss_lbl = SKLabelNode(text: "MISS");
+            miss_lbl.fontColor = UIColor.whiteColor();
+            miss_lbl.fontSize = 14;
+            miss_lbl.position = CGPointMake(target!.position.x, target!.position.y + target!.size.height*0.4);
+            miss_lbl.zPosition = ZCtrl.damage_label.rawValue;
+            self.addChild(miss_lbl);
+            
+            let m1 = SKAction.moveTo(CGPointMake(target!.position.x, target!.position.y + target!.size.height*0.5), duration: 0.3);
+            let f1 = SKAction.fadeAlphaTo(0.0, duration: 0.1);
+            let dend = SKAction.runBlock({ () -> Void in
+                miss_lbl.removeFromParent();
+                
+                callback();
+            })
+            miss_lbl.runAction(SKAction.sequence([m1, f1, dend]));
+        }
+    }
+
     func meleeAction_Def(#target: Character
         , content: CharBtlAction.Def
         , left: Bool = false
@@ -1632,6 +1612,20 @@ class GameScene: SKScene {
         var damage = (attacker.calcATK() * power / 100) - target.calcDEF(consumeDefenceds: true);
         damage = (damage < 0) ? 1 : damage;
         return damage
+    }
+    func judgeHit(#attacker: Character, target: Character, counter: Bool = false) -> Bool {
+        if counter {
+            return true;
+        }
+        var hit = attacker.HIT - target.AVD;
+        hit = min(100, hit);
+        hit = max(1, hit);
+        let random = 1 + (arc4random() % 100);
+        println("hit:\(hit) random:\(random)");
+        if random <= UInt32(hit) {
+            return true;
+        }
+        return false;
     }
     
     func addDef(executor: Character, action: Character.Action) {

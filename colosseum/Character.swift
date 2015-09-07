@@ -271,14 +271,18 @@ class Character : SKSpriteNode {
             jamming.addATK = power_TypeRatio;
         case CharBtlAction.JamType.enhDef:
             jamming.addDEF = power_TypeRatio;
+        case CharBtlAction.JamType.enhHit:
+            jamming.addHIT = power_TypeConst;
         case CharBtlAction.JamType.enhAvoid:
-            jamming.addAVD = power_TypeRatio;
+            jamming.addAVD = power_TypeConst;
         case CharBtlAction.JamType.enhAtkCnt:
             jamming.addATKCNT = power_TypeConst;
         case CharBtlAction.JamType.weakenAtk:
             jamming.addATK = 0 - power_TypeRatio;
         case CharBtlAction.JamType.weakenDef:
             jamming.addDEF = 0 - power_TypeRatio;
+        case CharBtlAction.JamType.weakenHit:
+            jamming.addHIT = 0 - power_TypeConst;
         case CharBtlAction.JamType.weakenAvoid:
             jamming.addAVD = 0 - power_TypeConst;
         case CharBtlAction.JamType.weakenAtkCnt:
@@ -324,6 +328,8 @@ class Character : SKSpriteNode {
         let power_TypeConst = Int(power);
         let power_TypeRatio: Int;
         switch seedType {
+        case CharBtlAction.SeedType.constant:
+            power_TypeRatio = power_TypeConst;
         case CharBtlAction.SeedType.atkNow:
             power_TypeRatio = (char.ATK * Int(power) / 100);
         case CharBtlAction.SeedType.atkBase:

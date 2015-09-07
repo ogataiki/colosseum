@@ -52,7 +52,7 @@ final class CharManager
         
         // 行動2
         // 基本防御力の2倍で1回防御
-        // 相手現在攻撃力の2倍でカウンター
+        // 2倍でカウンター
         // コスト2
         var def_1 = CharBtlAction.Def();
         def_1.seedType = CharBtlAction.SeedType.defBase;
@@ -86,12 +86,12 @@ final class CharManager
         
         
         // 行動4
-        // 現在攻撃力の0.5倍で相手防御力を減少
+        // 5%相手命中を減少
         // 3ターン
         var jam_1 = CharBtlAction.Jam();
-        jam_1.type = CharBtlAction.JamType.weakenDef;
-        jam_1.seedType = CharBtlAction.SeedType.atkNow;
-        jam_1.power = 50.0;
+        jam_1.type = CharBtlAction.JamType.weakenHit;
+        jam_1.seedType = CharBtlAction.SeedType.constant;
+        jam_1.power = 5.0;
         jam_1.turn = 3;
         var act_4 = Character.Action();
         act_4.action.type = CharBtlAction.ActType.jam;
@@ -168,13 +168,13 @@ final class CharManager
         
         // 行動2
         // 現在攻撃力の0.2倍で1回防御
-        // 自分現在攻撃力の3倍でカウンター
+        // 3倍でカウンター
         // コスト2
         var def_1 = CharBtlAction.Def();
         def_1.seedType = CharBtlAction.SeedType.atkNow;
         def_1.defPower = 0.3;
         def_1.defCount = 1;
-        def_1.defCounterAttack = 200.0;
+        def_1.defCounterAttack = 300.0;
         var act_2 = Character.Action();
         act_2.action.type = CharBtlAction.ActType.def;
         act_2.action.defEnable = true;
