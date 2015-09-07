@@ -20,11 +20,5 @@ class SKActionEx {
         let jumpAction = SKAction.followPath(bezierPath.CGPath, asOffset:false, orientToPath:false, duration: 0.2)
         jumpAction.timingMode = .EaseIn
         return jumpAction;
-        /*
-        let scaleA = SKAction.scaleTo(1.2, duration: 0.1)
-        let scaleB = SKAction.scaleTo(1.0, duration: 0.1)
-        let scaleSequence = SKAction.sequence([scaleA,scaleB])
-        return SKAction.group([jumpAction, scaleSequence])
-        */
     }
 }

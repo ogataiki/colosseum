@@ -69,7 +69,6 @@ class CharBtlAction {
     var atkEnable: Bool = false;
     struct Atk {
         var atkPower: CGFloat = 1.0;
-        var atkCount: Int = 1;
     }
     var atk: [Atk] = [];
     var atkCost: Int = 2;

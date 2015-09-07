@@ -2,6 +2,17 @@ import SpriteKit
 
 class Character : SKSpriteNode {
     
+    var isPlayer: Bool = false;
+    func setPlayer(v: Bool = true) {
+        isPlayer = v;
+        if isPlayer {
+            self.xScale = -1.0;
+        }
+        else {
+            self.xScale = 1.0;
+        }
+    }
+    
     var HP_base: Int = 3000;
     var ATK_base: Int = 100;
     var DEF_base: Int = 50;
@@ -15,17 +26,62 @@ class Character : SKSpriteNode {
     var HIT: Int = 100;
     var AVD: Int = 20;
     var ATK_CNT: Int = 1;
+    func statusInit(
+        #hp: Int,
+        atk: Int,
+        def: Int,
+        hit: Int,
+        avd: Int,
+        atk_cnt: Int)
+    {
+        HP_base = hp;
+        ATK_base = atk;
+        DEF_base = def;
+        HIT_base = hit;
+        AVD_base = avd;
+        ATK_CNT_base = atk_cnt;
+        
+        HP = hp;
+        ATK = atk;
+        DEF = def;
+        HIT = hit;
+        AVD = avd;
+        ATK_CNT = atk_cnt;
+    }
     
     var gaugeLangeth: CGFloat = 200.0;
     var gaugeAcceleration: CGFloat = 20.0;
     
     var gaugeHP: Gauge!;
+    func gaugeInit(size: CGSize, direction: Gauge.Direction, zPos: CGFloat) {
+        gaugeHP = Gauge(color: UIColor.grayColor(), size: size);
+        gaugeHP.initGauge(color: UIColor.greenColor(), direction: direction, zPos:zPos);
+        gaugeHP.initGauge_lo(color: UIColor.redColor(), zPos:zPos);
+        gaugeHP.changeAnchorPoint(CGPointMake(0.5, 0.5));
+        gaugeHP.changePosition(CGPointMake(self.position.x, self.position.y - size.height*0.6));
+        gaugeHP.resetProgress(0.0);
+        gaugeHP.updateProgress(100);
+    }
+    
     var labelHP: SKLabelNode!;
     var labelATK: SKLabelNode!;
     var labelDEF: SKLabelNode!;
     var labelHIT: SKLabelNode!;
     var labelAVD: SKLabelNode!;
     var labelATKCNT: SKLabelNode!;
+    func labelsInit() {
+        labelHP = SKLabelNode(text: "");
+        labelATK = SKLabelNode(text: "");
+        labelDEF = SKLabelNode(text: "");
+        labelHIT = SKLabelNode(text: "");
+        labelAVD = SKLabelNode(text: "");
+        
+        labelHP.fontSize = 12;
+        labelATK.fontSize = 12;
+        labelDEF.fontSize = 12;
+        labelHIT.fontSize = 12;
+        labelAVD.fontSize = 12;
+    }
     func refleshStatus() {
         if let gauge = gaugeHP {
             gaugeHP.updateProgress(CGFloat(HP) / CGFloat(HP_base) * 100);
@@ -339,6 +395,7 @@ class Character : SKSpriteNode {
     }
     
     func calcDEF(consumeDefenceds: Bool = false) -> Int {
+        // エンハンス時にステータスの値変更したのでそのまま使う
         var def = DEF;
         if defenceds.count > 0 {
             var defence = defenceds[defenceds.count-1];
@@ -351,4 +408,19 @@ class Character : SKSpriteNode {
         return def;
     }
 
+    func posUpdate(pos: CGPoint) {
+        self.position = pos;
+        self.position_base = pos;
+        if let gauge = gaugeHP {
+            gaugeHP.changePosition(CGPointMake(pos.x, pos.y - self.size.height*0.6));
+        }
+    }
+    
+    func zPosUpdate(z: CGFloat) {
+        if let gauge = gaugeHP {
+            gaugeHP.gauge.zPosition = z+2;
+            gaugeHP.gauge_lo.zPosition = z+1;
+        }
+        self.zPosition = z;
+    }
 }

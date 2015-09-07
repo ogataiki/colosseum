@@ -2,6 +2,8 @@ import SpriteKit
 
 class GameScene: SKScene {
     
+    var gameManager = GameManager.instance;
+    
     enum SceneStatus: Int {
         case stock = 1
         case tactical = 2
@@ -219,22 +221,14 @@ class GameScene: SKScene {
     }
     
     func playerInit() {
-        player_char = Character(imageNamed: "TestChar1");
-        player_char.position = CGPointMake(self.size.width*0.85, self.size.height*0.9);
-        player_char.position_base = player_char.position;
-        player_char.xScale = -1.0;
-        player_char.name = "player";
+        
+        player_char = CharManager.getCharacter("main_character");
+        player_char.posUpdate(CGPointMake(self.size.width*0.85, self.size.height*0.9));
+        player_char.setPlayer(v: true);
+        player_char.zPosUpdate(0);
+        self.addChild(player_char.gaugeHP);
         self.addChild(player_char);
         char_list[player_char.name!] = player_char;
-        
-        player_char.gaugeHP = Gauge(color: UIColor.grayColor(), size: CGSizeMake(player_char.size.width, 5));
-        player_char.gaugeHP.initGauge(color: UIColor.greenColor(), direction: Gauge.Direction.horizontal, zPos:ZCtrl.gauge.rawValue);
-        player_char.gaugeHP.initGauge_lo(color: UIColor.redColor(), zPos:ZCtrl.gauge_lo.rawValue);
-        player_char.gaugeHP.resetProgress(0.0);
-        player_char.gaugeHP.changeAnchorPoint(CGPointMake(0.5, 0.5));
-        player_char.gaugeHP.changePosition(CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*0.6));
-        player_char.gaugeHP.updateProgress(100);
-        self.addChild(player_char.gaugeHP);
 
         
         player_char.labelHP = SKLabelNode(text: "HP:\(player_char.HP)");
@@ -261,96 +255,19 @@ class GameScene: SKScene {
         self.addChild(player_char.labelHIT);
         self.addChild(player_char.labelAVD);
         
-
-        var non = Character.Action();
-        non.action.type = CharBtlAction.ActType.non;
-        player_char.actions.append(non);
-
-        var act_1 = Character.Action();
-        act_1.name = "攻撃";
-        act_1.action.type = CharBtlAction.ActType.atk;
-        act_1.action.atkEnable = true;
-        var atk_1 = CharBtlAction.Atk();
-        atk_1.atkPower = 2.0;
-        atk_1.atkCount = 2;
-        act_1.action.atk.append(atk_1);
-        act_1.cost = atk_1.atkCount;
-        player_char.actions.append(act_1);
-
-        var act_2 = Character.Action();
-        act_2.name = "防御";
-        act_2.action.type = CharBtlAction.ActType.def;
-        act_2.action.defEnable = true;
-        act_2.action.def.seedType = CharBtlAction.SeedType.atkNow;
-        act_2.action.def.defPower = 100.0;
-        act_2.action.def.defCounterAttack = 2.0;
-        act_2.cost = act_2.action.defCost;
-        player_char.actions.append(act_2);
-
-        var act_3 = Character.Action();
-        act_3.name = "強化";
-        act_3.action.type = CharBtlAction.ActType.enh;
-        act_3.action.enhEnable = true;
-        var enh_1 = CharBtlAction.Enh();
-        enh_1.type = CharBtlAction.EnhType.atk;
-        enh_1.seedType = CharBtlAction.SeedType.atkNow;
-        enh_1.power = 70.0;
-        act_3.action.enh.append(enh_1);
-        act_3.cost = act_3.action.enhCost;
-        player_char.actions.append(act_3);
-
-        var act_4 = Character.Action();
-        act_4.name = "妨害";
-        act_4.action.type = CharBtlAction.ActType.jam;
-        act_4.action.jamEnable = true;
-        var jam_1 = CharBtlAction.Jam();
-        jam_1.type = CharBtlAction.JamType.weakenDef;
-        jam_1.seedType = CharBtlAction.SeedType.atkNow;
-        jam_1.power = 50.0;
-        jam_1.turn = 3;
-        act_4.action.jam.append(jam_1);
-        act_4.cost = act_4.action.jamCost;
-        player_char.actions.append(act_4);
-
-        var act_5 = Character.Action();
-        act_5.name = "特技";
-        act_5.action.type = CharBtlAction.ActType.atk;
-        act_5.action.atkEnable = true;
-        var atk_5 = CharBtlAction.Atk();
-        atk_5.atkPower = 50.0;
-        atk_5.atkCount = 4;
-        act_5.action.atk.append(atk_5);
-        act_5.action.jamEnable = true;
-        var jam_5 = CharBtlAction.Jam();
-        jam_5.type = CharBtlAction.JamType.paralysis;
-        jam_5.seedType = CharBtlAction.SeedType.atkBase;
-        jam_5.power = 50.0;
-        jam_5.turn = 2;
-        act_5.action.jam.append(jam_5);
-        act_5.cost = act_5.action.atkCost + act_5.action.jamCost - 1;
-        player_char.actions.append(act_5);
-        
         // ゲージの長さをプレイヤーキャラ依存に
         reach_base = player_char.gaugeLangeth;
     }
     
     func enemyInit() {
-        enemy_char = Character(imageNamed: "TestChar2");
-        enemy_char.position = CGPointMake(self.size.width*0.15, self.size.height*0.9);
-        enemy_char.position_base = enemy_char.position;
-        enemy_char.name = "enemy";
+        
+        enemy_char = CharManager.getCharacter("muscle_woman");
+        enemy_char.posUpdate(CGPointMake(self.size.width*0.15, self.size.height*0.9));
+        enemy_char.setPlayer(v: false);
+        enemy_char.zPosUpdate(0);
+        self.addChild(enemy_char.gaugeHP);
         self.addChild(enemy_char);
         char_list[enemy_char.name!] = enemy_char;
-        
-        enemy_char.gaugeHP = Gauge(color: UIColor.grayColor(), size: CGSizeMake(enemy_char.size.width, 5));
-        enemy_char.gaugeHP.initGauge(color: UIColor.greenColor(), direction: Gauge.Direction.horizontal, zPos:ZCtrl.gauge.rawValue);
-        enemy_char.gaugeHP.initGauge_lo(color: UIColor.redColor(), zPos:ZCtrl.gauge_lo.rawValue);
-        enemy_char.gaugeHP.resetProgress(0.0);
-        enemy_char.gaugeHP.changeAnchorPoint(CGPointMake(0.5, 0.5));
-        enemy_char.gaugeHP.changePosition(CGPointMake(enemy_char.position.x, enemy_char.position.y - enemy_char.size.height*0.6));
-        enemy_char.gaugeHP.updateProgress(100);
-        self.addChild(enemy_char.gaugeHP);
-        
         
         enemy_char.labelHP = SKLabelNode(text: "HP:\(enemy_char.HP)");
         enemy_char.labelATK = SKLabelNode(text: "ATK:\(enemy_char.ATK)");
@@ -375,76 +292,7 @@ class GameScene: SKScene {
         self.addChild(enemy_char.labelDEF);
         self.addChild(enemy_char.labelHIT);
         self.addChild(enemy_char.labelAVD);
-        
-
-        var non = Character.Action();
-        non.action.type = CharBtlAction.ActType.non;
-        enemy_char.actions.append(non);
-
-        var act_1 = Character.Action();
-        act_1.name = "攻撃";
-        act_1.action.type = CharBtlAction.ActType.atk;
-        act_1.action.atkEnable = true;
-        var atk_1 = CharBtlAction.Atk();
-        atk_1.atkPower = 2.0;
-        atk_1.atkCount = 2;
-        act_1.action.atk.append(atk_1);
-        act_1.cost = atk_1.atkCount;
-        enemy_char.actions.append(act_1);
-        
-        var act_2 = Character.Action();
-        act_2.name = "防御";
-        act_2.action.type = CharBtlAction.ActType.def;
-        act_2.action.defEnable = true;
-        act_2.action.def.seedType = CharBtlAction.SeedType.atkNow;
-        act_2.action.def.defPower = 30.0;
-        act_2.action.def.defCounterAttack = 2.0;
-        act_2.cost = act_2.action.defCost;
-        enemy_char.actions.append(act_2);
-        
-        var act_3 = Character.Action();
-        act_3.name = "強化";
-        act_3.action.type = CharBtlAction.ActType.enh;
-        act_3.action.enhEnable = true;
-        var enh_1 = CharBtlAction.Enh();
-        enh_1.type = CharBtlAction.EnhType.def;
-        enh_1.seedType = CharBtlAction.SeedType.atkNow;
-        enh_1.power = 100.0;
-        act_3.action.enh.append(enh_1);
-        act_3.cost = act_3.action.enhCost;
-        enemy_char.actions.append(act_3);
-        
-        var act_4 = Character.Action();
-        act_4.name = "妨害";
-        act_4.action.type = CharBtlAction.ActType.jam;
-        act_4.action.jamEnable = true;
-        var jam_1 = CharBtlAction.Jam();
-        jam_1.type = CharBtlAction.JamType.weakenAtk;
-        jam_1.seedType = CharBtlAction.SeedType.atkNow;
-        jam_1.power = 50.0;
-        jam_1.turn = 3;
-        act_4.action.jam.append(jam_1);
-        act_4.cost = act_4.action.jamCost;
-        enemy_char.actions.append(act_4);
-        
-        var act_5 = Character.Action();
-        act_5.name = "特技";
-        act_5.action.type = CharBtlAction.ActType.atk;
-        act_5.action.atkEnable = true;
-        var atk_5 = CharBtlAction.Atk();
-        atk_5.atkPower = 50.0;
-        atk_5.atkCount = 4;
-        act_5.action.atk.append(atk_5);
-        act_5.action.jamEnable = true;
-        var jam_5 = CharBtlAction.Jam();
-        jam_5.type = CharBtlAction.JamType.paralysis;
-        jam_5.seedType = CharBtlAction.SeedType.atkBase;
-        jam_5.power = 50.0;
-        jam_5.turn = 2;
-        act_5.action.jam.append(jam_5);
-        act_5.cost = act_5.action.atkCost + act_5.action.jamCost - 1;
-        enemy_char.actions.append(act_5);
-    }
+     }
     
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
         /* Called when a touch begins */
@@ -796,9 +644,8 @@ class GameScene: SKScene {
     func melee_atk_non(#pAct: Character.Action) {
         
         meleeAction_Atk(attacker: player_char, target: enemy_char
-            , unilaterally: true
+            , damage: calcDamages(pAct, attacker: player_char, target: enemy_char)
             , left: true
-            , damage: calcDamage(player_char, target: enemy_char)
             , callback: { () -> Void in
                 
                 self.meleeNextFlg[0] = true;
@@ -808,20 +655,20 @@ class GameScene: SKScene {
     }
 
     func melee_atk_atk(#pAct: Character.Action, eAct: Character.Action) {
-        
+
         meleeAction_Atk(attacker: player_char, target: enemy_char
+            , damage: calcDamages(pAct, attacker: player_char, target: enemy_char)
             , unilaterally: false
             , left: true
-            , damage: calcDamage(player_char, target: enemy_char)
             , callback: { () -> Void in
                 
                 self.meleeNextFlg[0] = true;
         });
         
         meleeAction_Atk(attacker: enemy_char, target: player_char
+            , damage: calcDamages(eAct, attacker: enemy_char, target: player_char)
             , unilaterally: false
             , left: false
-            , damage: calcDamage(enemy_char, target: player_char)
             , callback: { () -> Void in
                 
                 self.meleeNextFlg[1] = true;
@@ -836,9 +683,8 @@ class GameScene: SKScene {
         self.meleeAction_ActTitleDisplay(player: "", enemy: "カウンター", callback: { () -> Void in
         });
         self.meleeAction_Atk(attacker: self.enemy_char, target: self.player_char
-            , unilaterally: true
+            , damage: [self.calcDamage(Int(eAct.action.def.defCounterAttack), attacker: self.player_char, target: self.enemy_char)]
             , left: false
-            , damage: self.calcDamage(self.player_char, target: self.enemy_char) * Int(eAct.action.def.defCounterAttack)
             , callback: { () -> Void in
                 
                 self.meleeNextFlg[0] = true;
@@ -868,9 +714,8 @@ class GameScene: SKScene {
     func melee_atk_enh(#pAct: Character.Action, eAct: Character.Action) {
     
         meleeAction_Atk(attacker: player_char, target: enemy_char
-            , unilaterally: true
+            , damage: calcDamages(pAct, attacker: player_char, target: enemy_char)
             , left: true
-            , damage: calcDamage(player_char, target: enemy_char)
             , callback: { () -> Void in
                 
                 self.meleeNextFlg[0] = true;
@@ -890,9 +735,8 @@ class GameScene: SKScene {
         // player有利
 
         meleeAction_Atk(attacker: player_char, target: enemy_char
-            , unilaterally: true
+            , damage: calcDamages(pAct, attacker: player_char, target: enemy_char)
             , left: true
-            , damage: calcDamage(player_char, target: enemy_char)
             , callback: { () -> Void in
                 
                 self.meleeNextFlg[0] = true;
@@ -940,9 +784,8 @@ class GameScene: SKScene {
         self.meleeAction_ActTitleDisplay(player: "カウンター", enemy: "", callback: { () -> Void in
         });
         self.meleeAction_Atk(attacker: self.player_char, target: self.enemy_char
-            , unilaterally: true
+            , damage: [self.calcDamage(Int(pAct.action.def.defCounterAttack), attacker: self.enemy_char, target: self.player_char)]
             , left: true
-            , damage: self.calcDamage(self.enemy_char, target: self.player_char) * Int(pAct.action.def.defCounterAttack)
             , callback: { () -> Void in
                 
                 self.meleeNextFlg[1] = true;
@@ -1058,9 +901,8 @@ class GameScene: SKScene {
     func melee_enh_atk(#pAct: Character.Action, eAct: Character.Action) {
         
         meleeAction_Atk(attacker: enemy_char, target: player_char
-            , unilaterally: true
+            , damage: calcDamages(eAct, attacker: enemy_char, target: player_char)
             , left: false
-            , damage: calcDamage(enemy_char, target: player_char)
             , callback: { () -> Void in
                 
                 self.meleeNextFlg[1] = true;
@@ -1172,9 +1014,8 @@ class GameScene: SKScene {
         // player不利
         
         meleeAction_Atk(attacker: enemy_char, target: player_char
-            , unilaterally: true
+            , damage: calcDamages(eAct, attacker: enemy_char, target: player_char)
             , left: false
-            , damage: calcDamage(enemy_char, target: player_char)
             , callback: { () -> Void in
                 
                 self.meleeNextFlg[1] = true;
@@ -1273,9 +1114,8 @@ class GameScene: SKScene {
         self.meleeNextFlg[0] = true;
         
         meleeAction_Atk(attacker: enemy_char, target: player_char
-            , unilaterally: true
+            , damage: calcDamages(eAct, attacker: enemy_char, target: player_char)
             , left: false
-            , damage: calcDamage(enemy_char, target: player_char)
             , callback: { () -> Void in
                 
                 self.meleeNextFlg[1] = true;
@@ -1471,12 +1311,17 @@ class GameScene: SKScene {
     }
 
     func meleeAction_Atk(#attacker: Character, target: Character
+        , damage: [Int] = []
         , unilaterally: Bool = true
         , left: Bool = false
-        , damage: Int
         , callback: () -> Void)
     {
-        
+        if damage.count == 0 {
+            callback();
+            return;
+        }
+        var actions: [SKAction] = [];
+
         let basePos = attacker.position;
         let movePos: CGPoint;
         if unilaterally {
@@ -1491,52 +1336,61 @@ class GameScene: SKScene {
             movePos = CGPointMake(self.size.width*0.5 - ((self.size.width*0.5 - attacker.position.x) * 0.05), attacker.position.y);
         }
         let move = SKAction.moveTo(movePos, duration: 0.1);
-        let attack_effect = SKAction.runBlock { () -> Void in
-
-            for i in 0 ..< 2 {
-                var startPos: CGPoint, endPos: CGPoint;
-                if left {
-                    startPos = CGPointMake(target.position.x + target.size.width*0.6, target.position.y + target.size.height*0.6);
-                    endPos = CGPointMake(target.position.x - target.size.width*0.4, target.position.y - target.size.height*0.4);
-                }
-                else {
-                    startPos = CGPointMake(target.position.x - target.size.width*0.6, target.position.y + target.size.height*0.6);
-                    endPos = CGPointMake(target.position.x + target.size.width*0.4, target.position.y - target.size.height*0.4);
-                }
-                var atkEffect = SKSpriteNode(imageNamed: "Sparkline");
-                atkEffect.blendMode = (i % 2 == 0) ? SKBlendMode.Add : SKBlendMode.Alpha;
-                atkEffect.alpha = 0.6;
-                atkEffect.position = startPos;
-                atkEffect.zPosition = target.zPosition;
-                atkEffect.setScale(0.0);
-                self.addChild(atkEffect);
+        actions.append(move);
+        
+        for i in 0 ..< damage.count {
+            let attack_effect = SKAction.runBlock { () -> Void in
                 
-                let atkScale1 = SKAction.scaleTo(0.0, duration: 0.0);
-                let radian = atan2(endPos.x - startPos.x, endPos.y - startPos.y);
-                let atkRote = SKAction.rotateToAngle(radian*(-1), duration: 0.0);
-                let atkMove = SKAction.moveTo(endPos, duration: 0.1);
-                let atkScale2 = SKAction.group([SKAction.scaleXTo(0.7, duration: 0.05), SKAction.scaleYTo(1.0, duration: 0.1)]);
-                let atkScale3 = SKAction.scaleXTo(0.0, duration: 0.05);
-                let atkScaleSeq = SKAction.sequence([atkScale2, atkScale3]);
-                let atkEFunc = SKAction.runBlock({ () -> Void in
-                    if i == 0 {
-                        self.meleeAction_Damage(target.name!, damage: damage, callback: { () -> Void in
-                        })
+                for i in 0 ..< 2 {
+                    var startPos: CGPoint, endPos: CGPoint;
+                    if left {
+                        startPos = CGPointMake(target.position.x + target.size.width*0.6, target.position.y + target.size.height*0.6);
+                        endPos = CGPointMake(target.position.x - target.size.width*0.4, target.position.y - target.size.height*0.4);
                     }
-                    atkEffect.removeFromParent();
-                })
-                atkEffect.runAction(SKAction.sequence([atkScale1, atkRote, SKAction.group([atkMove, atkScaleSeq]), atkEFunc]));
+                    else {
+                        startPos = CGPointMake(target.position.x - target.size.width*0.6, target.position.y + target.size.height*0.6);
+                        endPos = CGPointMake(target.position.x + target.size.width*0.4, target.position.y - target.size.height*0.4);
+                    }
+                    var atkEffect = SKSpriteNode(imageNamed: "Sparkline");
+                    atkEffect.blendMode = (i % 2 == 0) ? SKBlendMode.Add : SKBlendMode.Alpha;
+                    atkEffect.alpha = 0.6;
+                    atkEffect.position = startPos;
+                    atkEffect.zPosition = target.zPosition;
+                    atkEffect.setScale(0.0);
+                    self.addChild(atkEffect);
+                    
+                    let atkScale1 = SKAction.scaleTo(0.0, duration: 0.0);
+                    let radian = atan2(endPos.x - startPos.x, endPos.y - startPos.y);
+                    let atkRote = SKAction.rotateToAngle(radian*(-1), duration: 0.0);
+                    let atkMove = SKAction.moveTo(endPos, duration: 0.1);
+                    let atkScale2 = SKAction.group([SKAction.scaleXTo(0.7, duration: 0.05), SKAction.scaleYTo(1.0, duration: 0.1)]);
+                    let atkScale3 = SKAction.scaleXTo(0.0, duration: 0.05);
+                    let atkScaleSeq = SKAction.sequence([atkScale2, atkScale3]);
+                    let atkEFunc = SKAction.runBlock({ () -> Void in
+                        if i == 0 {
+                            self.meleeAction_Damage(target.name!, damage: damage[i], callback: { () -> Void in
+                            })
+                        }
+                        atkEffect.removeFromParent();
+                    })
+                    atkEffect.runAction(SKAction.sequence([atkScale1, atkRote, SKAction.group([atkMove, atkScaleSeq]), atkEFunc]));
+                }
             }
+            let wait = SKAction.waitForDuration(1.0);
+            actions.append(attack_effect);
+            actions.append(wait);
         }
-        let wait = SKAction.waitForDuration(0.5);
         let recoil = SKActionEx.jumpTo(startPoint: movePos
             , targetPoint: basePos
             , height: attacker.size.height
             , duration: 0.5);
+        actions.append(recoil);
         let attack_end = SKAction.runBlock { () -> Void in
             callback();
         }
-        attacker.runAction(SKAction.sequence([move, attack_effect, wait, recoil, attack_end]));
+        actions.append(attack_end);
+        
+        attacker.runAction(SKAction.sequence(actions));
     }
     
     func meleeAction_Damage(target_name: String, damage: Int, callback: () -> Void) {
@@ -1767,8 +1621,15 @@ class GameScene: SKScene {
         }
     }
 
-    func calcDamage(attacker: Character, target: Character) -> Int {
-        var damage = attacker.calcATK() - target.calcDEF(consumeDefenceds: true);
+    func calcDamages(act: Character.Action, attacker: Character, target: Character) -> [Int] {
+        var damages: [Int] = [];
+        for i in 0 ..< act.action.atk.count {
+            damages.append(calcDamage(Int(act.action.atk[i].atkPower), attacker: attacker, target: target));
+        }
+        return damages;
+    }
+    func calcDamage(power: Int, attacker: Character, target: Character) -> Int {
+        var damage = (attacker.calcATK() * power / 100) - target.calcDEF(consumeDefenceds: true);
         damage = (damage < 0) ? 1 : damage;
         return damage
     }
