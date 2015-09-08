@@ -8,8 +8,8 @@ class CharBtlAction {
         case non = 0
         case atk = 1
         case def = 2
-        case enh = 3
-        case jam = 4
+        case jam = 3
+        case enh = 4
     }
     var type = ActType.non;
     static func getActTypeName(type: ActType) -> String {
@@ -18,10 +18,10 @@ class CharBtlAction {
             return "攻撃";
         case ActType.def:
             return "防御";
-        case ActType.enh:
-            return "強化";
         case ActType.jam:
             return "妨害";
+        case ActType.enh:
+            return "強化";
         default: break;
         }
         return "";
@@ -29,7 +29,7 @@ class CharBtlAction {
     static func judgeAdvantage(type: ActType, comp: ActType) -> (Bool, Bool) {
         switch type {
         case ActType.atk:
-            if comp == ActType.jam {
+            if comp == ActType.enh {
                 return (true, false);
             }
             else if comp == ActType.def {
@@ -39,18 +39,18 @@ class CharBtlAction {
             if comp == ActType.atk {
                 return (true, false);
             }
-            else if comp == ActType.enh {
-                return (false, true);
-            }
-        case ActType.enh:
-            if comp == ActType.def {
-                return (true, false);
-            }
             else if comp == ActType.jam {
                 return (false, true);
             }
         case ActType.jam:
-            if comp == ActType.enh {
+            if comp == ActType.def {
+                return (true, false);
+            }
+            else if comp == ActType.enh {
+                return (false, true);
+            }
+        case ActType.enh:
+            if comp == ActType.jam {
                 return (true, false);
             }
             else if comp == ActType.atk {
@@ -86,27 +86,6 @@ class CharBtlAction {
     var def = Def();
     var defCost: Int = 2;
     
-    // enh
-    var enhEnable: Bool = false;
-    enum EnhType: Int {
-        case atk = 1
-        case def = 2
-        case avd = 3
-        case hit = 4
-        case atkcnt = 5
-    }
-    struct Enh {
-        
-        var type = EnhType.atk;
-        var seedType = SeedType.atkNow;
-
-        var power: CGFloat = 100.0;
-        var turn: Int = 2;                      // Continue turn;
-        var execTiming = ExecTiming.jastNow;
-    }
-    var enh: [Enh] = [];
-    var enhCost: Int = 3;
-    
     // jam
     var jamEnable: Bool = false;
     enum JamType: Int {
@@ -131,12 +110,35 @@ class CharBtlAction {
         var seedType = SeedType.atkNow;
         
         var power: CGFloat = 100.0;         // Ratio % for seedtype
+        var addDamage: CGFloat = 10.0;      // Ratio % for HP_base
         var turn: Int = 1;                  // Continue turn;
         var execTiming = ExecTiming.jastNow;
     }
     var jam: [Jam] = [];
     var jamCost: Int = 3;
     
+    // enh
+    var enhEnable: Bool = false;
+    enum EnhType: Int {
+        case atk = 1
+        case def = 2
+        case avd = 3
+        case hit = 4
+        case atkcnt = 5
+    }
+    struct Enh {
+        
+        var type = EnhType.atk;
+        var seedType = SeedType.atkNow;
+        
+        var power: CGFloat = 100.0;
+        var turn: Int = 2;                      // Continue turn;
+        var execTiming = ExecTiming.jastNow;
+    }
+    var enh: [Enh] = [];
+    var enhCost: Int = 3;
+    
+
     enum SeedType: Int {
         case constant = 0
         case atkNow = 10

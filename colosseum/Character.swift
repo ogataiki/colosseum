@@ -88,6 +88,18 @@ class Character : SKSpriteNode {
         }
         if let label = labelHP {
             labelHP.text = "HP:\(HP)";
+            if HP < HP_base / 5 {
+                labelHP.fontColor = UIColor.redColor();
+            }
+            else if HP < HP_base / 2 {
+                labelHP.fontColor = UIColor.yellowColor();
+            }
+            else if HP < HP_base {
+                labelHP.fontColor = UIColor.blueColor();
+            }
+            else {
+                labelHP.fontColor = UIColor.whiteColor();
+            }
         }
         if let label = labelATK {
             labelATK.text = "ATK:\(ATK)";
@@ -160,28 +172,204 @@ class Character : SKSpriteNode {
     }
     var actions: [Action] = [];
     
+    struct Attacked {
+        var content = CharBtlAction.Atk();
+        var damage: Int = 0;
+        var consumeDefenced: Bool = false;
+        var counter: Bool = false;
+    }
+    
+    func procAction_atk(atk: [CharBtlAction.Atk], target: Character
+        , counter: Bool = false, counter_content: CharBtlAction.Def = CharBtlAction.Def()) -> [Attacked]
+    {
+        var result: [Attacked] = [];
+        for i in 0 ..< atk.count {
+            var data = Attacked();
+            data.content = atk[i];
+            data.consumeDefenced = (target.defenceds.count > 0) ? true : false;
+            data.counter = counter;
+            if counter {
+                // カウンターはミスなし
+                data.damage = (calcATK() * Int(counter_content.defCounterAttack) / 100) - target.calcDEF(consumeDefenceds: true);
+                if data.damage <= 0 {
+                    data.damage = 1;
+                }
+            }
+            else {
+                data.damage = (calcATK() * Int(atk[i].atkPower) / 100) - target.calcDEF(consumeDefenceds: true);
+                if data.damage <= 0 {
+                    data.damage = 1;
+                }
+                
+                // 命中計算
+                var hit = HIT - target.AVD;
+                hit = min(100, hit);
+                hit = max(1, hit);
+                let random = 1 + (arc4random() % 100);
+                if random > UInt32(hit) {
+                    // ミス
+                    data.damage = 0;
+                }
+            }
+            result.append(data);
+        }
+        return result;
+    }
+    func addDamage(atk: [Attacked]) {
+        for data in atk {
+            HP = HP - data.damage;
+            if HP < 0 {
+                HP = 0;
+            }
+            
+            if data.consumeDefenced {
+                if defenceds.count > 0 {
+                    var defence = defenceds[defenceds.count-1];
+                    defence.lastCount--;
+                    if defence.lastCount <= 0 {
+                        defenceds.removeLast();
+                    }
+                }
+            }
+        }
+    }
+    
     struct Defenced {
         var content = CharBtlAction.Def();
         var addDef: Int = 0;
         var lastCount: Int = 0;
     }
     var defenceds: [Defenced] = [];
-    func addDefenced(def: CharBtlAction.Def) {
-        var defence = Defenced();
-        defence.content = def;
-        defence.lastCount = def.defCount
-        
-        // 強さ取得
-        let (power_TypeRatio: Int, power_TypeConst: Int) = calcPower(Int(def.defPower), seedType: def.seedType, char: self);
-        defence.addDef = power_TypeRatio;
-
-        defenceds.append(defence);
+    
+    func procAction_def(def: [CharBtlAction.Def]) -> [Defenced] {
+        var result: [Defenced] = [];
+        for i in 0 ..< def.count {
+            var data = Defenced();
+            data.content = def[i];
+            data.lastCount = def[i].defCount
+            
+            // 強さ取得
+            let (power_TypeRatio: Int, power_TypeConst: Int) = calcPower(Int(def[i].defPower), seedType: def[i].seedType, char: self);
+            data.addDef = power_TypeRatio;
+            
+            result.append(data);
+        }
+        return result;
+    }
+    func addDefenced(def: [Defenced]) {
+        for data in def {
+            defenceds.append(data);
+        }
         
         // 以降、相手の攻撃を受けるタイミングで消費
         // ターンで消費しない
     }
     func allCancelDefenced() {
         defenceds = [];
+    }
+
+    struct Jamming {
+        var content = CharBtlAction.Jam();
+        var damage: Int = 0;
+        var recover: Int = 0;
+        var addHP: Int = 0;
+        var addATK: Int = 0;
+        var addDEF: Int = 0;
+        var addHIT: Int = 0;
+        var addAVD: Int = 0;
+        var addATKCNT: Int = 0;
+        var poisonDamage: Int = 0;
+        var paralysisAVD: Int = 0;
+        var lastTrun: Int = 0;
+    }
+    var jammings: [Jamming] = [];
+    
+    func procAction_jam(jam: [CharBtlAction.Jam], target: Character) -> [Jamming] {
+        var result: [Jamming] = [];
+        for i in 0 ..< jam.count {
+            var data = Jamming();
+            // HPベース比率からの割合　防御力無視ダメージ
+            data.damage = (target.HP_base * Int(jam[i].addDamage) / 100);
+            if data.damage <= 0 {
+                data.damage = 1;
+            }
+
+            data.content = jam[i];
+            data.lastTrun = jam[i].turn;
+            
+            // 強さ取得
+            let (power_TypeRatio: Int, power_TypeConst: Int) = calcPower(Int(jam[i].power), seedType: jam[i].seedType, char: self);
+            
+            switch jam[i].type {
+            case CharBtlAction.JamType.recover:
+                data.recover = power_TypeRatio;
+            case CharBtlAction.JamType.enhAtk:
+                data.addATK = power_TypeRatio;
+            case CharBtlAction.JamType.enhDef:
+                data.addDEF = power_TypeRatio;
+            case CharBtlAction.JamType.enhHit:
+                data.addHIT = power_TypeConst;
+            case CharBtlAction.JamType.enhAvoid:
+                data.addAVD = power_TypeConst;
+            case CharBtlAction.JamType.enhAtkCnt:
+                data.addATKCNT = power_TypeConst;
+            case CharBtlAction.JamType.weakenAtk:
+                data.addATK = 0 - power_TypeRatio;
+            case CharBtlAction.JamType.weakenDef:
+                data.addDEF = 0 - power_TypeRatio;
+            case CharBtlAction.JamType.weakenHit:
+                data.addHIT = 0 - power_TypeConst;
+            case CharBtlAction.JamType.weakenAvoid:
+                data.addAVD = 0 - power_TypeConst;
+            case CharBtlAction.JamType.weakenAtkCnt:
+                data.addATKCNT = 0 - power_TypeConst;
+            case CharBtlAction.JamType.poison:
+                data.poisonDamage = power_TypeRatio;
+            case CharBtlAction.JamType.paralysis:
+                data.paralysisAVD = power_TypeConst;
+            }
+            result.append(data);
+        }
+        return result;
+    }
+    func addJamming(jam: [Jamming]) {
+        for data in jam {
+            jammings.append(data);
+
+            // ステータスに反映
+            if data.content.execTiming == CharBtlAction.ExecTiming.jastNow {
+                if HP + data.recover > HP_base {
+                    HP = HP_base;
+                }
+                else {
+                    HP += data.recover;
+                }
+                HP += data.addHP;
+                ATK += data.addATK;
+                DEF += data.addDEF;
+                HIT += data.addHIT;
+                AVD += data.addAVD;
+                ATK_CNT += data.addATKCNT;
+                
+                HP = HP - data.damage;
+                if HP < 0 {
+                    HP = 0;
+                }
+            }
+        }
+    }
+    func allCancelJammings() {
+        for jam in jammings {
+            
+            // ステータスに反映
+            HP -= jam.addHP;
+            ATK -= jam.addATK;
+            DEF -= jam.addDEF;
+            HIT -= jam.addHIT;
+            AVD -= jam.addAVD;
+            ATK_CNT -= jam.addATKCNT;
+        }
+        jammings = [];
     }
 
     struct Enhanced {
@@ -195,37 +383,46 @@ class Character : SKSpriteNode {
         var lastTrun: Int = 0;
     }
     var enhances: [Enhanced] = [];
-    func addEnhanced(enh: CharBtlAction.Enh) {
-        var enhance = Enhanced();
-        enhance.content = enh;
-        enhance.lastTrun = enh.turn;
-        
-        // 強さ取得
-        let (power_TypeRatio: Int, power_TypeConst: Int) = calcPower(Int(enh.power), seedType: enh.seedType, char: self);
-
-        switch enh.type {
-        case CharBtlAction.EnhType.atk:
-            enhance.addATK = power_TypeRatio;
-        case CharBtlAction.EnhType.def:
-            enhance.addDEF = power_TypeRatio;
-        case CharBtlAction.EnhType.avd:
-            enhance.addAVD = power_TypeConst;
-        case CharBtlAction.EnhType.hit:
-            enhance.addHIT = power_TypeConst;
-        case CharBtlAction.EnhType.atkcnt:
-            enhance.addATKCNT = power_TypeConst;
+    
+    func procAction_enh(enh: [CharBtlAction.Enh]) -> [Enhanced] {
+        var result: [Enhanced] = [];
+        for i in 0 ..< enh.count {
+            var data = Enhanced();
+            data.content = enh[i];
+            data.lastTrun = enh[i].turn;
+            
+            // 強さ取得
+            let (power_TypeRatio: Int, power_TypeConst: Int) = calcPower(Int(enh[i].power), seedType: enh[i].seedType, char: self);
+            
+            switch enh[i].type {
+            case CharBtlAction.EnhType.atk:
+                data.addATK = power_TypeRatio;
+            case CharBtlAction.EnhType.def:
+                data.addDEF = power_TypeRatio;
+            case CharBtlAction.EnhType.avd:
+                data.addAVD = power_TypeConst;
+            case CharBtlAction.EnhType.hit:
+                data.addHIT = power_TypeConst;
+            case CharBtlAction.EnhType.atkcnt:
+                data.addATKCNT = power_TypeConst;
+            }
+            result.append(data);
         }
-
-        enhances.append(enhance);
-
-        // ステータスに反映
-        if enhance.content.execTiming == CharBtlAction.ExecTiming.jastNow {
-            HP += enhance.addHP;
-            ATK += enhance.addATK;
-            DEF += enhance.addDEF;
-            HIT += enhance.addHIT;
-            AVD += enhance.addAVD;
-            ATK_CNT += enhance.addATKCNT;
+        return result;
+    }
+    func addEnhanced(enh: [Enhanced]) {
+        for data in enh {
+            enhances.append(data);
+            
+            // ステータスに反映
+            if data.content.execTiming == CharBtlAction.ExecTiming.jastNow {
+                HP += data.addHP;
+                ATK += data.addATK;
+                DEF += data.addDEF;
+                HIT += data.addHIT;
+                AVD += data.addAVD;
+                ATK_CNT += data.addATKCNT;
+            }
         }
     }
     func allCancelEnhanced() {
@@ -242,87 +439,6 @@ class Character : SKSpriteNode {
         enhances = [];
     }
     
-    struct Jamming {
-        var content = CharBtlAction.Jam();
-        var recover: Int = 0;
-        var addHP: Int = 0;
-        var addATK: Int = 0;
-        var addDEF: Int = 0;
-        var addHIT: Int = 0;
-        var addAVD: Int = 0;
-        var addATKCNT: Int = 0;
-        var poisonDamage: Int = 0;
-        var paralysisAVD: Int = 0;
-        var lastTrun: Int = 0;
-    }
-    var jammings: [Jamming] = [];
-    func addJamming(jam: CharBtlAction.Jam, executor: Character) {
-        var jamming = Jamming();
-        jamming.content = jam;
-        jamming.lastTrun = jam.turn;
-        
-        // 強さ取得
-        let (power_TypeRatio: Int, power_TypeConst: Int) = calcPower(Int(jam.power), seedType: jam.seedType, char: executor);
-        
-        switch jam.type {
-        case CharBtlAction.JamType.recover:
-            jamming.recover = power_TypeRatio;
-        case CharBtlAction.JamType.enhAtk:
-            jamming.addATK = power_TypeRatio;
-        case CharBtlAction.JamType.enhDef:
-            jamming.addDEF = power_TypeRatio;
-        case CharBtlAction.JamType.enhHit:
-            jamming.addHIT = power_TypeConst;
-        case CharBtlAction.JamType.enhAvoid:
-            jamming.addAVD = power_TypeConst;
-        case CharBtlAction.JamType.enhAtkCnt:
-            jamming.addATKCNT = power_TypeConst;
-        case CharBtlAction.JamType.weakenAtk:
-            jamming.addATK = 0 - power_TypeRatio;
-        case CharBtlAction.JamType.weakenDef:
-            jamming.addDEF = 0 - power_TypeRatio;
-        case CharBtlAction.JamType.weakenHit:
-            jamming.addHIT = 0 - power_TypeConst;
-        case CharBtlAction.JamType.weakenAvoid:
-            jamming.addAVD = 0 - power_TypeConst;
-        case CharBtlAction.JamType.weakenAtkCnt:
-            jamming.addATKCNT = 0 - power_TypeConst;
-        case CharBtlAction.JamType.poison:
-            jamming.poisonDamage = power_TypeRatio;
-        case CharBtlAction.JamType.paralysis:
-            jamming.paralysisAVD = power_TypeConst;
-        }
-        jammings.append(jamming);
-        
-        // ステータスに反映
-        if jamming.content.execTiming == CharBtlAction.ExecTiming.jastNow {
-            if HP + jamming.recover > HP_base {
-                HP = HP_base;
-            }
-            else {
-                HP += jamming.recover;
-            }
-            HP += jamming.addHP;
-            ATK += jamming.addATK;
-            DEF += jamming.addDEF;
-            HIT += jamming.addHIT;
-            AVD += jamming.addAVD;
-            ATK_CNT += jamming.addATKCNT;
-        }
-    }
-    func allCancelJammings() {
-        for jam in jammings {
-            
-            // ステータスに反映
-            HP += jam.addHP;
-            ATK += jam.addATK;
-            DEF += jam.addDEF;
-            HIT += jam.addHIT;
-            AVD += jam.addAVD;
-            ATK_CNT += jam.addATKCNT;
-        }
-        jammings = [];
-    }
 
     func calcPower(power: Int, seedType: CharBtlAction.SeedType, char: Character) -> (ratioValue:Int, constValue:Int) {
         let power_TypeConst = Int(power);
@@ -350,28 +466,6 @@ class Character : SKSpriteNode {
     
     func turnEnd() {
         
-        for var i = enhances.count-1; i >= 0; --i {
-            
-            // TODO:ターン終了アクションを実行
-            
-            enhances[i].lastTrun--;
-            
-            // ターン切れ強化を削除
-            if enhances[i].lastTrun == 0 {
-                
-                // ステータスに反映
-                let enhance = enhances[i];
-                HP -= enhance.addHP;
-                ATK -= enhance.addATK;
-                DEF -= enhance.addDEF;
-                HIT -= enhance.addHIT;
-                AVD -= enhance.addAVD;
-                ATK_CNT -= enhance.addATKCNT;
-                
-                enhances.removeAtIndex(i);
-            }
-        }
-        
         for var i = jammings.count-1; i >= 0; --i {
 
             // TODO:ターン終了アクションを実行
@@ -393,6 +487,28 @@ class Character : SKSpriteNode {
                 jammings.removeAtIndex(i);
             }
         }
+        
+        for var i = enhances.count-1; i >= 0; --i {
+            
+            // TODO:ターン終了アクションを実行
+            
+            enhances[i].lastTrun--;
+            
+            // ターン切れ強化を削除
+            if enhances[i].lastTrun == 0 {
+                
+                // ステータスに反映
+                let enhance = enhances[i];
+                HP -= enhance.addHP;
+                ATK -= enhance.addATK;
+                DEF -= enhance.addDEF;
+                HIT -= enhance.addHIT;
+                AVD -= enhance.addAVD;
+                ATK_CNT -= enhance.addATKCNT;
+                
+                enhances.removeAtIndex(i);
+            }
+        }
     }
     
     func calcATK() -> Int {
@@ -400,15 +516,13 @@ class Character : SKSpriteNode {
         return ATK;
     }
     
-    func calcDEF(consumeDefenceds: Bool = false) -> Int {
+    func calcDEF(consumeDefenceds: Bool = true) -> Int {
         // エンハンス時にステータスの値変更したのでそのまま使う
         var def = DEF;
-        if defenceds.count > 0 {
-            var defence = defenceds[defenceds.count-1];
-            def += defence.addDef;
-            defence.lastCount--;
-            if defence.lastCount <= 0 {
-                defenceds.removeLast();
+        if consumeDefenceds {
+            if defenceds.count > 0 {
+                var defence = defenceds[defenceds.count-1];
+                def += defence.addDef;
             }
         }
         return def;

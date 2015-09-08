@@ -69,23 +69,6 @@ final class CharManager
         
         
         // 行動3
-        // 現在攻撃力の1.0倍で攻撃力を強化
-        // 2ターン
-        var enh_1 = CharBtlAction.Enh();
-        enh_1.type = CharBtlAction.EnhType.atk;
-        enh_1.seedType = CharBtlAction.SeedType.atkNow;
-        enh_1.power = 100.0;
-        enh_1.turn = 2;
-        var act_3 = Character.Action();
-        act_3.action.type = CharBtlAction.ActType.enh;
-        act_3.action.enhEnable = true;
-        act_3.action.enh.append(enh_1);
-        act_3.cost = act_3.action.enhCost;
-        act_3.name = "強化";
-        main_character.actions.append(act_3);
-        
-        
-        // 行動4
         // 5%相手命中を減少
         // 3ターン
         var jam_1 = CharBtlAction.Jam();
@@ -93,12 +76,30 @@ final class CharManager
         jam_1.seedType = CharBtlAction.SeedType.constant;
         jam_1.power = 5.0;
         jam_1.turn = 3;
+        jam_1.addDamage = 10.0;
+        var act_3 = Character.Action();
+        act_3.action.type = CharBtlAction.ActType.jam;
+        act_3.action.jamEnable = true;
+        act_3.action.jam.append(jam_1);
+        act_3.cost = act_3.action.jamCost;
+        act_3.name = "妨害";
+        main_character.actions.append(act_3);
+
+        
+        // 行動4
+        // 現在攻撃力の1.0倍で攻撃力を強化
+        // 2ターン
+        var enh_1 = CharBtlAction.Enh();
+        enh_1.type = CharBtlAction.EnhType.atk;
+        enh_1.seedType = CharBtlAction.SeedType.atkNow;
+        enh_1.power = 100.0;
+        enh_1.turn = 2;
         var act_4 = Character.Action();
-        act_4.action.type = CharBtlAction.ActType.jam;
-        act_4.action.jamEnable = true;
-        act_4.action.jam.append(jam_1);
-        act_4.cost = act_4.action.jamCost;
-        act_4.name = "妨害";
+        act_4.action.type = CharBtlAction.ActType.enh;
+        act_4.action.enhEnable = true;
+        act_4.action.enh.append(enh_1);
+        act_4.cost = act_4.action.enhCost;
+        act_4.name = "強化";
         main_character.actions.append(act_4);
         
         
@@ -185,23 +186,6 @@ final class CharManager
         
         
         // 行動3
-        // 現在攻撃力の0.3倍で攻撃力を強化
-        // 3ターン
-        var enh_1 = CharBtlAction.Enh();
-        enh_1.type = CharBtlAction.EnhType.atk;
-        enh_1.seedType = CharBtlAction.SeedType.atkNow;
-        enh_1.power = 30.0;
-        enh_1.turn = 3;
-        var act_3 = Character.Action();
-        act_3.action.type = CharBtlAction.ActType.enh;
-        act_3.action.enhEnable = true;
-        act_3.action.enh.append(enh_1);
-        act_3.cost = act_3.action.enhCost;
-        act_3.name = "ビルドアップ";
-        muscle_woman.actions.append(act_3);
-        
-        
-        // 行動4
         // 基本攻撃力の0.5倍で相手攻撃力を減少
         // 2ターン
         var jam_1 = CharBtlAction.Jam();
@@ -209,12 +193,30 @@ final class CharManager
         jam_1.seedType = CharBtlAction.SeedType.atkBase;
         jam_1.power = 50.0;
         jam_1.turn = 3;
+        jam_1.addDamage = 5.0;
+        var act_3 = Character.Action();
+        act_3.action.type = CharBtlAction.ActType.jam;
+        act_3.action.jamEnable = true;
+        act_3.action.jam.append(jam_1);
+        act_3.cost = act_3.action.jamCost;
+        act_3.name = "武器破壊";
+        muscle_woman.actions.append(act_3);
+
+        
+        // 行動4
+        // 現在攻撃力の0.3倍で攻撃力を強化
+        // 3ターン
+        var enh_1 = CharBtlAction.Enh();
+        enh_1.type = CharBtlAction.EnhType.atk;
+        enh_1.seedType = CharBtlAction.SeedType.atkNow;
+        enh_1.power = 30.0;
+        enh_1.turn = 3;
         var act_4 = Character.Action();
-        act_4.action.type = CharBtlAction.ActType.jam;
-        act_4.action.jamEnable = true;
-        act_4.action.jam.append(jam_1);
-        act_4.cost = act_4.action.jamCost;
-        act_4.name = "武器破壊";
+        act_4.action.type = CharBtlAction.ActType.enh;
+        act_4.action.enhEnable = true;
+        act_4.action.enh.append(enh_1);
+        act_4.cost = act_4.action.enhCost;
+        act_4.name = "ビルドアップ";
         muscle_woman.actions.append(act_4);
         
         
