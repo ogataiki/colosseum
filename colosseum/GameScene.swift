@@ -56,6 +56,7 @@ class GameScene: SKScene {
     var meleeResultBuffer: [MeleeResultData] = [];
     var meleeProgress: Int = 0;
     var meleeNextFlg: [Bool] = [false, false];
+    var meleeActionFinishFlg: Bool = true;
     
     var player_char: Character!;
     var enemy_char: Character!;
@@ -449,7 +450,7 @@ class GameScene: SKScene {
     
     func updateMelee() {
         
-        if meleeNextFlg[0] && meleeNextFlg[1] {
+        if meleeActionFinishFlg {
             
             meleeProgress++;
             meleeMain();
@@ -605,14 +606,16 @@ class GameScene: SKScene {
         meleeNextFlg[0] = false;
         meleeNextFlg[1] = false;
         
-        if meleeProgress >= meleeBuffer.count {
-            meleeEnd();
+        if self.meleeProgress >= self.meleeBuffer.count {
+            self.meleeEnd();
         }
         else {
-            meleeNextAction();
+            self.meleeNextAction();
         }
     }
     func meleeNextAction() {
+        
+        meleeActionFinishFlg = false;
         
         let meleeData = meleeBuffer[meleeProgress];
         let playerAction = player_char.actions[meleeData.player_action.rawValue];
@@ -664,6 +667,17 @@ class GameScene: SKScene {
             case CharBtlAction.ActType.jam: melee_non_jam(eAct: enemyAction);
             case CharBtlAction.ActType.enh: melee_non_enh(eAct: enemyAction);
             }
+        }
+    }
+    func meleeActionFinish() {
+        
+        //混戦中の1アクションが終わったら処理する
+        if meleeNextFlg[0] && meleeNextFlg[1] {
+
+            meleeAction_ActTitleRemove { () -> Void in
+            }
+            
+            self.meleeActionFinishFlg = true;
         }
     }
     func meleeEnd() {
@@ -743,6 +757,8 @@ class GameScene: SKScene {
                 self.meleeNextFlg[0] = true;
                 
                 self.meleeNextFlg[1] = true;
+                
+                self.meleeActionFinish();
         });
     }
 
@@ -781,6 +797,8 @@ class GameScene: SKScene {
                 self.enemy_char.addDamage(player_atk_result);
                 self.enemy_char.refleshStatus();
                 self.meleeNextFlg[0] = true;
+                
+                self.meleeActionFinish();
         });
         
         meleeAction_Atk(attacker: enemy_char, target: player_char
@@ -792,6 +810,8 @@ class GameScene: SKScene {
                 self.player_char.addDamage(enemy_atk_result);
                 self.player_char.refleshStatus();
                 self.meleeNextFlg[1] = true;
+                
+                self.meleeActionFinish();
         });
     }
 
@@ -833,6 +853,8 @@ class GameScene: SKScene {
                         self.enemy_char.addDefenced(def_result);
                         self.enemy_char.refleshStatus();
                         self.meleeNextFlg[1] = true;
+                        
+                        self.meleeActionFinish();
                 })
         })
     }
@@ -866,6 +888,8 @@ class GameScene: SKScene {
                         self.player_char.addJamming(jam_result);
                         self.player_char.refleshStatus();
                         self.meleeNextFlg[1] = true;
+                        
+                        self.meleeActionFinish();
                 })
         });        
     }
@@ -898,6 +922,8 @@ class GameScene: SKScene {
                 self.meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.enh);
                 self.enemy_char.refleshStatus();
                 self.meleeNextFlg[1] = true;
+                
+                self.meleeActionFinish();
         });
         
     }
@@ -927,6 +953,8 @@ class GameScene: SKScene {
                 self.meleeNextFlg[0] = true;
                 
                 self.meleeNextFlg[1] = true;
+                
+                self.meleeActionFinish();
         })
     }
 
@@ -967,6 +995,8 @@ class GameScene: SKScene {
                         self.player_char.addDefenced(def_result);
                         self.player_char.refleshStatus();
                         self.meleeNextFlg[0] = true;
+                        
+                        self.meleeActionFinish();
                 })
         })
     }
@@ -992,6 +1022,8 @@ class GameScene: SKScene {
                 self.player_char.addDefenced(player_def_result);
                 self.player_char.refleshStatus();
                 self.meleeNextFlg[0] = true;
+                
+                self.meleeActionFinish();
         })
 
         meleeAction_Def(target: enemy_char
@@ -1002,6 +1034,8 @@ class GameScene: SKScene {
                 self.enemy_char.addDefenced(enemy_def_result);
                 self.enemy_char.refleshStatus();
                 self.meleeNextFlg[1] = true;
+                
+                self.meleeActionFinish();
         })
     }
 
@@ -1031,6 +1065,8 @@ class GameScene: SKScene {
                 self.meleeCancelAllStatus(self.player_char, cancelType: CharBtlAction.ActType.def);
                 self.player_char.refleshStatus();
                 self.meleeNextFlg[0] = true;
+                
+                self.meleeActionFinish();
         })
         
     }
@@ -1056,6 +1092,8 @@ class GameScene: SKScene {
                 self.player_char.addDefenced(def_result);
                 self.player_char.refleshStatus();
                 self.meleeNextFlg[0] = true;
+                
+                self.meleeActionFinish();
         }
 
         meleeAction_Enh(target: enemy_char
@@ -1065,6 +1103,8 @@ class GameScene: SKScene {
                 self.enemy_char.addEnhanced(enh_result);
                 self.enemy_char.refleshStatus();
                 self.meleeNextFlg[1] = true;
+                
+                self.meleeActionFinish();
         })
     }
 
@@ -1091,6 +1131,8 @@ class GameScene: SKScene {
                 self.enemy_char.addJamming(jam_result);
                 self.enemy_char.refleshStatus();
                 self.meleeNextFlg[0] = true;
+                
+                self.meleeActionFinish();
         })
         
         self.meleeNextFlg[1] = true;
@@ -1125,6 +1167,8 @@ class GameScene: SKScene {
                         self.enemy_char.addJamming(jam_result);
                         self.enemy_char.refleshStatus();
                         self.meleeNextFlg[0] = true;
+                        
+                        self.meleeActionFinish();
                 })
         });
     }
@@ -1154,6 +1198,8 @@ class GameScene: SKScene {
                 self.meleeCancelAllAction(player: false, enemy: true, index: self.meleeProgress);
                 self.meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.def);
                 self.meleeNextFlg[1] = true;
+                
+                self.meleeActionFinish();
         })
     }
     
@@ -1178,6 +1224,8 @@ class GameScene: SKScene {
                 self.enemy_char.addJamming(player_jam_result);
                 self.enemy_char.refleshStatus();
                 self.meleeNextFlg[0] = true;
+                
+                self.meleeActionFinish();
         })
         
         self.meleeAction_Jam(target: self.player_char
@@ -1187,6 +1235,8 @@ class GameScene: SKScene {
                 self.player_char.addJamming(enemy_jam_result);
                 self.player_char.refleshStatus();
                 self.meleeNextFlg[1] = true;
+                
+                self.meleeActionFinish();
         })
     }
 
@@ -1217,6 +1267,8 @@ class GameScene: SKScene {
                 self.meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.jam);
                 self.enemy_char.refleshStatus();
                 self.meleeNextFlg[0] = true;
+                
+                self.meleeActionFinish();
         }
     }
     
@@ -1242,6 +1294,8 @@ class GameScene: SKScene {
                 self.player_char.addEnhanced(enh_result);
                 self.player_char.refleshStatus();
                 self.meleeNextFlg[0] = true;
+                
+                self.meleeActionFinish();
         })
         
         self.meleeNextFlg[1] = true;
@@ -1275,6 +1329,8 @@ class GameScene: SKScene {
                 self.meleeCancelAllStatus(self.player_char, cancelType: CharBtlAction.ActType.enh);
                 self.player_char.refleshStatus();
                 self.meleeNextFlg[0] = true;
+                
+                self.meleeActionFinish();
         });
     }
     
@@ -1299,6 +1355,8 @@ class GameScene: SKScene {
                 self.player_char.addEnhanced(enh_result);
                 self.player_char.refleshStatus();
                 self.meleeNextFlg[0] = true;
+                
+                self.meleeActionFinish();
         })
         
         meleeAction_Def(target: enemy_char
@@ -1309,6 +1367,8 @@ class GameScene: SKScene {
                 self.enemy_char.addDefenced(def_result);
                 self.enemy_char.refleshStatus();
                 self.meleeNextFlg[1] = true;
+                
+                self.meleeActionFinish();
         }
     }
 
@@ -1339,6 +1399,8 @@ class GameScene: SKScene {
                 self.meleeCancelAllStatus(self.player_char, cancelType: CharBtlAction.ActType.jam);
                 self.player_char.refleshStatus();
                 self.meleeNextFlg[1] = true;
+                
+                self.meleeActionFinish();
         }
     }
 
@@ -1363,6 +1425,8 @@ class GameScene: SKScene {
                 self.player_char.addEnhanced(player_enh_result);
                 self.player_char.refleshStatus();
                 self.meleeNextFlg[0] = true;
+                
+                self.meleeActionFinish();
         })
         
         meleeAction_Enh(target: enemy_char
@@ -1372,6 +1436,8 @@ class GameScene: SKScene {
                 self.enemy_char.addEnhanced(enemy_enh_result);
                 self.enemy_char.refleshStatus();
                 self.meleeNextFlg[1] = true;
+                
+                self.meleeActionFinish();
         })
     }
 
@@ -1401,6 +1467,8 @@ class GameScene: SKScene {
                 self.player_char.addDamage(atk_result);
                 self.player_char.refleshStatus();
                 self.meleeNextFlg[1] = true;
+                
+                self.meleeActionFinish();
         });
     }
     
@@ -1427,6 +1495,8 @@ class GameScene: SKScene {
                 self.enemy_char.addDefenced(def_result);
                 self.enemy_char.refleshStatus();
                 self.meleeNextFlg[1] = true;
+                
+                self.meleeActionFinish();
         })
     }
     
@@ -1453,6 +1523,8 @@ class GameScene: SKScene {
                 self.player_char.addJamming(jam_result);
                 self.player_char.refleshStatus();
                 self.meleeNextFlg[1] = true;
+                
+                self.meleeActionFinish();
         })
     }
 
@@ -1478,6 +1550,8 @@ class GameScene: SKScene {
                 self.enemy_char.addEnhanced(enh_result);
                 self.enemy_char.refleshStatus();
                 self.meleeNextFlg[1] = true;
+                
+                self.meleeActionFinish();
         })
     }
     
@@ -1485,6 +1559,7 @@ class GameScene: SKScene {
         
         self.meleeNextFlg[0] = true;
         self.meleeNextFlg[1] = true;
+        self.meleeActionFinish();
     }
 
     func meleeAction_Pre(#pAct: CharBtlAction.ActType, eAct: CharBtlAction.ActType, callback: () -> Void)
@@ -1517,10 +1592,18 @@ class GameScene: SKScene {
         }
     }
     
+    var playerCutin: SKSpriteNode!;
+    var enemyCutin: SKSpriteNode!;
     func meleeAction_ActTitleDisplay(#player: String, enemy: String, callback: () -> Void) {
+        
         if player != "" {
             
-            var playerCutin = SKSpriteNode(color: UIColor.greenColor(), size: CGSizeMake(self.size.width*0.3, self.size.width*0.1));
+            if let cutin = playerCutin {
+                playerCutin.removeAllChildren();
+                playerCutin.removeFromParent();
+            }
+            
+            playerCutin = SKSpriteNode(color: UIColor.greenColor(), size: CGSizeMake(self.size.width*0.3, self.size.width*0.1));
             playerCutin.anchorPoint = CGPointMake(1.0, 1.0);
             playerCutin.position = CGPointMake(self.size.width + playerCutin.size.width, self.size.height);
             self.addChild(playerCutin);
@@ -1533,19 +1616,17 @@ class GameScene: SKScene {
             pActLbl.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Center;
             playerCutin.addChild(pActLbl);
             
-            let move1 = SKAction.moveToX(self.size.width, duration: 0.2);
-            let wait = SKAction.waitForDuration(0.7);
-            let move2 = SKAction.moveToX(self.size.width + playerCutin.size.width, duration: 0.2);
-            let endfunc = SKAction.runBlock({ () -> Void in
-                playerCutin.removeAllChildren();
-                playerCutin.removeFromParent();
-            });
-            playerCutin.runAction(SKAction.sequence([move1, wait, move2, endfunc]));
+            playerCutin.runAction(SKAction.moveToX(self.size.width, duration: 0.2));
         }
         
         if enemy != "" {
             
-            var enemyCutin = SKSpriteNode(color: UIColor.orangeColor(), size: CGSizeMake(self.size.width*0.3, self.size.width*0.1));
+            if let cutin = enemyCutin {
+                enemyCutin.removeAllChildren();
+                enemyCutin.removeFromParent();
+            }
+
+            enemyCutin = SKSpriteNode(color: UIColor.orangeColor(), size: CGSizeMake(self.size.width*0.3, self.size.width*0.1));
             enemyCutin.anchorPoint = CGPointMake(0.0, 1.0);
             enemyCutin.position = CGPointMake(0 - enemyCutin.size.width, self.size.height);
             self.addChild(enemyCutin);
@@ -1558,15 +1639,28 @@ class GameScene: SKScene {
             eActLbl.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Center;
             enemyCutin.addChild(eActLbl);
             
-            let move1 = SKAction.moveToX(0, duration: 0.2);
-            let wait = SKAction.waitForDuration(0.7);
-            let move2 = SKAction.moveToX(0 - enemyCutin.size.width, duration: 0.2);
-            let endfunc = SKAction.runBlock({ () -> Void in
-                enemyCutin.removeAllChildren();
-                enemyCutin.removeFromParent();
-            });
-            enemyCutin.runAction(SKAction.sequence([move1, wait, move2, endfunc]));
+            enemyCutin.runAction(SKAction.moveToX(0, duration: 0.2));
         }
+    }
+    func meleeAction_ActTitleRemove(callback: () -> Void) {
+    
+        if let cutin = playerCutin {
+            let move = SKAction.moveToX(self.size.width + cutin.size.width, duration: 0.2);
+            let endfunc = SKAction.runBlock({ () -> Void in
+                cutin.removeAllChildren();
+                cutin.removeFromParent();
+            });
+            cutin.runAction(SKAction.sequence([move, endfunc]));
+        }
+        if let cutin = enemyCutin {
+            let move = SKAction.moveToX(0 - cutin.size.width, duration: 0.2);
+            let endfunc = SKAction.runBlock({ () -> Void in
+                cutin.removeAllChildren();
+                cutin.removeFromParent();
+            });
+            cutin.runAction(SKAction.sequence([move, endfunc]));
+        }
+        callback();
     }
 
     func meleeAction_Break(#breakAct: CharBtlAction.ActType
