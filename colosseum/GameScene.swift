@@ -69,6 +69,10 @@ class GameScene: SKScene {
     var ui_tacticalDef: UIButton!;
     var ui_tacticalJam: UIButton!;
     var ui_tacticalEnh: UIButton!;
+    var ui_tacticalCompatibleArrow_atk_enh: SKSpriteNode!;
+    var ui_tacticalCompatibleArrow_def_atk: SKSpriteNode!;
+    var ui_tacticalCompatibleArrow_jam_def: SKSpriteNode!;
+    var ui_tacticalCompatibleArrow_enh_jam: SKSpriteNode!;
     var ui_tacticalEnter: UIButton!;
     var ui_tacticalReset: UIButton!;
     var tc_lastStock: Int = 0;
@@ -173,8 +177,7 @@ class GameScene: SKScene {
         self.view!.addSubview(ui_tacticalDef);
         
         ui_tacticalJam = UIButton(frame: CGRectMake(0,0, ui_tacticalAtk.frame.size.width, ui_tacticalAtk.frame.size.height));
-        ui_tacticalJam.layer.position = CGPointMake(self.size.width*0.25, self.size.height*0.55);
-        
+        ui_tacticalJam.layer.position = CGPointMake(self.size.width*0.75, self.size.height*0.55);
         ui_tacticalJam.backgroundColor = UIColor.brownColor();
         ui_tacticalJam.titleLabel!.lineBreakMode = NSLineBreakMode.ByWordWrapping;
         let actionJam = player_char.actions[CharBtlAction.ActType.jam.rawValue];
@@ -187,7 +190,7 @@ class GameScene: SKScene {
         self.view!.addSubview(ui_tacticalJam);
 
         ui_tacticalEnh = UIButton(frame: CGRectMake(0,0, ui_tacticalAtk.frame.size.width, ui_tacticalAtk.frame.size.height));
-        ui_tacticalEnh.layer.position = CGPointMake(self.size.width*0.75, self.size.height*0.55);
+        ui_tacticalEnh.layer.position = CGPointMake(self.size.width*0.25, self.size.height*0.55);
         ui_tacticalEnh.backgroundColor = UIColor.brownColor();
         ui_tacticalEnh.titleLabel!.lineBreakMode = NSLineBreakMode.ByWordWrapping;
         let actionEnh = player_char.actions[CharBtlAction.ActType.enh.rawValue];
@@ -198,6 +201,35 @@ class GameScene: SKScene {
         ui_tacticalEnh.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Highlighted)
         ui_tacticalEnh.addTarget(self, action: "tacticalEnh", forControlEvents: UIControlEvents.TouchUpInside);
         self.view!.addSubview(ui_tacticalEnh);
+        
+        
+        ui_tacticalCompatibleArrow_def_atk = SKSpriteNode(imageNamed: "CompatibleArrow");
+        ui_tacticalCompatibleArrow_def_atk.position = CGPointMake(
+            ui_tacticalAtk.layer.position.x + ((ui_tacticalDef.layer.position.x - ui_tacticalAtk.layer.position.x)/2)
+            , self.size.height - ui_tacticalAtk.layer.position.y);
+        ui_tacticalCompatibleArrow_def_atk.xScale = -1.0;
+        addChild(ui_tacticalCompatibleArrow_def_atk);
+
+        ui_tacticalCompatibleArrow_jam_def = SKSpriteNode(imageNamed: "CompatibleArrow");
+        ui_tacticalCompatibleArrow_jam_def.position = CGPointMake(
+            ui_tacticalJam.layer.position.x
+            , self.size.height - (ui_tacticalJam.layer.position.y - ((ui_tacticalJam.layer.position.y - ui_tacticalDef.layer.position.y)/2)));
+        ui_tacticalCompatibleArrow_jam_def.zRotation = 90 / 180.0 * CGFloat(M_PI);
+        addChild(ui_tacticalCompatibleArrow_jam_def);
+
+        ui_tacticalCompatibleArrow_enh_jam = SKSpriteNode(imageNamed: "CompatibleArrow");
+        ui_tacticalCompatibleArrow_enh_jam.position = CGPointMake(
+            ui_tacticalEnh.layer.position.x + ((ui_tacticalJam.layer.position.x - ui_tacticalEnh.layer.position.x)/2)
+            , self.size.height - ui_tacticalEnh.layer.position.y);
+        addChild(ui_tacticalCompatibleArrow_enh_jam);
+
+        ui_tacticalCompatibleArrow_atk_enh = SKSpriteNode(imageNamed: "CompatibleArrow");
+        ui_tacticalCompatibleArrow_atk_enh.position = CGPointMake(
+            ui_tacticalAtk.layer.position.x
+            , self.size.height - (ui_tacticalEnh.layer.position.y - ((ui_tacticalEnh.layer.position.y - ui_tacticalAtk.layer.position.y)/2)));
+        ui_tacticalCompatibleArrow_atk_enh.zRotation = 270 / 180.0 * CGFloat(M_PI);
+        addChild(ui_tacticalCompatibleArrow_atk_enh);
+        
         
 
         ui_tacticalEnter = UIButton(frame: CGRectMake(0,0, self.view!.frame.size.width*0.4, self.view!.frame.size.height*0.1));
@@ -238,6 +270,18 @@ class GameScene: SKScene {
         }
         if let ui = ui_tacticalEnh {
             ui.removeFromSuperview();
+        }
+        if let ui = ui_tacticalCompatibleArrow_atk_enh {
+            ui.removeFromParent();
+        }
+        if let ui = ui_tacticalCompatibleArrow_def_atk {
+            ui.removeFromParent();
+        }
+        if let ui = ui_tacticalCompatibleArrow_jam_def {
+            ui.removeFromParent();
+        }
+        if let ui = ui_tacticalCompatibleArrow_enh_jam {
+            ui.removeFromParent();
         }
         if let ui = ui_tacticalEnter {
             ui.removeFromSuperview();
