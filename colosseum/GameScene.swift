@@ -2082,6 +2082,7 @@ class GameScene: SKScene {
     //------
     // debug
     var debug_status = SceneStatus.debug;
+    var debug_speed: CGFloat = 0.0;
     var debug_updateStopButton: UIButton!;
     func debug_setting() {
         debug_updateStopButton = UIButton(frame: CGRectMake(self.frame.size.width-30, self.frame.size.height-30, 30, 30));
@@ -2091,10 +2092,14 @@ class GameScene: SKScene {
     }
     func debug_updateStop() {
         if scene_status == SceneStatus.debug {
+            self.speed = debug_speed;
+            debug_speed = 0;
             scene_status = debug_status;
             debug_status = SceneStatus.debug
         }
         else {
+            debug_speed = self.speed;
+            self.speed = 0;
             debug_status = scene_status;
             scene_status = SceneStatus.debug;
         }
