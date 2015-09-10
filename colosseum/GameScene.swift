@@ -294,7 +294,7 @@ class GameScene: SKScene {
     
     func playerInit() {
         
-        player_char = CharManager.getCharacter("main_character");
+        player_char = CharManager.getCharacter("Hero");
         player_char.posUpdate(CGPointMake(self.size.width*0.85, self.size.height*0.9));
         player_char.setPlayer(v: true);
         player_char.zPosUpdate(0);
@@ -333,7 +333,7 @@ class GameScene: SKScene {
     
     func enemyInit() {
         
-        enemy_char = CharManager.getCharacter("muscle_woman");
+        enemy_char = CharManager.getCharacter("HardbodyFemale");
         enemy_char.posUpdate(CGPointMake(self.size.width*0.15, self.size.height*0.9));
         enemy_char.setPlayer(v: false);
         enemy_char.zPosUpdate(0);
