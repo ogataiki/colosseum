@@ -24,6 +24,13 @@
 		501FD5891BA117CD00E99FCA /* GCHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501FD5881BA117CD00E99FCA /* GCHelper.swift */; };
 		501FD58C1BA1197000E99FCA /* CharacterHero.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501FD58B1BA1197000E99FCA /* CharacterHero.swift */; };
 		501FD58E1BA11B5B00E99FCA /* CharacterHardbodyFemale.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501FD58D1BA11B5B00E99FCA /* CharacterHardbodyFemale.swift */; };
+		501FD5901BA1729200E99FCA /* SceneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501FD58F1BA1729200E99FCA /* SceneManager.swift */; };
+		501FD5921BA1742100E99FCA /* PrologueScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501FD5911BA1742100E99FCA /* PrologueScene.swift */; };
+		501FD5941BA1747D00E99FCA /* CharSelectScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501FD5931BA1747D00E99FCA /* CharSelectScene.swift */; };
+		501FD5961BA1752800E99FCA /* StoryPreviewScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501FD5951BA1752800E99FCA /* StoryPreviewScene.swift */; };
+		501FD5981BA175CF00E99FCA /* BattleScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501FD5971BA175CF00E99FCA /* BattleScene.swift */; };
+		501FD59A1BA175EF00E99FCA /* BattleResultScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501FD5991BA175EF00E99FCA /* BattleResultScene.swift */; };
+		501FD59C1BA1761C00E99FCA /* PvPMatchScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501FD59B1BA1761C00E99FCA /* PvPMatchScene.swift */; };
 		503885A21B96881F001CE8B3 /* spark.png in Resources */ = {isa = PBXBuildFile; fileRef = 503885A01B96881F001CE8B3 /* spark.png */; };
 		503885A41B969E96001CE8B3 /* Enhanced.sks in Resources */ = {isa = PBXBuildFile; fileRef = 503885A31B969E96001CE8B3 /* Enhanced.sks */; };
 		503885A61B96A704001CE8B3 /* sparkline.png in Resources */ = {isa = PBXBuildFile; fileRef = 503885A51B96A704001CE8B3 /* sparkline.png */; };
@@ -63,6 +70,13 @@
 		501FD5881BA117CD00E99FCA /* GCHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GCHelper.swift; sourceTree = "<group>"; };
 		501FD58B1BA1197000E99FCA /* CharacterHero.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharacterHero.swift; sourceTree = "<group>"; };
 		501FD58D1BA11B5B00E99FCA /* CharacterHardbodyFemale.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharacterHardbodyFemale.swift; sourceTree = "<group>"; };
+		501FD58F1BA1729200E99FCA /* SceneManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SceneManager.swift; sourceTree = "<group>"; };
+		501FD5911BA1742100E99FCA /* PrologueScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrologueScene.swift; sourceTree = "<group>"; };
+		501FD5931BA1747D00E99FCA /* CharSelectScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharSelectScene.swift; sourceTree = "<group>"; };
+		501FD5951BA1752800E99FCA /* StoryPreviewScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoryPreviewScene.swift; sourceTree = "<group>"; };
+		501FD5971BA175CF00E99FCA /* BattleScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BattleScene.swift; sourceTree = "<group>"; };
+		501FD5991BA175EF00E99FCA /* BattleResultScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BattleResultScene.swift; sourceTree = "<group>"; };
+		501FD59B1BA1761C00E99FCA /* PvPMatchScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PvPMatchScene.swift; sourceTree = "<group>"; };
 		503885A01B96881F001CE8B3 /* spark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = spark.png; path = Particles/spark.png; sourceTree = "<group>"; };
 		503885A31B969E96001CE8B3 /* Enhanced.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Enhanced.sks; sourceTree = "<group>"; };
 		503885A51B96A704001CE8B3 /* sparkline.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = sparkline.png; path = Particles/sparkline.png; sourceTree = "<group>"; };
@@ -115,7 +129,8 @@
 				501EF6221B9D08A600CD81B8 /* GameManager.swift */,
 				500175631B8E86BB00567C73 /* GameViewController.swift */,
 				5001755F1B8E86BB00567C73 /* GameScene.sks */,
-				501EF6201B9D086F00CD81B8 /* HomeScene.swift */,
+				501FD58F1BA1729200E99FCA /* SceneManager.swift */,
+				501FD59D1BA17A7200E99FCA /* Scenes */,
 				500175611B8E86BB00567C73 /* GameScene.swift */,
 				500175811B8E876A00567C73 /* Gauge.swift */,
 				501EF6241B9D0AE300CD81B8 /* CharManager.swift */,
@@ -173,6 +188,20 @@
 				501FD58D1BA11B5B00E99FCA /* CharacterHardbodyFemale.swift */,
 			);
 			name = Characters;
+			sourceTree = "<group>";
+		};
+		501FD59D1BA17A7200E99FCA /* Scenes */ = {
+			isa = PBXGroup;
+			children = (
+				501FD5911BA1742100E99FCA /* PrologueScene.swift */,
+				501EF6201B9D086F00CD81B8 /* HomeScene.swift */,
+				501FD5931BA1747D00E99FCA /* CharSelectScene.swift */,
+				501FD5951BA1752800E99FCA /* StoryPreviewScene.swift */,
+				501FD5971BA175CF00E99FCA /* BattleScene.swift */,
+				501FD5991BA175EF00E99FCA /* BattleResultScene.swift */,
+				501FD59B1BA1761C00E99FCA /* PvPMatchScene.swift */,
+			);
+			name = Scenes;
 			sourceTree = "<group>";
 		};
 		503885991B9687F5001CE8B3 /* Effects */ = {
@@ -301,14 +330,21 @@
 				500175621B8E86BB00567C73 /* GameScene.swift in Sources */,
 				501FD58E1BA11B5B00E99FCA /* CharacterHardbodyFemale.swift in Sources */,
 				501EF6231B9D08A600CD81B8 /* GameManager.swift in Sources */,
+				501FD5921BA1742100E99FCA /* PrologueScene.swift in Sources */,
 				501EF6211B9D086F00CD81B8 /* HomeScene.swift in Sources */,
 				50483EE91B940EC2001638CE /* CharBtlAction.swift in Sources */,
+				501FD5981BA175CF00E99FCA /* BattleScene.swift in Sources */,
 				50121F5D1B901AA80071F8EC /* SKActionEx.swift in Sources */,
 				501FD58C1BA1197000E99FCA /* CharacterHero.swift in Sources */,
 				500175641B8E86BB00567C73 /* GameViewController.swift in Sources */,
+				501FD59A1BA175EF00E99FCA /* BattleResultScene.swift in Sources */,
 				503972E51B9050A9009AB94F /* Character.swift in Sources */,
 				501EF6251B9D0AE300CD81B8 /* CharManager.swift in Sources */,
+				501FD5901BA1729200E99FCA /* SceneManager.swift in Sources */,
+				501FD5941BA1747D00E99FCA /* CharSelectScene.swift in Sources */,
+				501FD59C1BA1761C00E99FCA /* PvPMatchScene.swift in Sources */,
 				501FD5891BA117CD00E99FCA /* GCHelper.swift in Sources */,
+				501FD5961BA1752800E99FCA /* StoryPreviewScene.swift in Sources */,
 				5001755E1B8E86BB00567C73 /* AppDelegate.swift in Sources */,
 				500175821B8E876A00567C73 /* Gauge.swift in Sources */,
 			);

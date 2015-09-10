@@ -16,6 +16,10 @@ class CharacterHero
         // ステータス設定
         data.statusInit(hp: 3000, atk: 200, def: 50, hit: 100, avd: 20, add_atk: 0);
         
+        // ゲージ設定
+        data.gaugeLangeth = 300.0;
+        data.gaugeAcceleration = 30.0;
+
         // 行動設定
         
         // 行動0 : 行動なし(固定)

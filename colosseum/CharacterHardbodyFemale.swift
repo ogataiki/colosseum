@@ -15,6 +15,10 @@ class CharacterHardbodyFemale
         // ステータス設定
         data.statusInit(hp: 3000, atk: 300, def: 50, hit: 90, avd: 20, add_atk: 0);
         
+        // ゲージ設定
+        data.gaugeLangeth = 200.0;
+        data.gaugeAcceleration = 30.0;
+
         // 行動設定
         
         // 行動0 : 行動なし(固定)
@@ -24,12 +28,12 @@ class CharacterHardbodyFemale
         
         
         // 行動1
-        // 現在攻撃力の1.0倍と0.5倍で2回攻撃
+        // 現在攻撃力の1.25倍と0.75倍の2回攻撃
         // コスト2
         var atk_1 = CharBtlAction.Atk();
-        atk_1.atkPower = 100.0;
+        atk_1.atkPower = 125.0;
         var atk_2 = CharBtlAction.Atk();
-        atk_2.atkPower = 50.0;
+        atk_2.atkPower = 75.0;
         var act_1 = Character.Action();
         act_1.action.type = CharBtlAction.ActType.atk;
         act_1.action.atkEnable = true;
@@ -77,18 +81,23 @@ class CharacterHardbodyFemale
         
         
         // 行動4
-        // 攻撃回数1増加
+        // 現在攻撃分の0.5倍の攻撃力と防御力が上がる
         // 2ターン
         var enh_1 = CharBtlAction.Enh();
-        enh_1.type = CharBtlAction.EnhType.atkcnt;
-        enh_1.power = 1.0;
+        enh_1.type = CharBtlAction.EnhType.atk;
+        enh_1.power = 50.0;
         enh_1.turn = 2;
+        var enh_2 = CharBtlAction.Enh();
+        enh_2.type = CharBtlAction.EnhType.def;
+        enh_2.power = 50.0;
+        enh_2.turn = 2;
         var act_4 = Character.Action();
         act_4.action.type = CharBtlAction.ActType.enh;
         act_4.action.enhEnable = true;
         act_4.action.enh.append(enh_1);
+        act_4.action.enh.append(enh_2);
         act_4.cost = act_4.action.enhCost;
-        act_4.name = "加速";
+        act_4.name = "ビルドアップ";
         data.actions.append(act_4);
         
         

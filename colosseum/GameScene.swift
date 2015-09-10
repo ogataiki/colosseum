@@ -97,11 +97,7 @@ class GameScene: SKScene {
         playerInit();
         
         enemyInit();
-        
-        // debug
-        player_char.gaugeLangeth = 300;
-        player_char.gaugeAcceleration = 30;
-        
+                
         gaugeInit();
     }
     
