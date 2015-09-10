@@ -89,7 +89,6 @@ class CharBtlAction {
     // jam
     var jamEnable: Bool = false;
     enum JamType: Int {
-        case recover = 0
         case enhAtk = 1
         case enhDef = 2
         case enhHit = 3
@@ -105,7 +104,7 @@ class CharBtlAction {
     }
     struct Jam {
         
-        var type = JamType.recover;
+        var type = JamType.weakenAtk;
         
         var seedType = SeedType.atkNow;
         

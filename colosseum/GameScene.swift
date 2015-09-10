@@ -308,24 +308,28 @@ class GameScene: SKScene {
         player_char.labelDEF = SKLabelNode(text: "DEF:\(player_char.DEF)");
         player_char.labelHIT = SKLabelNode(text: "HIT:\(player_char.HIT)");
         player_char.labelAVD = SKLabelNode(text: "ADV:\(player_char.AVD)");
-        
-        player_char.labelHP.position = CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*0.8);
-        player_char.labelATK.position = CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*1.0);
-        player_char.labelDEF.position = CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*1.2);
-        player_char.labelHIT.position = CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*1.4);
-        player_char.labelAVD.position = CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*1.6);
+        player_char.labelADDATK = SKLabelNode(text: "ADDATK:\(player_char.ADD_ATK)");
         
         player_char.labelHP.fontSize = 12;
         player_char.labelATK.fontSize = 12;
         player_char.labelDEF.fontSize = 12;
         player_char.labelHIT.fontSize = 12;
         player_char.labelAVD.fontSize = 12;
+        player_char.labelADDATK.fontSize = 12;
+
+        player_char.labelHP.position = CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*0.8);
+        player_char.labelATK.position = CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*1.0);
+        player_char.labelDEF.position = CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*1.2);
+        player_char.labelHIT.position = CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*1.4);
+        player_char.labelAVD.position = CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*1.6);
+        player_char.labelADDATK.position = CGPointMake(player_char.position.x, player_char.position.y - player_char.size.height*1.8);
         
         self.addChild(player_char.labelHP);
         self.addChild(player_char.labelATK);
         self.addChild(player_char.labelDEF);
         self.addChild(player_char.labelHIT);
         self.addChild(player_char.labelAVD);
+        self.addChild(player_char.labelADDATK);
         
         // ゲージの長さをプレイヤーキャラ依存に
         reach_base = player_char.gaugeLangeth;
@@ -346,24 +350,28 @@ class GameScene: SKScene {
         enemy_char.labelDEF = SKLabelNode(text: "DEF:\(enemy_char.DEF)");
         enemy_char.labelHIT = SKLabelNode(text: "HIT:\(enemy_char.HIT)");
         enemy_char.labelAVD = SKLabelNode(text: "ADV:\(enemy_char.AVD)");
-        
-        enemy_char.labelHP.position = CGPointMake(enemy_char.position.x, enemy_char.position.y - enemy_char.size.height*1.0);
-        enemy_char.labelATK.position = CGPointMake(enemy_char.position.x, enemy_char.position.y - enemy_char.size.height*1.3);
-        enemy_char.labelDEF.position = CGPointMake(enemy_char.position.x, enemy_char.position.y - enemy_char.size.height*1.6);
-        enemy_char.labelHIT.position = CGPointMake(enemy_char.position.x, enemy_char.position.y - enemy_char.size.height*1.9);
-        enemy_char.labelAVD.position = CGPointMake(enemy_char.position.x, enemy_char.position.y - enemy_char.size.height*2.2);
+        enemy_char.labelADDATK = SKLabelNode(text: "ADDATK:\(enemy_char.ADD_ATK)");
         
         enemy_char.labelHP.fontSize = 12;
         enemy_char.labelATK.fontSize = 12;
         enemy_char.labelDEF.fontSize = 12;
         enemy_char.labelHIT.fontSize = 12;
         enemy_char.labelAVD.fontSize = 12;
+        enemy_char.labelADDATK.fontSize = 12;
+
+        enemy_char.labelHP.position = CGPointMake(enemy_char.position.x, enemy_char.position.y - enemy_char.size.height*1.0);
+        enemy_char.labelATK.position = CGPointMake(enemy_char.position.x, enemy_char.position.y - enemy_char.size.height*1.3);
+        enemy_char.labelDEF.position = CGPointMake(enemy_char.position.x, enemy_char.position.y - enemy_char.size.height*1.6);
+        enemy_char.labelHIT.position = CGPointMake(enemy_char.position.x, enemy_char.position.y - enemy_char.size.height*1.9);
+        enemy_char.labelAVD.position = CGPointMake(enemy_char.position.x, enemy_char.position.y - enemy_char.size.height*2.2);
+        enemy_char.labelADDATK.position = CGPointMake(enemy_char.position.x, enemy_char.position.y - enemy_char.size.height*2.5);
         
         self.addChild(enemy_char.labelHP);
         self.addChild(enemy_char.labelATK);
         self.addChild(enemy_char.labelDEF);
         self.addChild(enemy_char.labelHIT);
         self.addChild(enemy_char.labelAVD);
+        self.addChild(enemy_char.labelADDATK);
      }
     
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {

@@ -9,13 +9,12 @@ class CharacterHero
         data = Character(imageNamed: "TestChar1");
         data.name = "Hero";
         data.gaugeInit(CGSizeMake(data.size.width, 5), direction: Gauge.Direction.horizontal, zPos: 0);
-        data.labelsInit();
         
         // バランス型
         // 全キャラクターの基準となる性能
         
         // ステータス設定
-        data.statusInit(hp: 3000, atk: 200, def: 50, hit: 100, avd: 20, atk_cnt: 1);
+        data.statusInit(hp: 3000, atk: 200, def: 50, hit: 100, avd: 20, add_atk: 0);
         
         // 行動設定
         
@@ -76,17 +75,23 @@ class CharacterHero
         
         
         // 行動4
-        // 現在攻撃力の1.0倍で攻撃力を強化
+        // 現在攻撃力の1.0倍で攻撃力と防御力を強化
         // 2ターン
         var enh_1 = CharBtlAction.Enh();
         enh_1.type = CharBtlAction.EnhType.atk;
         enh_1.seedType = CharBtlAction.SeedType.atkNow;
         enh_1.power = 100.0;
         enh_1.turn = 2;
+        var enh_2 = CharBtlAction.Enh();
+        enh_2.type = CharBtlAction.EnhType.def;
+        enh_2.seedType = CharBtlAction.SeedType.atkNow;
+        enh_2.power = 100.0;
+        enh_2.turn = 2;
         var act_4 = Character.Action();
         act_4.action.type = CharBtlAction.ActType.enh;
         act_4.action.enhEnable = true;
         act_4.action.enh.append(enh_1);
+        act_4.action.enh.append(enh_2);
         act_4.cost = act_4.action.enhCost;
         act_4.name = "強化";
         data.actions.append(act_4);
@@ -98,11 +103,11 @@ class CharacterHero
         atk_2.atkPower = 50.0;
         // 基本攻撃力の2.0倍で攻撃力を強化
         // 3ターン
-        var enh_2 = CharBtlAction.Enh();
-        enh_2.type = CharBtlAction.EnhType.atk;
-        enh_2.seedType = CharBtlAction.SeedType.atkBase;
-        enh_2.power = 200.0;
-        enh_2.turn = 3;
+        var enh_3 = CharBtlAction.Enh();
+        enh_3.type = CharBtlAction.EnhType.atk;
+        enh_3.seedType = CharBtlAction.SeedType.atkBase;
+        enh_3.power = 200.0;
+        enh_3.turn = 3;
         
         var act_5 = Character.Action();
         act_5.name = "全力強化";
@@ -113,7 +118,7 @@ class CharacterHero
         act_5.action.atk.append(atk_2);
         act_5.action.atk.append(atk_2);
         act_5.action.enhEnable = true;
-        act_5.action.enh.append(enh_2);
+        act_5.action.enh.append(enh_3);
         act_5.cost = act_5.action.atkCost + act_5.action.enhCost;
         data.actions.append(act_5);
         

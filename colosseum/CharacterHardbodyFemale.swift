@@ -9,12 +9,11 @@ class CharacterHardbodyFemale
         data = Character(imageNamed: "TestChar2");
         data.name = "HardbodyFemale";
         data.gaugeInit(CGSizeMake(data.size.width, 5), direction: Gauge.Direction.horizontal, zPos: 0);
-        data.labelsInit();
         
         // 攻撃特化型
         
         // ステータス設定
-        data.statusInit(hp: 3000, atk: 300, def: 50, hit: 90, avd: 20, atk_cnt: 1);
+        data.statusInit(hp: 3000, atk: 300, def: 50, hit: 90, avd: 20, add_atk: 0);
         
         // 行動設定
         
@@ -25,15 +24,17 @@ class CharacterHardbodyFemale
         
         
         // 行動1
-        // 現在攻撃力の1.5倍で2回攻撃
+        // 現在攻撃力の1.0倍と0.5倍で2回攻撃
         // コスト2
         var atk_1 = CharBtlAction.Atk();
-        atk_1.atkPower = 150.0;
+        atk_1.atkPower = 100.0;
+        var atk_2 = CharBtlAction.Atk();
+        atk_2.atkPower = 50.0;
         var act_1 = Character.Action();
         act_1.action.type = CharBtlAction.ActType.atk;
         act_1.action.atkEnable = true;
         act_1.action.atk.append(atk_1);
-        act_1.action.atk.append(atk_1);
+        act_1.action.atk.append(atk_2);
         act_1.cost = act_1.action.atkCost;
         act_1.name = "強連撃";
         data.actions.append(act_1);
@@ -76,32 +77,31 @@ class CharacterHardbodyFemale
         
         
         // 行動4
-        // 現在攻撃力の0.3倍で攻撃力を強化
-        // 3ターン
+        // 攻撃回数1増加
+        // 2ターン
         var enh_1 = CharBtlAction.Enh();
-        enh_1.type = CharBtlAction.EnhType.atk;
-        enh_1.seedType = CharBtlAction.SeedType.atkNow;
-        enh_1.power = 30.0;
-        enh_1.turn = 3;
+        enh_1.type = CharBtlAction.EnhType.atkcnt;
+        enh_1.power = 1.0;
+        enh_1.turn = 2;
         var act_4 = Character.Action();
         act_4.action.type = CharBtlAction.ActType.enh;
         act_4.action.enhEnable = true;
         act_4.action.enh.append(enh_1);
         act_4.cost = act_4.action.enhCost;
-        act_4.name = "ビルドアップ";
+        act_4.name = "加速";
         data.actions.append(act_4);
         
         
         // 特技
         // 現在攻撃力の5.0倍で1回攻撃
-        var atk_2 = CharBtlAction.Atk();
-        atk_2.atkPower = 500.0;
+        var atk_3 = CharBtlAction.Atk();
+        atk_3.atkPower = 500.0;
         
         var act_5 = Character.Action();
         act_5.name = "全力強撃";
         act_5.action.type = CharBtlAction.ActType.atk;
         act_5.action.atkEnable = true;
-        act_5.action.atk.append(atk_2);
+        act_5.action.atk.append(atk_3);
         act_5.cost = 4;
         data.actions.append(act_5);
     }

@@ -18,35 +18,34 @@ class Character : SKSpriteNode {
     var DEF_base: Int = 50;
     var HIT_base: Int = 100;
     var AVD_base: Int = 20;
-    var ATK_CNT_base: Int = 1;
     
     var HP: Int = 3000;
     var ATK: Int = 100;
     var DEF: Int = 50;
     var HIT: Int = 100;
     var AVD: Int = 20;
-    var ATK_CNT: Int = 1;
+    var ADD_ATK: Int = 0;
+    
     func statusInit(
         #hp: Int,
         atk: Int,
         def: Int,
         hit: Int,
         avd: Int,
-        atk_cnt: Int)
+        add_atk: Int)
     {
         HP_base = hp;
         ATK_base = atk;
         DEF_base = def;
         HIT_base = hit;
         AVD_base = avd;
-        ATK_CNT_base = atk_cnt;
         
         HP = hp;
         ATK = atk;
         DEF = def;
         HIT = hit;
         AVD = avd;
-        ATK_CNT = atk_cnt;
+        ADD_ATK = add_atk;
     }
     
     var gaugeLangeth: CGFloat = 200.0;
@@ -68,20 +67,7 @@ class Character : SKSpriteNode {
     var labelDEF: SKLabelNode!;
     var labelHIT: SKLabelNode!;
     var labelAVD: SKLabelNode!;
-    var labelATKCNT: SKLabelNode!;
-    func labelsInit() {
-        labelHP = SKLabelNode(text: "");
-        labelATK = SKLabelNode(text: "");
-        labelDEF = SKLabelNode(text: "");
-        labelHIT = SKLabelNode(text: "");
-        labelAVD = SKLabelNode(text: "");
-        
-        labelHP.fontSize = 12;
-        labelATK.fontSize = 12;
-        labelDEF.fontSize = 12;
-        labelHIT.fontSize = 12;
-        labelAVD.fontSize = 12;
-    }
+    var labelADDATK: SKLabelNode!;
     func refleshStatus() {
         if let gauge = gaugeHP {
             gaugeHP.updateProgress(CGFloat(HP) / CGFloat(HP_base) * 100);
@@ -149,16 +135,13 @@ class Character : SKSpriteNode {
                 labelAVD.fontColor = UIColor.whiteColor();
             }
         }
-        if let label = labelATKCNT {
-            labelATKCNT.text = "ATK:\(ATK_CNT)";
-            if ATK_CNT < ATK_CNT_base {
-                labelATKCNT.fontColor = UIColor.blueColor();
-            }
-            else if ATK_CNT > ATK_CNT_base {
-                labelATKCNT.fontColor = UIColor.orangeColor();
+        if let label = labelADDATK {
+            labelADDATK.text = "ADDATK:\(ADD_ATK)";
+            if ADD_ATK > 0 {
+                labelADDATK.fontColor = UIColor.orangeColor();
             }
             else {
-                labelATKCNT.fontColor = UIColor.whiteColor();
+                labelADDATK.fontColor = UIColor.whiteColor();
             }
         }
     }
@@ -213,6 +196,30 @@ class Character : SKSpriteNode {
             }
             result.append(data);
         }
+        // 加算攻撃回数
+        for i in 0 ..< ADD_ATK {
+            var data = Attacked();
+            data.content = CharBtlAction.Atk();
+            data.content.atkPower = 100.0;
+            data.consumeDefenced = (target.defenceds.count > 0) ? true : false;
+            data.counter = counter;
+            data.damage = calcATK() - target.calcDEF(consumeDefenceds: true);
+            if data.damage <= 0 {
+                data.damage = 1;
+            }
+            
+            // 命中計算
+            var hit = HIT - target.AVD;
+            hit = min(100, hit);
+            hit = max(1, hit);
+            let random = 1 + (arc4random() % 100);
+            if random > UInt32(hit) {
+                // ミス
+                data.damage = 0;
+            }
+            result.append(data);
+        }
+        
         return result;
     }
     func addDamage(atk: [Attacked]) {
@@ -271,7 +278,6 @@ class Character : SKSpriteNode {
     struct Jamming {
         var content = CharBtlAction.Jam();
         var damage: Int = 0;
-        var recover: Int = 0;
         var addHP: Int = 0;
         var addATK: Int = 0;
         var addDEF: Int = 0;
@@ -301,8 +307,6 @@ class Character : SKSpriteNode {
             let (power_TypeRatio: Int, power_TypeConst: Int) = calcPower(Int(jam[i].power), seedType: jam[i].seedType, char: self);
             
             switch jam[i].type {
-            case CharBtlAction.JamType.recover:
-                data.recover = power_TypeRatio;
             case CharBtlAction.JamType.enhAtk:
                 data.addATK = power_TypeRatio;
             case CharBtlAction.JamType.enhDef:
@@ -338,18 +342,12 @@ class Character : SKSpriteNode {
 
             // ステータスに反映
             if data.content.execTiming == CharBtlAction.ExecTiming.jastNow {
-                if HP + data.recover > HP_base {
-                    HP = HP_base;
-                }
-                else {
-                    HP += data.recover;
-                }
                 HP += data.addHP;
                 ATK += data.addATK;
                 DEF += data.addDEF;
                 HIT += data.addHIT;
                 AVD += data.addAVD;
-                ATK_CNT += data.addATKCNT;
+                ADD_ATK += data.addATKCNT;
                 
                 HP = HP - data.damage;
                 if HP < 0 {
@@ -367,7 +365,7 @@ class Character : SKSpriteNode {
             DEF -= jam.addDEF;
             HIT -= jam.addHIT;
             AVD -= jam.addAVD;
-            ATK_CNT -= jam.addATKCNT;
+            ADD_ATK -= jam.addATKCNT;
         }
         jammings = [];
     }
@@ -421,7 +419,7 @@ class Character : SKSpriteNode {
                 DEF += data.addDEF;
                 HIT += data.addHIT;
                 AVD += data.addAVD;
-                ATK_CNT += data.addATKCNT;
+                ADD_ATK += data.addATKCNT;
             }
         }
     }
@@ -434,7 +432,7 @@ class Character : SKSpriteNode {
             DEF -= enh.addDEF;
             HIT -= enh.addHIT;
             AVD -= enh.addAVD;
-            ATK_CNT -= enh.addATKCNT;
+            ADD_ATK -= enh.addATKCNT;
         }
         enhances = [];
     }
@@ -482,7 +480,7 @@ class Character : SKSpriteNode {
                 DEF -= jamming.addDEF;
                 HIT -= jamming.addHIT;
                 AVD -= jamming.addAVD;
-                ATK_CNT -= jamming.addATKCNT;
+                ADD_ATK -= jamming.addATKCNT;
 
                 jammings.removeAtIndex(i);
             }
@@ -504,7 +502,7 @@ class Character : SKSpriteNode {
                 DEF -= enhance.addDEF;
                 HIT -= enhance.addHIT;
                 AVD -= enhance.addAVD;
-                ATK_CNT -= enhance.addATKCNT;
+                ADD_ATK -= enhance.addATKCNT;
                 
                 enhances.removeAtIndex(i);
             }
