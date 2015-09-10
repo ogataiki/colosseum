@@ -10,7 +10,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         
         // GameKit Helper
-        GCHelper.instance.authenticateLocalUser()
+        //GCHelper.instance.authenticateLocalUser()
 
         return true
     }

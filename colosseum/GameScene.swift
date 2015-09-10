@@ -108,7 +108,6 @@ class GameScene: SKScene {
         gauge.resetProgress(0.0);
         gauge.changeAnchorPoint(CGPointMake(0.5, 0.5));
         gauge.changePosition(self.view!.center);
-        gauge.updateProgress(100);
         self.addChild(gauge);
         
         rise_bar = SKSpriteNode(color: UIColor.blackColor(), size: CGSizeMake(36, 5));
@@ -120,6 +119,10 @@ class GameScene: SKScene {
         attack_count_lbl = SKLabelNode(text: "0");
         attack_count_lbl.position = CGPointMake(gauge.position.x, gauge.position.y - gauge.size.height*0.65);
         self.addChild(attack_count_lbl);
+        
+        reach_frame = reach_base;
+        rise_speed = rise_speed_base;
+        gauge.updateProgress(100);
     }
     func gaugeRemove() {
         if let ui = gauge {
@@ -702,9 +705,6 @@ class GameScene: SKScene {
         
         // ゲージを初期化
         gaugeInit();
-        reach_frame = reach_base;
-        rise_speed = rise_speed_base;
-        gauge.updateProgress(100);
         
         attack_list = [];
         attack_count_lbl.text = "\(attack_list.count)"
