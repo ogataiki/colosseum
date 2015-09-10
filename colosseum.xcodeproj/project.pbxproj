@@ -242,6 +242,7 @@
 				TargetAttributes = {
 					500175571B8E86BB00567C73 = {
 						CreatedOnToolsVersion = 6.3.1;
+						DevelopmentTeam = CPGTRG2F88;
 					};
 					500175701B8E86BB00567C73 = {
 						CreatedOnToolsVersion = 6.3.1;
@@ -441,7 +442,7 @@
 				INFOPLIST_FILE = colosseum/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "363bb7c5-de95-4c1b-bbfd-d1fbb0f1ae45";
+				PROVISIONING_PROFILE = "b97d66eb-fe3d-4c54-8d07-5010c5234cfe";
 			};
 			name = Debug;
 		};
@@ -452,7 +453,7 @@
 				INFOPLIST_FILE = colosseum/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "363bb7c5-de95-4c1b-bbfd-d1fbb0f1ae45";
+				PROVISIONING_PROFILE = "b97d66eb-fe3d-4c54-8d07-5010c5234cfe";
 			};
 			name = Release;
 		};
