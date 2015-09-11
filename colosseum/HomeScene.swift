@@ -17,10 +17,11 @@ class HomeScene: SKScene {
         let moveend = SKAction.runBlock { () -> Void in
             
             self.tutorialSpeechInit();
-            self.tutorialSpeechStart(CGPointMake(self.size.width*0.5, self.naviChar.position.y + self.naviChar.size.height*0.6)
+            self.tutorialSpeechStart(point: CGPointMake(self.size.width*0.5, self.naviChar.position.y + self.naviChar.size.height*0.6)
                 , index: 0
                 , callback: { () -> Void in
                     
+                    // TODO:ここでストーリーモード選択ボタンカットイン
                     callback();
             })
         }
@@ -46,7 +47,7 @@ class HomeScene: SKScene {
         
         var speech = SKSendText(color: UIColor.whiteColor(), size: CGSizeMake(self.size.width*0.8, 40));
         speech.setting("", fontSize: 14, fontColor: UIColor.blackColor(), posX: 0, posY: 0, addView: self);
-        speech.position = CGPointMake(self.size.width*0.5, self.naviChar.position.y + self.naviChar.size.height*0.6);
+        speech.position = point;
         self.addChild(speech);
         speech.parseText(speechList[index].speech);
         speech.drawText { () -> Void in
@@ -55,7 +56,7 @@ class HomeScene: SKScene {
             let next = SKAction.runBlock({ () -> Void in
                 speech.remove();
                 speech.removeFromParent();
-                self.tutorialSpeechStart(point, index: index+1, callback: { () -> Void in
+                self.speechStart(speechList, point: point, index: index+1, callback: { () -> Void in
                     callback();
                 })
             })
@@ -76,7 +77,7 @@ class HomeScene: SKScene {
         tutorialSpeech.append(SpeechData(speech: "戦うといい。", wait: 1.8));
         tutorialSpeech.append(SpeechData(speech: "それしかやることはない。", wait: 2.5));
     }
-    func tutorialSpeechStart(point: CGPoint, index: Int, callback: () -> Void) {
+    func tutorialSpeechStart(#point: CGPoint, index: Int, callback: () -> Void) {
         
         speechStart(tutorialSpeech, point: point, index: index) { () -> Void in
             callback();
