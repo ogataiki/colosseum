@@ -43,10 +43,10 @@ class GameScene: SKScene {
     struct MeleeResult {
         var non_action: Bool = false;
         var cancel_action: Bool = false;
-        var attack: [Character.Attacked] = [];
-        var defence: [Character.Defenced] = [];
-        var jamming: [Character.Jamming] = [];
-        var enhance: [Character.Enhanced] = [];
+        var attack: [CharBase.Attacked] = [];
+        var defence: [CharBase.Defenced] = [];
+        var jamming: [CharBase.Jamming] = [];
+        var enhance: [CharBase.Enhanced] = [];
     }
     struct MeleeResultData {
         var player_result = MeleeResult();
@@ -58,9 +58,9 @@ class GameScene: SKScene {
     var meleeNextFlg: [Bool] = [false, false];
     var meleeActionFinishFlg: Bool = true;
     
-    var player_char: Character!;
-    var enemy_char: Character!;
-    var char_list: [String : Character] = [:];
+    var player_char: CharBase!;
+    var enemy_char: CharBase!;
+    var char_list: [String : CharBase] = [:];
     
     //------
     // UI系
@@ -293,7 +293,7 @@ class GameScene: SKScene {
     
     func playerInit() {
         
-        player_char = CharManager.getCharacter("Hero");
+        player_char = CharManager.getChar("Hero");
         player_char.posUpdate(CGPointMake(self.size.width*0.85, self.size.height*0.9));
         player_char.setPlayer(v: true);
         player_char.zPosUpdate(0);
@@ -336,7 +336,7 @@ class GameScene: SKScene {
     
     func enemyInit() {
         
-        enemy_char = CharManager.getCharacter("HardbodyFemale");
+        enemy_char = CharManager.getChar("HardbodyFemale");
         enemy_char.posUpdate(CGPointMake(self.size.width*0.15, self.size.height*0.9));
         enemy_char.setPlayer(v: false);
         enemy_char.zPosUpdate(0);
@@ -381,7 +381,7 @@ class GameScene: SKScene {
 
             switch(scene_status) {
                 
-            case SceneStatus.stock:
+            case .stock:
                 
                 if reach_frame < rise_frame {
                     
@@ -399,15 +399,15 @@ class GameScene: SKScene {
                 
                 rise_frame = 0;
                 
-            case SceneStatus.tactical:
+            case .tactical:
                 // 各UIのハンドラに任せる
                 break;
                 
-            case SceneStatus.melee:
+            case .melee:
                 
                 //meleeEnd();
                 break;
-            case SceneStatus.debug:
+            case .debug:
                 break;
             }
 
@@ -418,13 +418,13 @@ class GameScene: SKScene {
         /* Called before each frame is rendered */
         
         switch(scene_status) {
-        case SceneStatus.stock:
+        case .stock:
             updateStock();
-        case SceneStatus.tactical:
+        case .tactical:
             updateTactical();
-        case SceneStatus.melee:
+        case .melee:
             updateMelee();
-        case SceneStatus.debug:
+        case .debug:
             break;
         }
     }
@@ -567,13 +567,13 @@ class GameScene: SKScene {
             lbl.text = "command:"
             for i in 0 ..< tc_list.count {
                 switch tc_list[i] {
-                case CharBtlAction.ActType.atk:
+                case .atk:
                     lbl.text += "atk,"
-                case CharBtlAction.ActType.def:
+                case .def:
                     lbl.text += "def,"
-                case CharBtlAction.ActType.enh:
+                case .enh:
                     lbl.text += "enh,"
-                case CharBtlAction.ActType.jam:
+                case .jam:
                     lbl.text += "jam,"
                 default:
                     break;
@@ -632,47 +632,47 @@ class GameScene: SKScene {
             self.meleeNextActionExec(meleeData, playerAction: playerAction, enemyAction: enemyAction);
         };
     }
-    func meleeNextActionExec(meleeData: MeleeData, playerAction: Character.Action, enemyAction: Character.Action) {
+    func meleeNextActionExec(meleeData: MeleeData, playerAction: CharBase.Action, enemyAction: CharBase.Action) {
         switch meleeData.player_action {
-        case CharBtlAction.ActType.atk:
+        case .atk:
             switch meleeData.enemy_action {
-            case CharBtlAction.ActType.non: melee_atk_non(pAct: playerAction);
-            case CharBtlAction.ActType.atk: melee_atk_atk(pAct: playerAction, eAct: enemyAction);
-            case CharBtlAction.ActType.def: melee_atk_def(pAct: playerAction, eAct: enemyAction);
-            case CharBtlAction.ActType.jam: melee_atk_jam(pAct: playerAction, eAct: enemyAction);
-            case CharBtlAction.ActType.enh: melee_atk_enh(pAct: playerAction, eAct: enemyAction);
+            case .non: melee_atk_non(pAct: playerAction);
+            case .atk: melee_atk_atk(pAct: playerAction, eAct: enemyAction);
+            case .def: melee_atk_def(pAct: playerAction, eAct: enemyAction);
+            case .jam: melee_atk_jam(pAct: playerAction, eAct: enemyAction);
+            case .enh: melee_atk_enh(pAct: playerAction, eAct: enemyAction);
             }
-        case CharBtlAction.ActType.def:
+        case .def:
             switch meleeData.enemy_action {
-            case CharBtlAction.ActType.non: melee_def_non(pAct: playerAction);
-            case CharBtlAction.ActType.atk: melee_def_atk(pAct: playerAction, eAct: enemyAction);
-            case CharBtlAction.ActType.def: melee_def_def(pAct: playerAction, eAct: enemyAction);
-            case CharBtlAction.ActType.jam: melee_def_jam(pAct: playerAction, eAct: enemyAction);
-            case CharBtlAction.ActType.enh: melee_def_enh(pAct: playerAction, eAct: enemyAction);
+            case .non: melee_def_non(pAct: playerAction);
+            case .atk: melee_def_atk(pAct: playerAction, eAct: enemyAction);
+            case .def: melee_def_def(pAct: playerAction, eAct: enemyAction);
+            case .jam: melee_def_jam(pAct: playerAction, eAct: enemyAction);
+            case .enh: melee_def_enh(pAct: playerAction, eAct: enemyAction);
             }
-        case CharBtlAction.ActType.enh:
+        case .enh:
             switch meleeData.enemy_action {
-            case CharBtlAction.ActType.non: melee_enh_non(pAct: playerAction);
-            case CharBtlAction.ActType.atk: melee_enh_atk(pAct: playerAction, eAct: enemyAction);
-            case CharBtlAction.ActType.def: melee_enh_def(pAct: playerAction, eAct: enemyAction);
-            case CharBtlAction.ActType.jam: melee_enh_jam(pAct: playerAction, eAct: enemyAction);
-            case CharBtlAction.ActType.enh: melee_enh_enh(pAct: playerAction, eAct: enemyAction);
+            case .non: melee_enh_non(pAct: playerAction);
+            case .atk: melee_enh_atk(pAct: playerAction, eAct: enemyAction);
+            case .def: melee_enh_def(pAct: playerAction, eAct: enemyAction);
+            case .jam: melee_enh_jam(pAct: playerAction, eAct: enemyAction);
+            case .enh: melee_enh_enh(pAct: playerAction, eAct: enemyAction);
             }
-        case CharBtlAction.ActType.jam:
+        case .jam:
             switch meleeData.enemy_action {
-            case CharBtlAction.ActType.non: melee_jam_non(pAct: playerAction);
-            case CharBtlAction.ActType.atk: melee_jam_atk(pAct: playerAction, eAct: enemyAction);
-            case CharBtlAction.ActType.def: melee_jam_def(pAct: playerAction, eAct: enemyAction);
-            case CharBtlAction.ActType.jam: melee_jam_jam(pAct: playerAction, eAct: enemyAction);
-            case CharBtlAction.ActType.enh: melee_jam_enh(pAct: playerAction, eAct: enemyAction);
+            case .non: melee_jam_non(pAct: playerAction);
+            case .atk: melee_jam_atk(pAct: playerAction, eAct: enemyAction);
+            case .def: melee_jam_def(pAct: playerAction, eAct: enemyAction);
+            case .jam: melee_jam_jam(pAct: playerAction, eAct: enemyAction);
+            case .enh: melee_jam_enh(pAct: playerAction, eAct: enemyAction);
             }
-        case CharBtlAction.ActType.non:
+        case .non:
             switch meleeData.enemy_action {
-            case CharBtlAction.ActType.non: melee_non_non();
-            case CharBtlAction.ActType.atk: melee_non_atk(eAct: enemyAction);
-            case CharBtlAction.ActType.def: melee_non_def(eAct: enemyAction);
-            case CharBtlAction.ActType.jam: melee_non_jam(eAct: enemyAction);
-            case CharBtlAction.ActType.enh: melee_non_enh(eAct: enemyAction);
+            case .non: melee_non_non();
+            case .atk: melee_non_atk(eAct: enemyAction);
+            case .def: melee_non_def(eAct: enemyAction);
+            case .jam: melee_non_jam(eAct: enemyAction);
+            case .enh: melee_non_enh(eAct: enemyAction);
             }
         }
     }
@@ -740,7 +740,7 @@ class GameScene: SKScene {
     //------------
     // player atk
     
-    func melee_atk_non(#pAct: Character.Action) {
+    func melee_atk_non(#pAct: CharBase.Action) {
         
         let atk_result = player_char.procAction_atk(pAct.action.atk, target: enemy_char);
 
@@ -766,7 +766,7 @@ class GameScene: SKScene {
         });
     }
 
-    func melee_atk_atk(#pAct: Character.Action, eAct: Character.Action) {
+    func melee_atk_atk(#pAct: CharBase.Action, eAct: CharBase.Action) {
 
         let player_atk_result = player_char.procAction_atk(pAct.action.atk, target: enemy_char);
         let enemy_atk_result = enemy_char.procAction_atk(eAct.action.atk, target: player_char);
@@ -819,7 +819,7 @@ class GameScene: SKScene {
         });
     }
 
-    func melee_atk_def(#pAct: Character.Action, eAct: Character.Action) {
+    func melee_atk_def(#pAct: CharBase.Action, eAct: CharBase.Action) {
         // player不利
         // atk < def 攻撃失敗 + 有利側カウンターアタック
 
@@ -863,7 +863,7 @@ class GameScene: SKScene {
         })
     }
 
-    func melee_atk_jam(#pAct: Character.Action, eAct: Character.Action) {
+    func melee_atk_jam(#pAct: CharBase.Action, eAct: CharBase.Action) {
         
         let atk_result = player_char.procAction_atk(pAct.action.atk, target: enemy_char);
         let jam_result = enemy_char.procAction_jam(eAct.action.jam, target: player_char);
@@ -898,7 +898,7 @@ class GameScene: SKScene {
         });        
     }
 
-    func melee_atk_enh(#pAct: Character.Action, eAct: Character.Action) {
+    func melee_atk_enh(#pAct: CharBase.Action, eAct: CharBase.Action) {
         // player有利
         // enh < atk 強化失敗 + 強化効果全解除
         
@@ -935,7 +935,7 @@ class GameScene: SKScene {
     //------------
     // player def
 
-    func melee_def_non(#pAct: Character.Action) {
+    func melee_def_non(#pAct: CharBase.Action) {
         
         let def_result = player_char.procAction_def([pAct.action.def]);
         
@@ -962,7 +962,7 @@ class GameScene: SKScene {
         })
     }
 
-    func melee_def_atk(#pAct: Character.Action, eAct: Character.Action) {
+    func melee_def_atk(#pAct: CharBase.Action, eAct: CharBase.Action) {
         // player有利
         // atk < def 攻撃失敗 + 有利側カウンターアタック
 
@@ -1005,7 +1005,7 @@ class GameScene: SKScene {
         })
     }
 
-    func melee_def_def(#pAct: Character.Action, eAct: Character.Action) {
+    func melee_def_def(#pAct: CharBase.Action, eAct: CharBase.Action) {
         
         let player_def_result = player_char.procAction_def([pAct.action.def]);
         let enemy_def_result = enemy_char.procAction_def([eAct.action.def]);
@@ -1043,7 +1043,7 @@ class GameScene: SKScene {
         })
     }
 
-    func melee_def_jam(#pAct: Character.Action, eAct: Character.Action) {
+    func melee_def_jam(#pAct: CharBase.Action, eAct: CharBase.Action) {
         // player不利
         // def < jam 防御失敗 + 防御効果全破壊
         
@@ -1075,7 +1075,7 @@ class GameScene: SKScene {
         
     }
 
-    func melee_def_enh(#pAct: Character.Action, eAct: Character.Action) {
+    func melee_def_enh(#pAct: CharBase.Action, eAct: CharBase.Action) {
         
         let def_result = player_char.procAction_def([pAct.action.def]);
         let enh_result = enemy_char.procAction_enh(eAct.action.enh);
@@ -1115,7 +1115,7 @@ class GameScene: SKScene {
     //------------
     // player jam
     
-    func melee_jam_non(#pAct: Character.Action) {
+    func melee_jam_non(#pAct: CharBase.Action) {
         
         let jam_result = player_char.procAction_jam(pAct.action.jam, target:enemy_char);
         
@@ -1142,7 +1142,7 @@ class GameScene: SKScene {
         self.meleeNextFlg[1] = true;
     }
     
-    func melee_jam_atk(#pAct: Character.Action, eAct: Character.Action) {
+    func melee_jam_atk(#pAct: CharBase.Action, eAct: CharBase.Action) {
 
         let jam_result = player_char.procAction_jam(pAct.action.jam, target:enemy_char);
         let atk_result = enemy_char.procAction_atk(eAct.action.atk, target: player_char);
@@ -1177,7 +1177,7 @@ class GameScene: SKScene {
         });
     }
     
-    func melee_jam_def(#pAct: Character.Action, eAct: Character.Action) {
+    func melee_jam_def(#pAct: CharBase.Action, eAct: CharBase.Action) {
         // player有利
         // def < jam 防御失敗 + 防御効果全破壊
         
@@ -1207,7 +1207,7 @@ class GameScene: SKScene {
         })
     }
     
-    func melee_jam_jam(#pAct: Character.Action, eAct: Character.Action) {
+    func melee_jam_jam(#pAct: CharBase.Action, eAct: CharBase.Action) {
         
         let player_jam_result = player_char.procAction_jam(pAct.action.jam, target:enemy_char);
         let enemy_jam_result = enemy_char.procAction_jam(pAct.action.jam, target:player_char);
@@ -1244,7 +1244,7 @@ class GameScene: SKScene {
         })
     }
 
-    func melee_jam_enh(#pAct: Character.Action, eAct: Character.Action) {
+    func melee_jam_enh(#pAct: CharBase.Action, eAct: CharBase.Action) {
         // player不利
         // jam < enh 妨害失敗 + 妨害追加効果全解除
         
@@ -1279,7 +1279,7 @@ class GameScene: SKScene {
     //------------
     // player enh
 
-    func melee_enh_non(#pAct: Character.Action) {
+    func melee_enh_non(#pAct: CharBase.Action) {
         
         let enh_result = player_char.procAction_enh(pAct.action.enh);
         
@@ -1305,7 +1305,7 @@ class GameScene: SKScene {
         self.meleeNextFlg[1] = true;
     }
 
-    func melee_enh_atk(#pAct: Character.Action, eAct: Character.Action) {
+    func melee_enh_atk(#pAct: CharBase.Action, eAct: CharBase.Action) {
         // player不利
         // enh < atk 強化失敗 + 強化効果全解除
         
@@ -1338,7 +1338,7 @@ class GameScene: SKScene {
         });
     }
     
-    func melee_enh_def(#pAct: Character.Action, eAct: Character.Action) {
+    func melee_enh_def(#pAct: CharBase.Action, eAct: CharBase.Action) {
 
         let enh_result = player_char.procAction_enh(pAct.action.enh);
         let def_result = enemy_char.procAction_def([eAct.action.def]);
@@ -1376,7 +1376,7 @@ class GameScene: SKScene {
         }
     }
 
-    func melee_enh_jam(#pAct: Character.Action, eAct: Character.Action) {
+    func melee_enh_jam(#pAct: CharBase.Action, eAct: CharBase.Action) {
         // player有利
         // jam < enh 妨害失敗 + 妨害追加効果全解除
         
@@ -1408,7 +1408,7 @@ class GameScene: SKScene {
         }
     }
 
-    func melee_enh_enh(#pAct: Character.Action, eAct: Character.Action) {
+    func melee_enh_enh(#pAct: CharBase.Action, eAct: CharBase.Action) {
         
         let player_enh_result = player_char.procAction_enh(pAct.action.enh);
         let enemy_enh_result = enemy_char.procAction_enh(eAct.action.enh);
@@ -1448,7 +1448,7 @@ class GameScene: SKScene {
     //------------
     // player non
 
-    func melee_non_atk(#eAct: Character.Action) {
+    func melee_non_atk(#eAct: CharBase.Action) {
         
         let atk_result = enemy_char.procAction_atk(eAct.action.atk, target: player_char);
         
@@ -1476,7 +1476,7 @@ class GameScene: SKScene {
         });
     }
     
-    func melee_non_def(#eAct: Character.Action) {
+    func melee_non_def(#eAct: CharBase.Action) {
         
         let def_result = enemy_char.procAction_def([eAct.action.def]);
         
@@ -1504,7 +1504,7 @@ class GameScene: SKScene {
         })
     }
     
-    func melee_non_jam(#eAct: Character.Action) {
+    func melee_non_jam(#eAct: CharBase.Action) {
         
         let jam_result = enemy_char.procAction_jam(eAct.action.jam, target: player_char);
         
@@ -1532,7 +1532,7 @@ class GameScene: SKScene {
         })
     }
 
-    func melee_non_enh(#eAct: Character.Action) {
+    func melee_non_enh(#eAct: CharBase.Action) {
         
         let enh_result = enemy_char.procAction_enh(eAct.action.enh);
         
@@ -1668,25 +1668,25 @@ class GameScene: SKScene {
     }
 
     func meleeAction_Break(#breakAct: CharBtlAction.ActType
-        , advantageChar: Character, breakChar: Character
+        , advantageChar: CharBase, breakChar: CharBase
         , callback: () -> Void)
     {
         var cutin = SKSpriteNode(color: UIColor.greenColor(), size: CGSizeMake(self.size.width, self.size.height*0.2));
         cutin.position = CGPointMake(self.size.width*0.5, self.size.height*0.5);
         self.addChild(cutin);
         
-        var contentText1 = "\(advantageChar.name!)の有利行動";
-        var contentText2 = "\(breakChar.name!)は体勢を崩した！";
+        var contentText1 = "\(advantageChar.displayName)の有利行動";
+        var contentText2 = "\(breakChar.displayName)は体勢を崩した！";
         let contentText3: String;
         switch breakAct {
-        case CharBtlAction.ActType.atk:
-            contentText3 = "さらに\(breakChar.name!)の強化効果がすべて解除！";
-        case CharBtlAction.ActType.def:
-            contentText3 = "さらに\(breakChar.name!)へカウンター！";
-        case CharBtlAction.ActType.jam:
-            contentText3 = "さらに\(breakChar.name!)の防御効果がすべて解除！";
-        case CharBtlAction.ActType.enh:
-            contentText3 = "さらに\(advantageChar.name!)への妨害効果がすべて解除！";
+        case .atk:
+            contentText3 = "さらに\(breakChar.displayName)の強化効果がすべて解除！";
+        case .def:
+            contentText3 = "さらに\(breakChar.displayName)へカウンター！";
+        case .jam:
+            contentText3 = "さらに\(breakChar.displayName)の防御効果がすべて解除！";
+        case .enh:
+            contentText3 = "さらに\(advantageChar.displayName)への妨害効果がすべて解除！";
         default:
             contentText3 = "";
         }
@@ -1728,8 +1728,8 @@ class GameScene: SKScene {
         advantageChar.runAction(SKAction.sequence([jump, jump]));
     }
 
-    func meleeAction_Atk(#attacker: Character, target: Character
-        , content: [Character.Attacked] = []
+    func meleeAction_Atk(#attacker: CharBase, target: CharBase
+        , content: [CharBase.Attacked] = []
         , unilaterally: [Bool] = []
         , left: Bool = false
         , callback: () -> Void)
@@ -1885,8 +1885,8 @@ class GameScene: SKScene {
         }
     }
 
-    func meleeAction_Def(#target: Character
-        , content: [Character.Defenced]
+    func meleeAction_Def(#target: CharBase
+        , content: [CharBase.Defenced]
         , left: Bool = false
         , callback: () -> Void)
     {
@@ -1927,8 +1927,8 @@ class GameScene: SKScene {
             ]));
     }
 
-    func meleeAction_Enh(#target: Character
-        , content: [Character.Enhanced]
+    func meleeAction_Enh(#target: CharBase
+        , content: [CharBase.Enhanced]
         , callback: () -> Void)
     {
         for i in 0 ..< 30 {
@@ -2008,8 +2008,8 @@ class GameScene: SKScene {
         */
     }
     
-    func meleeAction_Jam(#target: Character
-        , content: [Character.Jamming]
+    func meleeAction_Jam(#target: CharBase
+        , content: [CharBase.Jamming]
         , callback: () -> Void)
     {
         for i in 0 ..< 30 {
@@ -2061,15 +2061,15 @@ class GameScene: SKScene {
             }
         }
     }
-    func meleeCancelAllStatus(target: Character, cancelType: CharBtlAction.ActType) {
+    func meleeCancelAllStatus(target: CharBase, cancelType: CharBtlAction.ActType) {
         switch cancelType {
-        case CharBtlAction.ActType.atk:
+        case .atk:
             break;
-        case CharBtlAction.ActType.def:
+        case .def:
             target.allCancelDefenced();
-        case CharBtlAction.ActType.enh:
+        case .enh:
             target.allCancelEnhanced();
-        case CharBtlAction.ActType.jam:
+        case .jam:
             target.allCancelJammings();
         default: break;
         }

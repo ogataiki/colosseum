@@ -14,13 +14,13 @@ class CharBtlAction {
     var type = ActType.non;
     static func getActTypeName(type: ActType) -> String {
         switch type {
-        case ActType.atk:
+        case .atk:
             return "攻撃";
-        case ActType.def:
+        case .def:
             return "防御";
-        case ActType.jam:
+        case .jam:
             return "妨害";
-        case ActType.enh:
+        case .enh:
             return "強化";
         default: break;
         }
@@ -28,28 +28,28 @@ class CharBtlAction {
     }
     static func judgeAdvantage(type: ActType, comp: ActType) -> (Bool, Bool) {
         switch type {
-        case ActType.atk:
+        case .atk:
             if comp == ActType.enh {
                 return (true, false);
             }
             else if comp == ActType.def {
                 return (false, true);
             }
-        case ActType.def:
+        case .def:
             if comp == ActType.atk {
                 return (true, false);
             }
             else if comp == ActType.jam {
                 return (false, true);
             }
-        case ActType.jam:
+        case .jam:
             if comp == ActType.def {
                 return (true, false);
             }
             else if comp == ActType.enh {
                 return (false, true);
             }
-        case ActType.enh:
+        case .enh:
             if comp == ActType.jam {
                 return (true, false);
             }

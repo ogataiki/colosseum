@@ -1,6 +1,6 @@
 import SpriteKit
 
-class Character : SKSpriteNode {
+class CharBase : SKSpriteNode {
     
     var isPlayer: Bool = false;
     func setPlayer(v: Bool = true) {
@@ -12,6 +12,8 @@ class Character : SKSpriteNode {
             self.xScale = 1.0;
         }
     }
+    
+    var displayName: String = "";
     
     var HP_base: Int = 3000;
     var ATK_base: Int = 100;
@@ -162,7 +164,7 @@ class Character : SKSpriteNode {
         var counter: Bool = false;
     }
     
-    func procAction_atk(atk: [CharBtlAction.Atk], target: Character
+    func procAction_atk(atk: [CharBtlAction.Atk], target: CharBase
         , counter: Bool = false, counter_content: CharBtlAction.Def = CharBtlAction.Def()) -> [Attacked]
     {
         var result: [Attacked] = [];
@@ -290,7 +292,7 @@ class Character : SKSpriteNode {
     }
     var jammings: [Jamming] = [];
     
-    func procAction_jam(jam: [CharBtlAction.Jam], target: Character) -> [Jamming] {
+    func procAction_jam(jam: [CharBtlAction.Jam], target: CharBase) -> [Jamming] {
         var result: [Jamming] = [];
         for i in 0 ..< jam.count {
             var data = Jamming();
@@ -307,29 +309,29 @@ class Character : SKSpriteNode {
             let (power_TypeRatio: Int, power_TypeConst: Int) = calcPower(Int(jam[i].power), seedType: jam[i].seedType, char: self);
             
             switch jam[i].type {
-            case CharBtlAction.JamType.enhAtk:
+            case .enhAtk:
                 data.addATK = power_TypeRatio;
-            case CharBtlAction.JamType.enhDef:
+            case .enhDef:
                 data.addDEF = power_TypeRatio;
-            case CharBtlAction.JamType.enhHit:
+            case .enhHit:
                 data.addHIT = power_TypeConst;
-            case CharBtlAction.JamType.enhAvoid:
+            case .enhAvoid:
                 data.addAVD = power_TypeConst;
-            case CharBtlAction.JamType.enhAtkCnt:
+            case .enhAtkCnt:
                 data.addATKCNT = power_TypeConst;
-            case CharBtlAction.JamType.weakenAtk:
+            case .weakenAtk:
                 data.addATK = 0 - power_TypeRatio;
-            case CharBtlAction.JamType.weakenDef:
+            case .weakenDef:
                 data.addDEF = 0 - power_TypeRatio;
-            case CharBtlAction.JamType.weakenHit:
+            case .weakenHit:
                 data.addHIT = 0 - power_TypeConst;
-            case CharBtlAction.JamType.weakenAvoid:
+            case .weakenAvoid:
                 data.addAVD = 0 - power_TypeConst;
-            case CharBtlAction.JamType.weakenAtkCnt:
+            case .weakenAtkCnt:
                 data.addATKCNT = 0 - power_TypeConst;
-            case CharBtlAction.JamType.poison:
+            case .poison:
                 data.poisonDamage = power_TypeRatio;
-            case CharBtlAction.JamType.paralysis:
+            case .paralysis:
                 data.paralysisAVD = power_TypeConst;
             }
             result.append(data);
@@ -393,15 +395,15 @@ class Character : SKSpriteNode {
             let (power_TypeRatio: Int, power_TypeConst: Int) = calcPower(Int(enh[i].power), seedType: enh[i].seedType, char: self);
             
             switch enh[i].type {
-            case CharBtlAction.EnhType.atk:
+            case .atk:
                 data.addATK = power_TypeRatio;
-            case CharBtlAction.EnhType.def:
+            case .def:
                 data.addDEF = power_TypeRatio;
-            case CharBtlAction.EnhType.avd:
+            case .avd:
                 data.addAVD = power_TypeConst;
-            case CharBtlAction.EnhType.hit:
+            case .hit:
                 data.addHIT = power_TypeConst;
-            case CharBtlAction.EnhType.atkcnt:
+            case .atkcnt:
                 data.addATKCNT = power_TypeConst;
             }
             result.append(data);
@@ -438,25 +440,25 @@ class Character : SKSpriteNode {
     }
     
 
-    func calcPower(power: Int, seedType: CharBtlAction.SeedType, char: Character) -> (ratioValue:Int, constValue:Int) {
+    func calcPower(power: Int, seedType: CharBtlAction.SeedType, char: CharBase) -> (ratioValue:Int, constValue:Int) {
         let power_TypeConst = Int(power);
         let power_TypeRatio: Int;
         switch seedType {
-        case CharBtlAction.SeedType.constant:
+        case .constant:
             power_TypeRatio = power_TypeConst;
-        case CharBtlAction.SeedType.atkNow:
+        case .atkNow:
             power_TypeRatio = (char.ATK * Int(power) / 100);
-        case CharBtlAction.SeedType.atkBase:
+        case .atkBase:
             power_TypeRatio = (char.ATK_base * Int(power) / 100);
-        case CharBtlAction.SeedType.defNow:
+        case .defNow:
             power_TypeRatio = (char.DEF * Int(power) / 100);
-        case CharBtlAction.SeedType.defBase:
+        case .defBase:
             power_TypeRatio = (char.DEF_base * Int(power) / 100);
-        case CharBtlAction.SeedType.lasthp:
+        case .lasthp:
             power_TypeRatio = (char.HP * Int(power) / 100);
-        case CharBtlAction.SeedType.maxhp:
+        case .maxhp:
             power_TypeRatio = (char.HP_base * Int(power) / 100);
-        case CharBtlAction.SeedType.subhp:
+        case .subhp:
             power_TypeRatio = ((char.HP_base - char.HP) * Int(power) / 100);
         }
         return (power_TypeRatio, power_TypeConst);

@@ -8,17 +8,17 @@ final class CharManager
         characterInit();
     }
     
-    var char_dic: [String : Character] = [:];
-    static func getCharacter(name: String) -> Character! {
+    var char_dic: [String : CharBase] = [:];
+    static func getChar(name: String) -> CharBase! {
         return CharManager.instance.char_dic[name];
     }
     
     func characterInit() {
         
-        let hero = CharacterHero();
+        let hero = CharHero();
         char_dic[hero.data.name!] = hero.data;
 
-        let hardbodyFemale = CharacterHardbodyFemale();
+        let hardbodyFemale = CharHardbodyFemale();
         char_dic[hardbodyFemale.data.name!] = hardbodyFemale.data;
     }
 }

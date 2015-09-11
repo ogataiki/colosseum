@@ -1,12 +1,13 @@
 import SpriteKit
 
-class CharacterHero
+class CharHero
 {
-    var data: Character;
+    var data: CharBase;
     
     init() {
         
-        data = Character(imageNamed: "TestChar1");
+        data = CharBase(imageNamed: "TestChar1");
+        data.displayName = "主人公";
         data.name = "Hero";
         data.gaugeInit(CGSizeMake(data.size.width, 5), direction: Gauge.Direction.horizontal, zPos: 0);
         
@@ -23,7 +24,7 @@ class CharacterHero
         // 行動設定
         
         // 行動0 : 行動なし(固定)
-        var non = Character.Action();
+        var non = CharBase.Action();
         non.action.type = CharBtlAction.ActType.non;
         data.actions.append(non);
         
@@ -33,7 +34,7 @@ class CharacterHero
         // コスト2
         var atk_1 = CharBtlAction.Atk();
         atk_1.atkPower = 100.0;
-        var act_1 = Character.Action();
+        var act_1 = CharBase.Action();
         act_1.action.type = CharBtlAction.ActType.atk;
         act_1.action.atkEnable = true;
         act_1.action.atk.append(atk_1);
@@ -51,7 +52,7 @@ class CharacterHero
         def_1.defPower = 200.0;
         def_1.defCount = 1;
         def_1.defCounterAttack = 200.0;
-        var act_2 = Character.Action();
+        var act_2 = CharBase.Action();
         act_2.action.type = CharBtlAction.ActType.def;
         act_2.action.defEnable = true;
         act_2.action.def = def_1;
@@ -69,7 +70,7 @@ class CharacterHero
         jam_1.power = 5.0;
         jam_1.turn = 3;
         jam_1.addDamage = 10.0;
-        var act_3 = Character.Action();
+        var act_3 = CharBase.Action();
         act_3.action.type = CharBtlAction.ActType.jam;
         act_3.action.jamEnable = true;
         act_3.action.jam.append(jam_1);
@@ -91,7 +92,7 @@ class CharacterHero
         enh_2.seedType = CharBtlAction.SeedType.atkNow;
         enh_2.power = 100.0;
         enh_2.turn = 2;
-        var act_4 = Character.Action();
+        var act_4 = CharBase.Action();
         act_4.action.type = CharBtlAction.ActType.enh;
         act_4.action.enhEnable = true;
         act_4.action.enh.append(enh_1);
@@ -113,7 +114,7 @@ class CharacterHero
         enh_3.power = 200.0;
         enh_3.turn = 3;
         
-        var act_5 = Character.Action();
+        var act_5 = CharBase.Action();
         act_5.name = "全力強化";
         act_5.action.type = CharBtlAction.ActType.enh;
         act_5.action.atkEnable = true;
