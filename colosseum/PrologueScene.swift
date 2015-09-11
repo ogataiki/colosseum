@@ -17,17 +17,23 @@ class PrologueScene: SKScene {
         back.colorBlendFactor = 0.4;
         self.addChild(back);
         
-        prologueText = SKSendText(text: ""
-            , fontsize: 14
-            , posX: self.size.width*0.15, posY: self.size.height*0.75
-            , addView: self
-            , color: UIColor.whiteColor());
-        prologueText.m_delayTime = 0.15;
-        prologueText.position = CGPointZero;
-        self.addChild(prologueText);
+        let prologue = "   〜　コロシアム　〜\n\n\nそれは国民の娯楽。\n\n\nあるいは、\n\n\n食うに困った者たちが行き着く\n最後の働き口。\n\n\nそして、\n\n\n一獲千金を目指す者たちの\n夢の舞台。";
         
-        let prologue = "コロシアム\n\n\nそれは国民の娯楽。\n\n\nあるいは、\n\n\n食うに困った者たちが行き着く\n最後の働き口。\n\n\nそして、\n\n\n一獲千金を目指す者たちの\n夢の舞台。";
-        prologueText.drawText(prologue);
+        prologueText = SKSendText(color: UIColor.clearColor(), size: self.size);
+        prologueText.setting("", fontSize: 14, fontColor: UIColor.whiteColor(), posX: 0, posY: 0, addView: self);
+        prologueText.position = CGPointMake(self.size.width*0.5, self.size.height*0.5);
+        self.addChild(prologueText);
+        prologueText.parseText(prologue);
+        prologueText.m_delayTime = 0.15;
+        prologueText.m_posX = 0 - (CGFloat(prologueText.maxWidth/2) * prologueText.m_fontSize);
+        if prologueText.maxWidth % 2 == 1 {
+            prologueText.m_posX! -= (prologueText.m_fontSize*0.5);
+        }
+        prologueText.m_posY = (CGFloat(prologueText.m_totalHeight/2) * prologueText.m_fontSize);
+        if prologueText.m_totalHeight % 2 == 1 {
+            prologueText.m_posY! += (prologueText.m_fontSize*0.5);
+        }
+        prologueText.drawText();
     }
     
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
