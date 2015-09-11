@@ -26,7 +26,7 @@ final class SceneManager
             if var scene = SceneManager.getSceneInstance(next) {
                 scene.scaleMode = .AspectFill;
                 scene.size = skView.frame.size;
-                skView.presentScene(scene)
+                skView.presentScene(scene, transition: tr);
                 return true;
             }
         }

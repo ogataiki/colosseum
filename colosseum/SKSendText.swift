@@ -44,7 +44,8 @@ class SKSendText : SKSpriteNode {
             case .send:
                 self.m_delayTime = 0.1
             case .skip:
-                self.skipDraw(m_text)
+                self.skipDraw(m_text, callback: {() -> Void in
+                })
             case .remove:
                 self.remove()
             }
@@ -95,7 +96,7 @@ class SKSendText : SKSpriteNode {
         parseText(text);
     }
     
-    func parseText(text: String!, withDraw: Bool = false) {
+    func parseText(text: String!) {
         
         self.remove()
         
@@ -132,26 +133,23 @@ class SKSendText : SKSpriteNode {
             content.label.fontColor = m_color;
             m_labelArray.append(content);
             
-            // 描画開始
-            if withDraw {
-                let xPos = m_posX! + (CGFloat(content.x-1) * m_fontSize);
-                let yPos = m_posY! - (CGFloat(content.y) * m_fontSize);
-                content.label.position = CGPoint(x: xPos, y: yPos);
-                self.addChild(content.label)
-                
-                let delay = SKAction.waitForDuration(NSTimeInterval(m_delayTime * strcount))
-                let fadein = SKAction.fadeAlphaBy(1.0, duration: 0.5)
-                let seq = SKAction.sequence([delay, fadein])
-                content.label.runAction(seq)
-            }
-
             strcount += 1.0
         }
         m_totalHeight = y;
+        
+        // 開始点を調整
+        m_posX = 0 - (CGFloat(maxWidth/2) * m_fontSize);
+        if maxWidth % 2 == 1 {
+            m_posX! -= (m_fontSize*0.5);
+        }
+        m_posY = (CGFloat(m_totalHeight/2) * m_fontSize);
+        if m_totalHeight % 2 == 1 {
+            m_posY! += (m_fontSize*0.5);
+        }
     }
     
     /// テキストの描画
-    func drawText() {
+    func drawText(callback: () -> Void) {
         
         if m_count == 0 { return }  // 空なら描画せず終了
         var strcount: CGFloat = 0.0
@@ -168,7 +166,12 @@ class SKSendText : SKSpriteNode {
             
             let delay = SKAction.waitForDuration(NSTimeInterval(m_delayTime * strcount))
             let fadein = SKAction.fadeAlphaBy(1.0, duration: 0.5)
-            let seq = SKAction.sequence([delay, fadein])
+            let end = SKAction.runBlock({ () -> Void in
+                if Int(strcount) >= self.m_labelArray.count-1 {
+                    callback();
+                }
+            });
+            let seq = SKAction.sequence([delay, fadein, end])
             content.label.runAction(seq)
             
             strcount += 1.0
@@ -176,7 +179,7 @@ class SKSendText : SKSpriteNode {
     }
     
     /// スキップモードの文字の描画
-    func skipDraw(text: String!){
+    func skipDraw(text: String!, callback: () -> Void){
         if m_drawEndFlag { return }
         
         self.remove()
@@ -219,6 +222,8 @@ class SKSendText : SKSpriteNode {
             m_labelArray.append(content)
         }
         m_totalHeight = y;
+        
+        callback();
     }
     
     
@@ -236,10 +241,13 @@ class SKSendText : SKSpriteNode {
     }
     
     /// 描画の基本設定はそのままに、違う文へ切り替え
-    func changeText(text: String!){
+    func changeText(text: String!, callback: () -> Void){
         if m_drawEndFlag {
             self.changeState( .send )
-            parseText(text, withDraw: true);
+            parseText(text);
+            drawText({ () -> Void in
+                callback();
+            })
         } else {
             self.changeState( .skip )
         }

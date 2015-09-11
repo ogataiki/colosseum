@@ -25,15 +25,8 @@ class PrologueScene: SKScene {
         self.addChild(prologueText);
         prologueText.parseText(prologue);
         prologueText.m_delayTime = 0.15;
-        prologueText.m_posX = 0 - (CGFloat(prologueText.maxWidth/2) * prologueText.m_fontSize);
-        if prologueText.maxWidth % 2 == 1 {
-            prologueText.m_posX! -= (prologueText.m_fontSize*0.5);
+        prologueText.drawText { () -> Void in
         }
-        prologueText.m_posY = (CGFloat(prologueText.m_totalHeight/2) * prologueText.m_fontSize);
-        if prologueText.m_totalHeight % 2 == 1 {
-            prologueText.m_posY! += (prologueText.m_fontSize*0.5);
-        }
-        prologueText.drawText();
     }
     
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
@@ -47,11 +40,11 @@ class PrologueScene: SKScene {
                     text.changeState( .skip );
                 }
                 else {
-                    SceneManager.changeScene(SceneManager.Scenes.mock);
+                    SceneManager.changeScene(SceneManager.Scenes.home);
                 }
             }
             else {
-                SceneManager.changeScene(SceneManager.Scenes.mock);
+                SceneManager.changeScene(SceneManager.Scenes.home);
             }
         }
     }
