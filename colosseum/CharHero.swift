@@ -99,6 +99,15 @@ class CharHero
         
         
         // 特技
+        // 現在攻撃力の0.5倍で4回攻撃
+        var atk_2 = CharBtlAction.Atk();
+        atk_2.atkPower = 50.0;
+        var skl_1 = CharBtlAction.Skl();
+        skl_1.type = CharBtlAction.ActType.atk;
+        skl_1.atk.append(atk_2);
+        skl_1.atk.append(atk_2);
+        skl_1.atk.append(atk_2);
+        skl_1.atk.append(atk_2);
         // 基本攻撃力の2.0倍で攻撃力を強化
         // 3ターン
         var enh_3 = CharBtlAction.Enh();
@@ -106,25 +115,16 @@ class CharHero
         enh_3.seedType = CharBtlAction.SeedType.atkBase;
         enh_3.power = 200.0;
         enh_3.turn = 3;
-        var skl_1 = CharBtlAction.Skl();
-        skl_1.type = CharBtlAction.ActType.enh;
-        skl_1.enh.append(enh_3);
-        // 強化後、現在攻撃力の0.5倍で4回攻撃
-        var atk_2 = CharBtlAction.Atk();
-        atk_2.atkPower = 50.0;
         var skl_2 = CharBtlAction.Skl();
-        skl_2.type = CharBtlAction.ActType.atk;
-        skl_2.atk.append(atk_2);
-        skl_2.atk.append(atk_2);
-        skl_2.atk.append(atk_2);
-        skl_2.atk.append(atk_2);
+        skl_2.type = CharBtlAction.ActType.enh;
+        skl_2.enh.append(enh_3);
         
         var act_5 = CharBase.Action();
         act_5.type = CharBase.ActionType.skl;
         act_5.action.type = CharBtlAction.ActType.enh;
         act_5.action.skl.append(skl_1);
         act_5.action.skl.append(skl_2);
-        act_5.name = "強化&ラッシュ";
+        act_5.name = "ラッシュ&ビルド";
         act_5.cost = act_5.action.sklCost;
         data.actions.append(act_5);
         
