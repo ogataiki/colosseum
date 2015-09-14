@@ -37,7 +37,6 @@ class CharHardbodyFemale
         atk_2.atkPower = 75.0;
         var act_1 = CharBase.Action();
         act_1.action.type = CharBtlAction.ActType.atk;
-        act_1.action.atkEnable = true;
         act_1.action.atk.append(atk_1);
         act_1.action.atk.append(atk_2);
         act_1.cost = act_1.action.atkCost;
@@ -56,8 +55,7 @@ class CharHardbodyFemale
         def_1.defCounterAttack = 300.0;
         var act_2 = CharBase.Action();
         act_2.action.type = CharBtlAction.ActType.def;
-        act_2.action.defEnable = true;
-        act_2.action.def = def_1;
+        act_2.action.def.append(def_1);
         act_2.cost = act_2.action.defCost;
         act_2.name = "反撃の構え";
         data.actions.append(act_2);
@@ -74,7 +72,6 @@ class CharHardbodyFemale
         jam_1.addDamage = 5.0;
         var act_3 = CharBase.Action();
         act_3.action.type = CharBtlAction.ActType.jam;
-        act_3.action.jamEnable = true;
         act_3.action.jam.append(jam_1);
         act_3.cost = act_3.action.jamCost;
         act_3.name = "武器破壊";
@@ -94,7 +91,6 @@ class CharHardbodyFemale
         enh_2.turn = 2;
         var act_4 = CharBase.Action();
         act_4.action.type = CharBtlAction.ActType.enh;
-        act_4.action.enhEnable = true;
         act_4.action.enh.append(enh_1);
         act_4.action.enh.append(enh_2);
         act_4.cost = act_4.action.enhCost;
@@ -106,13 +102,16 @@ class CharHardbodyFemale
         // 現在攻撃力の5.0倍で1回攻撃
         var atk_3 = CharBtlAction.Atk();
         atk_3.atkPower = 500.0;
+        var skl_1 = CharBtlAction.Skl();
+        skl_1.type = CharBtlAction.ActType.atk;
+        skl_1.atk.append(atk_3);
         
         var act_5 = CharBase.Action();
+        act_5.type = CharBase.ActionType.skl;
         act_5.name = "全力強撃";
         act_5.action.type = CharBtlAction.ActType.atk;
-        act_5.action.atkEnable = true;
-        act_5.action.atk.append(atk_3);
-        act_5.cost = 4;
+        act_5.action.skl.append(skl_1);
+        act_5.cost = act_5.action.sklCost;
         data.actions.append(act_5);
     }
 }

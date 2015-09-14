@@ -36,10 +36,9 @@ class CharHero
         atk_1.atkPower = 100.0;
         var act_1 = CharBase.Action();
         act_1.action.type = CharBtlAction.ActType.atk;
-        act_1.action.atkEnable = true;
         act_1.action.atk.append(atk_1);
-        act_1.cost = act_1.action.atkCost;
         act_1.name = "攻撃";
+        act_1.cost = act_1.action.atkCost;
         data.actions.append(act_1);
         
         
@@ -54,10 +53,9 @@ class CharHero
         def_1.defCounterAttack = 200.0;
         var act_2 = CharBase.Action();
         act_2.action.type = CharBtlAction.ActType.def;
-        act_2.action.defEnable = true;
-        act_2.action.def = def_1;
-        act_2.cost = act_2.action.defCost;
+        act_2.action.def.append(def_1);
         act_2.name = "防御";
+        act_2.cost = act_2.action.defCost;
         data.actions.append(act_2);
         
         
@@ -72,10 +70,9 @@ class CharHero
         jam_1.addDamage = 10.0;
         var act_3 = CharBase.Action();
         act_3.action.type = CharBtlAction.ActType.jam;
-        act_3.action.jamEnable = true;
         act_3.action.jam.append(jam_1);
-        act_3.cost = act_3.action.jamCost;
         act_3.name = "妨害";
+        act_3.cost = act_3.action.jamCost;
         data.actions.append(act_3);
         
         
@@ -94,18 +91,14 @@ class CharHero
         enh_2.turn = 2;
         var act_4 = CharBase.Action();
         act_4.action.type = CharBtlAction.ActType.enh;
-        act_4.action.enhEnable = true;
         act_4.action.enh.append(enh_1);
         act_4.action.enh.append(enh_2);
-        act_4.cost = act_4.action.enhCost;
         act_4.name = "強化";
+        act_4.cost = act_4.action.enhCost;
         data.actions.append(act_4);
         
         
         // 特技
-        // 現在攻撃力の0.5倍で4回攻撃
-        var atk_2 = CharBtlAction.Atk();
-        atk_2.atkPower = 50.0;
         // 基本攻撃力の2.0倍で攻撃力を強化
         // 3ターン
         var enh_3 = CharBtlAction.Enh();
@@ -113,18 +106,26 @@ class CharHero
         enh_3.seedType = CharBtlAction.SeedType.atkBase;
         enh_3.power = 200.0;
         enh_3.turn = 3;
+        var skl_1 = CharBtlAction.Skl();
+        skl_1.type = CharBtlAction.ActType.enh;
+        skl_1.enh.append(enh_3);
+        // 強化後、現在攻撃力の0.5倍で4回攻撃
+        var atk_2 = CharBtlAction.Atk();
+        atk_2.atkPower = 50.0;
+        var skl_2 = CharBtlAction.Skl();
+        skl_2.type = CharBtlAction.ActType.atk;
+        skl_2.atk.append(atk_2);
+        skl_2.atk.append(atk_2);
+        skl_2.atk.append(atk_2);
+        skl_2.atk.append(atk_2);
         
         var act_5 = CharBase.Action();
-        act_5.name = "全力強化";
+        act_5.type = CharBase.ActionType.skl;
         act_5.action.type = CharBtlAction.ActType.enh;
-        act_5.action.atkEnable = true;
-        act_5.action.atk.append(atk_2);
-        act_5.action.atk.append(atk_2);
-        act_5.action.atk.append(atk_2);
-        act_5.action.atk.append(atk_2);
-        act_5.action.enhEnable = true;
-        act_5.action.enh.append(enh_3);
-        act_5.cost = act_5.action.atkCost + act_5.action.enhCost;
+        act_5.action.skl.append(skl_1);
+        act_5.action.skl.append(skl_2);
+        act_5.name = "強化&ラッシュ";
+        act_5.cost = act_5.action.sklCost;
         data.actions.append(act_5);
         
     }

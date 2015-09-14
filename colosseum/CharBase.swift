@@ -151,11 +151,40 @@ class CharBase : SKSpriteNode {
     var position_base: CGPoint = CGPointZero;
     
     struct Action {
+        var type = ActionType.non;
         var name: String = "";
         var cost: Int = 2;
         var action = CharBtlAction();
     }
     var actions: [Action] = [];
+    
+    enum ActionType: Int {
+        case non = 0;
+        case atk
+        case def
+        case jam
+        case enh
+        case skl
+    }
+    static func cnvActType(action: Action) -> CharBtlAction.ActType {
+        if action.type == ActionType.skl {
+            switch action.action.type {
+            case .non:
+                return CharBtlAction.ActType.non;
+            case .atk:
+                return CharBtlAction.ActType.atk;
+            case .def:
+                return CharBtlAction.ActType.def;
+            case .jam:
+                return CharBtlAction.ActType.jam;
+            case .enh:
+                return CharBtlAction.ActType.enh;
+            }
+        }
+        else {
+            return action.action.type;
+        }
+    }
     
     struct Attacked {
         var content = CharBtlAction.Atk();
@@ -439,6 +468,62 @@ class CharBase : SKSpriteNode {
         enhances = [];
     }
     
+    struct Skilled {
+        var type = CharBtlAction.ActType.non;
+        var atk: [Attacked] = [];
+        var def: [Defenced] = [];
+        var jam: [Jamming] = [];
+        var enh: [Enhanced] = [];
+    }
+    var skilleds: [Skilled] = [];
+    
+    func procAction_skl(skl: [CharBtlAction.Skl], target: CharBase)
+        -> [Skilled]
+    {
+        var result: [Skilled] = [];
+        for i in 0 ..< skl.count {
+            var data = Skilled();
+            data.type = skl[i].type;
+            switch skl[i].type {
+            case .atk:
+                data.atk = procAction_atk(skl[i].atk, target: target);
+            case .def:
+                data.def = procAction_def(skl[i].def);
+            case .jam:
+                data.jam = procAction_jam(skl[i].jam, target: target);
+            case .enh:
+                data.enh = procAction_enh(skl[i].enh);
+            default:
+                break;
+            }
+            result.append(data);
+        }
+        return result;
+    }
+    func addSkilled(skl: [Skilled]) {
+        for data in skl {
+            skilleds.append(data);
+            
+            // ステータスに反映
+            switch data.type {
+            case .atk:
+                addDamage(data.atk);
+            case .def:
+                addDefenced(data.def);
+            case .jam:
+                addJamming(data.jam);
+            case .enh:
+                addEnhanced(data.enh);
+            default:
+                break;
+            }
+        }
+    }
+    func allCancelSkilled() {
+        // ステータスへの反映は各々のキャンセルメソッドで処理すること
+        // 特技で与えたものだけを選択してクリアはしない(複雑すぎて意味不明になる)
+        skilleds = [];
+    }
 
     func calcPower(power: Int, seedType: CharBtlAction.SeedType, char: CharBase) -> (ratioValue:Int, constValue:Int) {
         let power_TypeConst = Int(power);

@@ -63,10 +63,10 @@ class CharBtlAction {
     
     // ---
     // 攻撃のタイプと内容
-    // 複数のタイプを同時にセットすることが可能
+    // 複数のタイプを同時にセットすることが可能な構造だが設定してはダメ
+    // 複数のタイプはスキルのみ設定可能
     
     // atk
-    var atkEnable: Bool = false;
     struct Atk {
         var atkPower: CGFloat = 1.0;
     }
@@ -74,7 +74,6 @@ class CharBtlAction {
     var atkCost: Int = 2;
     
     // def
-    var defEnable: Bool = false;
     struct Def {
         
         var seedType = SeedType.atkNow;
@@ -83,11 +82,12 @@ class CharBtlAction {
         var defCount: Int = 1;                  // this turn enable count
         var defCounterAttack: CGFloat = 0.0;    // 0.0 ~
     }
-    var def = Def();
+    // 基本1個しか設定できない
+    // 複数いれた場合はカウンターの値が先頭しか有効にならない
+    var def: [Def] = [];
     var defCost: Int = 2;
     
     // jam
-    var jamEnable: Bool = false;
     enum JamType: Int {
         case enhAtk = 1
         case enhDef = 2
@@ -117,7 +117,6 @@ class CharBtlAction {
     var jamCost: Int = 3;
     
     // enh
-    var enhEnable: Bool = false;
     enum EnhType: Int {
         case atk = 1
         case def = 2
@@ -136,6 +135,16 @@ class CharBtlAction {
     }
     var enh: [Enh] = [];
     var enhCost: Int = 3;
+    
+    struct Skl {
+        var type = ActType.non;
+        var atk: [Atk] = [];
+        var def: [Def] = [];
+        var jam: [Jam] = [];
+        var enh: [Enh] = [];
+    }
+    var skl: [Skl] = [];
+    var sklCost: Int = 5;
     
 
     enum SeedType: Int {
