@@ -3,10 +3,11 @@ import SpriteKit
 class PrologueScene: SKScene {
     
     enum SceneStatus: Int {
+        case pretreat = -1
         case idle = 0
         case runText
     }
-    var scene_status = SceneStatus.idle;
+    var scene_status = SceneStatus.pretreat;
     
     override func didMoveToView(view: SKView) {
         /* Setup your scene here */
@@ -28,13 +29,14 @@ class PrologueScene: SKScene {
         for touch in (touches as! Set<UITouch>) {
             let location = touch.locationInNode(self)
             
-            if scene_status == .runText {
+            switch scene_status {
+            case .runText:
                 if let t = prologueNarration {
                     prologueNarration.skip();
                 }
                 scene_status = .idle;
-            }
-            else if scene_status == .idle {
+            
+            case .idle:
                 if let p = prologueNarration {
                     prologueNarration.remove({ () -> Void in
                         SceneManager.changeScene(SceneManager.Scenes.home);
@@ -43,6 +45,9 @@ class PrologueScene: SKScene {
                 else {
                     SceneManager.changeScene(SceneManager.Scenes.home);
                 }
+            
+            default:
+                break;
             }
         }
     }

@@ -9,12 +9,16 @@ class NarrationBase {
     var status = Status.idle;
 
     var targetScene: SKScene;
+    
     var narration: String;
+    
     var back: SKSpriteNode!;
+    
     var width: CGFloat;
     var height: CGFloat;
     var center: CGPoint;
     var zPosition: CGFloat = 0.0;
+    
     var callback_finish: () -> Void;
     
     var fontSize: CGFloat = 14;
@@ -80,8 +84,8 @@ class NarrationBase {
         text.zPosition = zPosition;
         targetScene.addChild(text);
         
-        text.parseText(self.narration);
-        text.m_delayTime = self.delayTime;
+        text.parseText(narration);
+        text.m_delayTime = delayTime;
         text.drawText { () -> Void in
             self.status = .idle;
             self.callback_finish();

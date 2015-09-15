@@ -2,11 +2,21 @@ import SpriteKit
 
 class HomeScene: SKScene {
     
+    enum SceneStatus: Int {
+        case pretreat = -1
+        case idle = 0
+        case runTutorialSpeech
+        case waitTapTutorialSpeech
+    }
+    var scene_status = SceneStatus.pretreat;
+
+    
+    
     //---------------
     // ナビキャラ
     
     var naviChar: SKSpriteNode!;
-    func naviStart(callback: () -> Void) {
+    func naviStart() {
         naviChar = SKSpriteNode(imageNamed: "NaviChar");
         naviChar.position = CGPointMake(self.size.width*0.85+self.size.width, self.size.height*0.4);
         self.addChild(naviChar);
@@ -16,14 +26,12 @@ class HomeScene: SKScene {
         let move3 = SKAction.moveToX(self.size.width*0.85, duration: 0.05);
         let moveend = SKAction.runBlock { () -> Void in
             
+            // TODO:チュートリアルの各段階とチュートリアル終了後のランダム台詞を用意
             self.tutorialSpeechInit();
-            self.tutorialSpeechStart(point: CGPointMake(self.size.width*0.5, self.naviChar.position.y + self.naviChar.size.height*0.6)
+            self.tutorialSpeechStart(
+                point: CGPointMake(self.size.width*0.5, self.naviChar.position.y + self.naviChar.size.height*0.6)
                 , index: 0
-                , callback: { () -> Void in
-                    
-                    // TODO:ここでストーリーモード選択ボタンカットイン
-                    callback();
-            })
+            );
         }
         let moveseq = SKAction.sequence([move1, move2, move3, moveend]);
         naviChar.runAction(moveseq);
@@ -32,56 +40,52 @@ class HomeScene: SKScene {
     
     
     //---------------
-    // ナビキャラの台詞
-
-    struct SpeechData {
-        var speech = "";
-        var wait: NSTimeInterval = 2.0;
+    // チュートリアル用
+    
+    var tutorialSpeech: [SpeechBase] = [];
+    var tutorialSpeechIndex: Int = 0;
+    func tutorialSpeechInit() {
+        let speechs: [String] = [
+            "案内するぞい。",
+            "それがワシの仕事じゃ。",
+            "（面倒じゃ・・・）",
+            "とりあえず、",
+            "戦うといい。",
+            "それしかやることはない。"
+        ];
+        for var i = speechs.count-1; i >= 0; --i {
+            let speech = SpeechBase(scene: self
+                , speaker: naviChar
+                , text: speechs[i]
+                , index: i
+                , size: CGSizeMake(self.size.width*0.8, 40)
+                , position: CGPointZero
+                , z: 0
+                , callback: tutorialSpeechCallback);
+            tutorialSpeech.insert(speech, atIndex: 0);
+        }
     }
-    func speechStart(speechList: [SpeechData], point: CGPoint, index: Int, callback: () -> Void) {
+    func tutorialSpeechStart(#point: CGPoint, index: Int) {
         
-        if index >= speechList.count {
-            callback();
+        if index >= tutorialSpeech.count {
+            tutorialSpeechEnd();
             return;
         }
         
-        var speech = SKSendText(color: UIColor.whiteColor(), size: CGSizeMake(self.size.width*0.8, 40));
-        speech.setting("", fontSize: 14, fontColor: UIColor.blackColor(), posX: 0, posY: 0, addView: self);
-        speech.position = point;
-        self.addChild(speech);
-        speech.parseText(speechList[index].speech);
-        speech.drawText { () -> Void in
-            
-            let wait = SKAction.waitForDuration(speechList[index].wait);
-            let next = SKAction.runBlock({ () -> Void in
-                speech.remove();
-                speech.removeFromParent();
-                self.speechStart(speechList, point: point, index: index+1, callback: { () -> Void in
-                    callback();
-                })
-            })
-            speech.runAction(SKAction.sequence([wait, next]));
-        }
-    }
-
-    
-    //---------------
-    // チュートリアル用
-    
-    var tutorialSpeech: [SpeechData] = [];
-    func tutorialSpeechInit() {
-        tutorialSpeech.append(SpeechData(speech: "案内するぞい。", wait: 2.0));
-        tutorialSpeech.append(SpeechData(speech: "それがワシの仕事じゃ。", wait: 2.0));
-        tutorialSpeech.append(SpeechData(speech: "（面倒じゃ・・・）", wait: 1.0));
-        tutorialSpeech.append(SpeechData(speech: "とりあえず、", wait: 1.6));
-        tutorialSpeech.append(SpeechData(speech: "戦うといい。", wait: 1.8));
-        tutorialSpeech.append(SpeechData(speech: "それしかやることはない。", wait: 2.5));
-    }
-    func tutorialSpeechStart(#point: CGPoint, index: Int, callback: () -> Void) {
+        tutorialSpeechIndex = index;
+        tutorialSpeech[index].setPosition(point);
+        tutorialSpeech[index].run();
         
-        speechStart(tutorialSpeech, point: point, index: index) { () -> Void in
-            callback();
-        }
+        scene_status = .runTutorialSpeech;
+    }
+    func tutorialSpeechCallback(index: Int) {
+        
+        scene_status = .waitTapTutorialSpeech;
+    }
+    func tutorialSpeechEnd() {
+        // TODO:ここでストーリーモード選択ボタンカットイン
+        
+        scene_status = .idle;
     }
 
     
@@ -92,8 +96,7 @@ class HomeScene: SKScene {
         // これしないと孫要素の表示順がおかしくなる
         view.ignoresSiblingOrder = false;
         
-        naviStart { () -> Void in
-        }
+        naviStart();
     }
     
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
@@ -101,7 +104,25 @@ class HomeScene: SKScene {
         
         for touch in (touches as! Set<UITouch>) {
             let location = touch.locationInNode(self)
-            SceneManager.changeScene(SceneManager.Scenes.mock);
+            
+            switch scene_status {
+            case .idle:
+                SceneManager.changeScene(SceneManager.Scenes.mock);
+                
+            case .runTutorialSpeech:
+                tutorialSpeech[tutorialSpeechIndex].skip();
+                scene_status = .waitTapTutorialSpeech;
+                
+            case .waitTapTutorialSpeech:
+                let index = tutorialSpeechIndex;
+                
+                tutorialSpeech[index].remove({ () -> Void in
+                    self.tutorialSpeechStart(point: self.tutorialSpeech[index].center, index: index+1);
+                })
+                
+            default:
+                break;
+            }
         }
     }
     

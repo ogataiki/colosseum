@@ -156,7 +156,7 @@ class SKSendText : SKSpriteNode {
         var x: UInt = 0              // 横に何文字目か
         var y: UInt = 0              // 何行目か
         for content in m_labelArray {
-            if m_state == .remove { return }    // 表示途中で文字を消して、といった処理が来た時用のフラグと処理
+            if m_state != .send { return }    // 表示途中で文字を消して、といった処理が来た時用のフラグと処理
 
             // 描画開始
             let xPos = m_posX! + (CGFloat(content.x-1) * m_fontSize);
