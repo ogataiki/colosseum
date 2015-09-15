@@ -2,7 +2,11 @@ import SpriteKit
 
 class PrologueScene: SKScene {
     
-    var prologueText: SKSendText!;
+    enum SceneStatus: Int {
+        case idle = 0
+        case runText
+    }
+    var scene_status = SceneStatus.idle;
     
     override func didMoveToView(view: SKView) {
         /* Setup your scene here */
@@ -13,20 +17,9 @@ class PrologueScene: SKScene {
         let back = SKSpriteNode(imageNamed: "ColosseumExterior");
         back.position = CGPointMake(self.size.width*0.5, self.size.height*0.5);
         back.size = CGSizeMake(back.size.width * (self.size.height / back.size.height), self.size.height);
-        back.color = UIColor.blackColor();
-        back.colorBlendFactor = 0.4;
         self.addChild(back);
         
-        let prologue = "   〜　コロシアム　〜\n\n\nそれは国民の娯楽。\n\n\nあるいは、\n\n\n食うに困った者たちが行き着く\n最後の働き口。\n\n\nそして、\n\n\n一獲千金を目指す者たちの\n夢の舞台。";
-        
-        prologueText = SKSendText(color: UIColor.clearColor(), size: self.size);
-        prologueText.setting("", fontSize: 14, fontColor: UIColor.whiteColor(), posX: 0, posY: 0, addView: self);
-        prologueText.position = CGPointMake(self.size.width*0.5, self.size.height*0.5);
-        self.addChild(prologueText);
-        prologueText.parseText(prologue);
-        prologueText.m_delayTime = 0.15;
-        prologueText.drawText { () -> Void in
-        }
+        runPrologue();
     }
     
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
@@ -35,16 +28,21 @@ class PrologueScene: SKScene {
         for touch in (touches as! Set<UITouch>) {
             let location = touch.locationInNode(self)
             
-            if let text = prologueText {
-                if text.checkDrawEnd() == false {
-                    text.changeState( .skip );
+            if scene_status == .runText {
+                if let t = prologueNarration {
+                    prologueNarration.skip();
+                }
+                scene_status = .idle;
+            }
+            else if scene_status == .idle {
+                if let p = prologueNarration {
+                    prologueNarration.remove({ () -> Void in
+                        SceneManager.changeScene(SceneManager.Scenes.home);
+                    })
                 }
                 else {
                     SceneManager.changeScene(SceneManager.Scenes.home);
                 }
-            }
-            else {
-                SceneManager.changeScene(SceneManager.Scenes.home);
             }
         }
     }
@@ -53,5 +51,27 @@ class PrologueScene: SKScene {
         /* Called before each frame is rendered */
         
     }
-    
+
+    var prologueNarration: NarrationBase!;
+    func runPrologue() {
+        
+        scene_status = .runText;
+        
+        let prologue = "   〜　コロシアム　〜\n\n\nそれは国民の娯楽。\n\n\nあるいは、\n\n\n食うに困った者たちが行き着く\n最後の働き口。\n\n\nそして、\n\n\n一獲千金を目指す者たちの\n夢の舞台。";
+        
+        let back = SKSpriteNode(color: UIColor.blackColor(), size: self.size);
+        back.alpha = 0.4;
+
+        prologueNarration = NarrationBase(scene: self
+            , text: prologue
+            , size: self.size
+            , position: CGPointMake(self.size.width*0.5, self.size.height*0.5)
+            , z: 0
+            , background: back
+            , callback: { () -> Void in
+                self.scene_status = .idle;
+        });
+        prologueNarration.delayTime = 0.15;
+        prologueNarration.run();
+    }
 }

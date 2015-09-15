@@ -16,7 +16,7 @@ class SKSendText : SKSpriteNode {
     // テキストを文字送りするのに必要そうな変数
     var m_text: String?                 // 表示する文字列
     var m_count: Int = 0                // テキストの文字数取得
-    var m_strcount: CGFloat = 0.0       // 現在何文字目表示したか
+    var m_strcount: Int = 0             // 現在何文字目表示したか
     var m_delayTime: CGFloat = 0.1      // 一文字毎に描画するのを遅らせる秒数
     var m_nextLineKey: Character = "\n" // 改行キー
     var m_parentScene: SKScene?         // とりつけるシーン
@@ -167,8 +167,10 @@ class SKSendText : SKSpriteNode {
             let delay = SKAction.waitForDuration(NSTimeInterval(m_delayTime * strcount))
             let fadein = SKAction.fadeAlphaBy(1.0, duration: 0.5)
             let end = SKAction.runBlock({ () -> Void in
-                if Int(strcount) >= self.m_labelArray.count-1 {
+                self.m_strcount++;
+                if self.m_strcount >= self.m_labelArray.count-1 {
                     callback();
+                    self.m_strcount = 0;
                 }
             });
             let seq = SKAction.sequence([delay, fadein, end])
