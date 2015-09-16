@@ -1,6 +1,6 @@
 import SpriteKit
 
-class HomeScene: SKScene {
+class HomeScene: SKScene, SpeechDelegate {
     
     enum SceneStatus: Int {
         case pretreat = -1
@@ -13,81 +13,35 @@ class HomeScene: SKScene {
     
     
     //---------------
-    // ナビキャラ
-    
-    var naviChar: SKSpriteNode!;
-    func naviStart() {
-        naviChar = SKSpriteNode(imageNamed: "NaviChar");
-        naviChar.position = CGPointMake(self.size.width*0.85+self.size.width, self.size.height*0.4);
-        self.addChild(naviChar);
-        
-        let move1 = SKAction.moveToX(self.size.width*0.88, duration: 0.2);
-        let move2 = SKAction.moveToX(self.size.width*0.83, duration: 0.1);
-        let move3 = SKAction.moveToX(self.size.width*0.85, duration: 0.05);
-        let moveend = SKAction.runBlock { () -> Void in
-            
-            // TODO:チュートリアルの各段階とチュートリアル終了後のランダム台詞を用意
-            self.tutorialSpeechInit();
-            self.tutorialSpeechStart(
-                point: CGPointMake(self.size.width*0.5, self.naviChar.position.y + self.naviChar.size.height*0.6)
-                , index: 0
-            );
-        }
-        let moveseq = SKAction.sequence([move1, move2, move3, moveend]);
-        naviChar.runAction(moveseq);
-    }
-
-    
-    
-    //---------------
     // チュートリアル用
     
-    var tutorialSpeech: [SpeechBase] = [];
-    var tutorialSpeechIndex: Int = 0;
-    func tutorialSpeechInit() {
-        let speechs: [String] = [
-            "案内するぞい。",
-            "それがワシの仕事じゃ。",
-            "（面倒じゃ・・・）",
-            "とりあえず、",
-            "戦うといい。",
-            "それしかやることはない。"
-        ];
-        for var i = speechs.count-1; i >= 0; --i {
-            let speech = SpeechBase(scene: self
-                , speaker: naviChar
-                , text: speechs[i]
-                , index: i
-                , size: CGSizeMake(self.size.width*0.8, 40)
-                , position: CGPointZero
-                , z: 0
-                , callback: tutorialSpeechCallback);
-            tutorialSpeech.insert(speech, atIndex: 0);
-        }
+    var tutorialSpeech: [String] = [
+        "案内するぞい。",
+        "それがワシの仕事じゃ。",
+        "（面倒じゃ・・・）",
+        "とりあえず、",
+        "戦うといい。",
+        "それしかやることはない。"
+    ];
+    var tutorialNavi: SpeechCtrl!;
+    func tutorialNaviStart() {
+        tutorialNavi = SpeechCtrl(_scene: self
+            , _speaker_image: "NaviChar"
+            , _speaker_position: CGPointMake(self.size.width*0.85+self.size.width, self.size.height*0.4)
+            , _zPosition: 0
+            , _speechs: tutorialSpeech
+            , _delegate: self);
+        tutorialNavi.run();
     }
-    func tutorialSpeechStart(#point: CGPoint, index: Int) {
+    func callbackSpeechFinish(index: Int) {
         
         if index >= tutorialSpeech.count {
-            tutorialSpeechEnd();
-            return;
+            scene_status = .idle;
         }
-        
-        tutorialSpeechIndex = index;
-        tutorialSpeech[index].setPosition(point);
-        tutorialSpeech[index].run();
-        
-        scene_status = .runTutorialSpeech;
+        else {
+            scene_status = .waitTapTutorialSpeech;
+        }
     }
-    func tutorialSpeechCallback(index: Int) {
-        
-        scene_status = .waitTapTutorialSpeech;
-    }
-    func tutorialSpeechEnd() {
-        // TODO:ここでストーリーモード選択ボタンカットイン
-        
-        scene_status = .idle;
-    }
-
     
     
     override func didMoveToView(view: SKView) {
@@ -96,7 +50,7 @@ class HomeScene: SKScene {
         // これしないと孫要素の表示順がおかしくなる
         view.ignoresSiblingOrder = false;
         
-        naviStart();
+        tutorialNaviStart();
     }
     
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
@@ -110,16 +64,20 @@ class HomeScene: SKScene {
                 SceneManager.changeScene(SceneManager.Scenes.mock);
                 
             case .runTutorialSpeech:
-                tutorialSpeech[tutorialSpeechIndex].skip();
-                scene_status = .waitTapTutorialSpeech;
-                
+                fallthrough
             case .waitTapTutorialSpeech:
-                let index = tutorialSpeechIndex;
-                
-                tutorialSpeech[index].remove({ () -> Void in
-                    self.tutorialSpeechStart(point: self.tutorialSpeech[index].center, index: index+1);
-                })
-                
+                let sts = tutorialNavi.tap();
+                switch sts {
+                case .runSpeech:
+                    scene_status = .runTutorialSpeech;
+                case .waitTap:
+                    scene_status = .waitTapTutorialSpeech;
+                case .idle:
+                    scene_status = .idle;
+                default:
+                    break;
+                }
+            
             default:
                 break;
             }

@@ -40,6 +40,7 @@
 		503885A61B96A704001CE8B3 /* sparkline.png in Resources */ = {isa = PBXBuildFile; fileRef = 503885A51B96A704001CE8B3 /* sparkline.png */; };
 		503972E51B9050A9009AB94F /* CharBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503972E41B9050A9009AB94F /* CharBase.swift */; };
 		50483EE91B940EC2001638CE /* CharBtlAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50483EE81B940EC2001638CE /* CharBtlAction.swift */; };
+		50ACE3AA1BA8EC5B000C8107 /* SpeechCtrl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50ACE3A91BA8EC5B000C8107 /* SpeechCtrl.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -90,6 +91,7 @@
 		503885A51B96A704001CE8B3 /* sparkline.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = sparkline.png; path = Particles/sparkline.png; sourceTree = "<group>"; };
 		503972E41B9050A9009AB94F /* CharBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharBase.swift; sourceTree = "<group>"; };
 		50483EE81B940EC2001638CE /* CharBtlAction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharBtlAction.swift; sourceTree = "<group>"; };
+		50ACE3A91BA8EC5B000C8107 /* SpeechCtrl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpeechCtrl.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -217,6 +219,7 @@
 				50221AE71BA794B800672862 /* StoryManager.swift */,
 				50221AED1BA7C64000672862 /* NarrationBase.swift */,
 				50221AEF1BA7C66300672862 /* SpeechBase.swift */,
+				50ACE3A91BA8EC5B000C8107 /* SpeechCtrl.swift */,
 			);
 			name = Story;
 			sourceTree = "<group>";
@@ -372,6 +375,7 @@
 				501EF6251B9D0AE300CD81B8 /* CharManager.swift in Sources */,
 				50221AEE1BA7C64000672862 /* NarrationBase.swift in Sources */,
 				50221AF01BA7C66300672862 /* SpeechBase.swift in Sources */,
+				50ACE3AA1BA8EC5B000C8107 /* SpeechCtrl.swift in Sources */,
 				501FD5901BA1729200E99FCA /* SceneManager.swift in Sources */,
 				501FD5941BA1747D00E99FCA /* CharSelectScene.swift in Sources */,
 				501FD59C1BA1761C00E99FCA /* PvPMatchScene.swift in Sources */,
