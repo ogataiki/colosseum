@@ -5,20 +5,18 @@ final class CharManager
     static let instance = CharManager()
     
     private init() {
-        characterInit();
     }
     
-    var char_dic: [String : CharBase] = [:];
-    static func getChar(name: String) -> CharBase! {
-        return CharManager.instance.char_dic[name];
+    enum CharNames: String {
+        case mob = "Mob"
+        case hero = "Hero"
+        case hardbodyFemale = "HardbodyFemale"
     }
-    
-    func characterInit() {
-        
-        let hero = CharHero();
-        char_dic[hero.data.name!] = hero.data;
-
-        let hardbodyFemale = CharHardbodyFemale();
-        char_dic[hardbodyFemale.data.name!] = hardbodyFemale.data;
+    static func getChar(name: String) -> CharBase {
+        switch name {
+        case CharNames.mob.rawValue:              return CharMob().data;
+        case CharNames.hardbodyFemale.rawValue:   return CharHardbodyFemale().data;
+        default: return CharHero().data;
+        }
     }
 }

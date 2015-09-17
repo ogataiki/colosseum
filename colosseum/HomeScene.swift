@@ -61,7 +61,7 @@ class HomeScene: SKScene, SpeechDelegate {
             
             switch scene_status {
             case .idle:
-                SceneManager.changeScene(SceneManager.Scenes.mock);
+                SceneManager.changeScene(SceneManager.Scenes.battle);
                 
             case .runTutorialSpeech:
                 fallthrough

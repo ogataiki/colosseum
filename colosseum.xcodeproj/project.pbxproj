@@ -41,6 +41,7 @@
 		503972E51B9050A9009AB94F /* CharBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503972E41B9050A9009AB94F /* CharBase.swift */; };
 		50483EE91B940EC2001638CE /* CharBtlAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50483EE81B940EC2001638CE /* CharBtlAction.swift */; };
 		50ACE3AA1BA8EC5B000C8107 /* SpeechCtrl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50ACE3A91BA8EC5B000C8107 /* SpeechCtrl.swift */; };
+		50DC3D711BAA373E008BEE38 /* CharMob.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50DC3D701BAA373E008BEE38 /* CharMob.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -92,6 +93,7 @@
 		503972E41B9050A9009AB94F /* CharBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharBase.swift; sourceTree = "<group>"; };
 		50483EE81B940EC2001638CE /* CharBtlAction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharBtlAction.swift; sourceTree = "<group>"; };
 		50ACE3A91BA8EC5B000C8107 /* SpeechCtrl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpeechCtrl.swift; sourceTree = "<group>"; };
+		50DC3D701BAA373E008BEE38 /* CharMob.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharMob.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -190,6 +192,7 @@
 				501EF6241B9D0AE300CD81B8 /* CharManager.swift */,
 				50483EE81B940EC2001638CE /* CharBtlAction.swift */,
 				503972E41B9050A9009AB94F /* CharBase.swift */,
+				50DC3D701BAA373E008BEE38 /* CharMob.swift */,
 				501FD58B1BA1197000E99FCA /* CharHero.swift */,
 				501FD58D1BA11B5B00E99FCA /* CharHardbodyFemale.swift */,
 			);
@@ -370,6 +373,7 @@
 				50221AE81BA794B800672862 /* StoryManager.swift in Sources */,
 				501FD58C1BA1197000E99FCA /* CharHero.swift in Sources */,
 				500175641B8E86BB00567C73 /* GameViewController.swift in Sources */,
+				50DC3D711BAA373E008BEE38 /* CharMob.swift in Sources */,
 				501FD59A1BA175EF00E99FCA /* BattleResultScene.swift in Sources */,
 				503972E51B9050A9009AB94F /* CharBase.swift in Sources */,
 				501EF6251B9D0AE300CD81B8 /* CharManager.swift in Sources */,

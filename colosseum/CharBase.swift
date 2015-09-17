@@ -549,7 +549,7 @@ class CharBase : SKSpriteNode {
         return (power_TypeRatio, power_TypeConst);
     }
     
-    func turnEnd() {
+    func turnEnd() -> Bool {
         
         for var i = jammings.count-1; i >= 0; --i {
 
@@ -594,6 +594,8 @@ class CharBase : SKSpriteNode {
                 enhances.removeAtIndex(i);
             }
         }
+        
+        return (HP <= 0) ? true : false;
     }
     
     func calcATK() -> Int {

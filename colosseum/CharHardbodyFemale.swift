@@ -4,17 +4,27 @@ class CharHardbodyFemale
 {
     var data: CharBase;
     
+    static func getName() -> String {
+        return CharManager.CharNames.hardbodyFemale.rawValue;
+    }
+    static func getImageName() -> String {
+        return "TestChar2";
+    }
+    static func getDisplayName() -> String {
+        return "マリー";
+    }
+
     init() {
         
-        data = CharBase(imageNamed: "TestChar2");
-        data.displayName = "マリー";
-        data.name = "HardbodyFemale";
+        data = CharBase(imageNamed: CharHardbodyFemale.getImageName());
+        data.displayName = CharHardbodyFemale.getDisplayName();
+        data.name = CharHardbodyFemale.getName();
         data.gaugeInit(CGSizeMake(data.size.width, 5), direction: Gauge.Direction.horizontal, zPos: 0);
         
         // 攻撃特化型
         
         // ステータス設定
-        data.statusInit(hp: 3000, atk: 300, def: 50, hit: 90, avd: 20, add_atk: 0);
+        data.statusInit(hp: 3000, atk: 300, def: 100, hit: 90, avd: 20, add_atk: 0);
         
         // ゲージ設定
         data.gaugeLangeth = 200.0;
@@ -45,7 +55,7 @@ class CharHardbodyFemale
         
         
         // 行動2
-        // 現在攻撃力の0.2倍で1回防御
+        // 現在攻撃力の0.5倍で1回防御
         // 3倍でカウンター
         // コスト2
         var def_1 = CharBtlAction.Def();
