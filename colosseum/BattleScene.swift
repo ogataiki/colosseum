@@ -64,9 +64,6 @@ class BattleScene: SKScene {
     var enemy_char: CharBase!;
     var char_list: [String : CharBase] = [:];
     
-    var player_dead: Bool = false;
-    var enemy_dead: Bool = false;
-    
     //------
     // UI系
     var ui_playerLastStock: SKLabelNode!;
@@ -311,11 +308,15 @@ class BattleScene: SKScene {
         if let ui = ui_tacticalReset {
             ui.removeFromSuperview();
         }
+        
+        if let ui = debug_updateStopButton {
+            ui.removeFromSuperview();
+        }
     }
     
     func playerInit() {
         
-        player_char = gameManager.player_character;
+        player_char = CharManager.getChar(gameManager.player_character.rawValue);
         player_char.posUpdate(CGPointMake(self.size.width*0.85, self.size.height*0.9));
         player_char.setPlayer(v: true);
         player_char.zPosUpdate(0);
@@ -358,7 +359,7 @@ class BattleScene: SKScene {
     
     func enemyInit() {
         
-        enemy_char = gameManager.enemy_character;
+        enemy_char = CharManager.getChar(gameManager.enemy_character.rawValue);
         enemy_char.posUpdate(CGPointMake(self.size.width*0.15, self.size.height*0.9));
         enemy_char.setPlayer(v: false);
         enemy_char.zPosUpdate(0);
@@ -652,6 +653,11 @@ class BattleScene: SKScene {
     }
     func meleeMain() {
         
+        if player_char.isDead() || enemy_char.isDead() {
+            meleeEnd();
+            return;
+        }
+
         meleeNextFlg[0] = false;
         meleeNextFlg[1] = false;
         
@@ -745,13 +751,13 @@ class BattleScene: SKScene {
         meleeNextFlg[0] = true;
         meleeNextFlg[1] = true;
         
-        player_dead = player_char.turnEnd();
-        enemy_dead = enemy_char.turnEnd();
+        player_char.turnEnd();
+        enemy_char.turnEnd();
         
         player_char.refleshStatus();
         enemy_char.refleshStatus();
         
-        if player_dead || enemy_dead {
+        if player_char.isDead() || enemy_char.isDead() {
             changeStatus(SceneStatus.finish);
             battleFinish({ () -> Void in
                 
@@ -1959,10 +1965,10 @@ class BattleScene: SKScene {
         self.addChild(cutin);
         
         var contentText = "";
-        if player_dead {
+        if player_char.isDead() {
             contentText += "\(player_char.displayName) ";
         }
-        if enemy_dead {
+        if enemy_char.isDead() {
             contentText += "\(enemy_char.displayName) ";
         }
         contentText += "は戦闘不能";

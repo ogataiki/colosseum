@@ -32,6 +32,7 @@ class HomeScene: SKScene, SpeechDelegate {
             , _speechs: tutorialSpeech
             , _delegate: self);
         tutorialNavi.run();
+        scene_status = .runTutorialSpeech;
     }
     func callbackSpeechFinish(index: Int) {
         
