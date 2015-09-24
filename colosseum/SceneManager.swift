@@ -16,8 +16,6 @@ final class SceneManager
         case story_battle_after
         case battle_result
         case pvp_match
-        
-        case mock
     }
     var scene_buffer: [Scenes] = [];
     private func moveScene(next: Scenes) -> Bool {
@@ -72,11 +70,7 @@ final class SceneManager
         case Scenes.battle_result:
             return BattleResultScene.unarchiveFromFile(sks) as? BattleResultScene;
         case Scenes.pvp_match:
-            return PvPMatchScene.unarchiveFromFile(sks) as? PvPMatchScene;
-            
-        case Scenes.mock:
-            return GameScene.unarchiveFromFile(sks) as? GameScene;
-
+            return PvPMatchScene.unarchiveFromFile(sks) as? PvPMatchScene;            
         }
     }
 }

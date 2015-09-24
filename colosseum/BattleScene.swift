@@ -41,6 +41,10 @@ class BattleScene: SKScene {
         var player_action = CharBase.ActionType.non;
         var enemy_action = CharBase.ActionType.non;
     }
+    struct MeleeSpec {
+        var spec = CharBase.Spec();
+        var defs: [CharBase.Defenced] = [];
+    }
     struct MeleeResult {
         var non_action: Bool = false;
         var cancel_action: Bool = false;
@@ -49,6 +53,8 @@ class BattleScene: SKScene {
         var jamming: [CharBase.Jamming] = [];
         var enhance: [CharBase.Enhanced] = [];
         var skill: [CharBase.Skilled] = [];
+        var specAfter_executer = MeleeSpec();
+        var specAfter_target = MeleeSpec();
     }
     struct MeleeResultData {
         var player_result = MeleeResult();
@@ -63,6 +69,9 @@ class BattleScene: SKScene {
     var player_char: CharBase!;
     var enemy_char: CharBase!;
     var char_list: [String : CharBase] = [:];
+    
+    var player_spec = CharBase.Spec();
+    var enemy_spec = CharBase.Spec();
     
     //------
     // UI系
@@ -325,12 +334,12 @@ class BattleScene: SKScene {
         char_list[player_char.name!] = player_char;
         
         
-        player_char.labelHP = SKLabelNode(text: "HP:\(player_char.HP)");
-        player_char.labelATK = SKLabelNode(text: "ATK:\(player_char.ATK)");
-        player_char.labelDEF = SKLabelNode(text: "DEF:\(player_char.DEF)");
-        player_char.labelHIT = SKLabelNode(text: "HIT:\(player_char.HIT)");
-        player_char.labelAVD = SKLabelNode(text: "ADV:\(player_char.AVD)");
-        player_char.labelADDATK = SKLabelNode(text: "ADDATK:\(player_char.ADD_ATK)");
+        player_char.labelHP = SKLabelNode(text: "HP:\(player_char.spec.HP)");
+        player_char.labelATK = SKLabelNode(text: "ATK:\(player_char.spec.ATK)");
+        player_char.labelDEF = SKLabelNode(text: "DEF:\(player_char.spec.DEF)");
+        player_char.labelHIT = SKLabelNode(text: "HIT:\(player_char.spec.HIT)");
+        player_char.labelAVD = SKLabelNode(text: "ADV:\(player_char.spec.AVD)");
+        player_char.labelADDATK = SKLabelNode(text: "ADDATK:\(player_char.spec.ADD_ATK)");
         
         player_char.labelHP.fontSize = 12;
         player_char.labelATK.fontSize = 12;
@@ -355,6 +364,8 @@ class BattleScene: SKScene {
         
         // ゲージの長さをプレイヤーキャラ依存に
         reach_base = player_char.gaugeLangeth;
+        
+        player_char.refleshStatus();
     }
     
     func enemyInit() {
@@ -367,12 +378,12 @@ class BattleScene: SKScene {
         self.addChild(enemy_char);
         char_list[enemy_char.name!] = enemy_char;
         
-        enemy_char.labelHP = SKLabelNode(text: "HP:\(enemy_char.HP)");
-        enemy_char.labelATK = SKLabelNode(text: "ATK:\(enemy_char.ATK)");
-        enemy_char.labelDEF = SKLabelNode(text: "DEF:\(enemy_char.DEF)");
-        enemy_char.labelHIT = SKLabelNode(text: "HIT:\(enemy_char.HIT)");
-        enemy_char.labelAVD = SKLabelNode(text: "ADV:\(enemy_char.AVD)");
-        enemy_char.labelADDATK = SKLabelNode(text: "ADDATK:\(enemy_char.ADD_ATK)");
+        enemy_char.labelHP = SKLabelNode(text: "HP:\(enemy_char.spec.HP)");
+        enemy_char.labelATK = SKLabelNode(text: "ATK:\(enemy_char.spec.ATK)");
+        enemy_char.labelDEF = SKLabelNode(text: "DEF:\(enemy_char.spec.DEF)");
+        enemy_char.labelHIT = SKLabelNode(text: "HIT:\(enemy_char.spec.HIT)");
+        enemy_char.labelAVD = SKLabelNode(text: "ADV:\(enemy_char.spec.AVD)");
+        enemy_char.labelADDATK = SKLabelNode(text: "ADDATK:\(enemy_char.spec.ADD_ATK)");
         
         enemy_char.labelHP.fontSize = 12;
         enemy_char.labelATK.fontSize = 12;
@@ -394,6 +405,8 @@ class BattleScene: SKScene {
         self.addChild(enemy_char.labelHIT);
         self.addChild(enemy_char.labelAVD);
         self.addChild(enemy_char.labelADDATK);
+        
+        enemy_char.refleshStatus();
     }
     
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
@@ -648,6 +661,10 @@ class BattleScene: SKScene {
             meleeBuffer.append(data);
         }
         
+        player_spec = player_char.spec;
+        enemy_spec = enemy_char.spec;
+        
+
         meleeProgress = 0;
         meleeMain();
     }
@@ -905,7 +922,9 @@ class BattleScene: SKScene {
     func melee_atk_non(#pAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
-        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct);
+        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
+            , specBefor: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds));
         meleeResult.enemy_result.non_action = true;
         
         // TODO : ここで通信
@@ -919,8 +938,12 @@ class BattleScene: SKScene {
     func melee_atk_atk(#pAct: CharBase.Action, eAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
-        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct);
-        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct);
+        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
+            , specBefor: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds));
+        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct
+            , specBefor: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds));
         
         // TODO : ここで通信
         
@@ -938,25 +961,34 @@ class BattleScene: SKScene {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result.cancel_action = true;
-        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct);
         
-        let counter_result = enemy_char.procAction_atk(pAct.action.atk, target: player_char, counter: true, counter_content: eAct.action.def[0]);
-        meleeResult.enemy_result.attack = counter_result;
+        var counter_result = enemy_char.procAction_atk(pAct.action.atk
+            , _attack: enemy_char.spec.ATK, targetSpecBefor: player_char.spec, targetDefences: player_char.defenceds
+            , counter: true, counter_content: eAct.action.def[0]);
+        
+        meleeResult.player_result.specAfter_target.spec = counter_result.specAfter;
+        meleeResult.player_result.specAfter_target.defs = counter_result.defsAfter;
+        
+        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct
+            , specBefor: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds)
+            , specBefor_target: meleeResult.player_result.specAfter_target);
+        meleeResult.enemy_result.attack = counter_result.result;
+        
         
         // TODO : ここで通信
         
         // 通信結果OK
         
         // 敵カウンター行動->敵行動
+        self.meleeCancelAllAction(player: true, enemy: false, index: self.meleeProgress);
+        self.melee_action_finish_player();
+        
         self.meleeAction_ActTitleDisplay(player: "", enemy: "カウンター", callback: { () -> Void in
         });
         self.meleeAction_Atk(attacker: self.enemy_char, target: self.player_char
-            , content: counter_result
+            , content: counter_result.result
             , left: false
             , callback: { () -> Void in
-                
-                self.meleeCancelAllAction(player: true, enemy: false, index: self.meleeProgress);
-                self.melee_action_finish_player();
                 
                 self.melee_enemy(meleeResult.enemy_result, eAct: eAct, callback: self.melee_action_finish_enemy);
         })
@@ -965,8 +997,12 @@ class BattleScene: SKScene {
     func melee_atk_jam(#pAct: CharBase.Action, eAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
-        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct);
-        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct);
+        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
+            , specBefor: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds));
+        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct
+            , specBefor: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds));
         
         // TODO : ここで通信
         
@@ -986,24 +1022,23 @@ class BattleScene: SKScene {
         // enh < atk 強化失敗 + 強化効果全解除
         
         var meleeResult = MeleeResultData();
-        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct);
         meleeResult.enemy_result.cancel_action = true;
-        
+        let eSpec = meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.enh, proc: true);
+        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
+            , specBefor: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds)
+            , specBefor_target: eSpec);
         
         // TODO : ここで通信
         
         // 通信結果OK
         
-        // player行動->enemy行動キャンセル
-        melee_player(meleeResult.player_result, pAct: pAct) { () -> Void in
-            self.melee_action_finish_player();
-            
-            self.meleeCancelAllAction(player: false, enemy: true, index: self.meleeProgress);
-            self.meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.enh);
-            self.enemy_char.refleshStatus();
-            
-            self.melee_action_finish_enemy();
-        };
+        // enemy行動キャンセル->player行動
+        self.meleeCancelAllAction(player: false, enemy: true, index: self.meleeProgress);
+        self.meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.enh);
+        self.enemy_char.refleshStatus();
+        self.melee_action_finish_enemy();
+        
+        melee_player(meleeResult.player_result, pAct: pAct, callback:melee_action_finish_player);
     }
     
     //------------
@@ -1012,7 +1047,9 @@ class BattleScene: SKScene {
     func melee_def_non(#pAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
-        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct);
+        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
+            , specBefor: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds));
         meleeResult.enemy_result.non_action = true;
         
         // TODO : ここで通信
@@ -1029,27 +1066,36 @@ class BattleScene: SKScene {
         // atk < def 攻撃失敗 + 有利側カウンターアタック
         
         var meleeResult = MeleeResultData();
-        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct);
         meleeResult.enemy_result.cancel_action = true;
         
-        let counter_result = player_char.procAction_atk(eAct.action.atk, target: enemy_char, counter: true, counter_content: pAct.action.def[0]);
-        meleeResult.player_result.attack = counter_result;
+        var counter_result = player_char.procAction_atk(eAct.action.atk
+            , _attack: player_char.spec.ATK, targetSpecBefor: enemy_char.spec, targetDefences: enemy_char.defenceds
+            , counter: true, counter_content: pAct.action.def[0]);
+        
+        meleeResult.enemy_result.specAfter_target.spec = counter_result.specAfter;
+        meleeResult.enemy_result.specAfter_target.defs = counter_result.defsAfter;
+
+        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
+            , specBefor: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds)
+            , specBefor_target: meleeResult.enemy_result.specAfter_target);
+        meleeResult.player_result.attack = counter_result.result;
+        
         
         // TODO : ここで通信
         
         // 通信結果OK
         
         // playerカウンター行動->player行動
+        self.meleeCancelAllAction(player: false, enemy: true, index: self.meleeProgress);
+        self.enemy_char.refleshStatus();
+        self.melee_action_finish_enemy();
+        
         self.meleeAction_ActTitleDisplay(player: "カウンター", enemy: "", callback: { () -> Void in
         });
         self.meleeAction_Atk(attacker: self.player_char, target: self.enemy_char
-            , content: counter_result
+            , content: counter_result.result
             , left: true
             , callback: { () -> Void in
-                
-                self.meleeCancelAllAction(player: false, enemy: true, index: self.meleeProgress);
-                self.enemy_char.refleshStatus();
-                self.melee_action_finish_enemy();
                 
                 self.melee_player(meleeResult.player_result, pAct: pAct, callback: self.melee_action_finish_player);
         })
@@ -1058,8 +1104,12 @@ class BattleScene: SKScene {
     func melee_def_def(#pAct: CharBase.Action, eAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
-        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct);
-        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct);
+        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
+            , specBefor: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds));
+        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct
+            , specBefor: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds));
         
         // TODO : ここで通信
         
@@ -1077,29 +1127,34 @@ class BattleScene: SKScene {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result.cancel_action = true;
-        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct);
-        
+        let pSpec = meleeCancelAllStatus(self.player_char, cancelType: CharBtlAction.ActType.def, proc: true);
+        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct
+            , specBefor: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds)
+            , specBefor_target: pSpec);
+
+
         // TODO : ここで通信
         
         // 通信結果OK
         
-        // enemy行動->player行動キャンセル
-        melee_enemy(meleeResult.enemy_result, eAct: eAct) { () -> Void in
-            
-            self.melee_action_finish_enemy();
-            
-            self.meleeCancelAllAction(player: true, enemy: false, index: self.meleeProgress);
-            self.meleeCancelAllStatus(self.player_char, cancelType: CharBtlAction.ActType.def);
-            self.player_char.refleshStatus();
-            self.melee_action_finish_player();
-        }
+        // player行動キャンセル->enemy行動
+        self.meleeCancelAllAction(player: true, enemy: false, index: self.meleeProgress);
+        self.meleeCancelAllStatus(self.player_char, cancelType: CharBtlAction.ActType.def);
+        self.player_char.refleshStatus();
+        self.melee_action_finish_player();
+        
+        melee_enemy(meleeResult.enemy_result, eAct: eAct, callback: melee_action_finish_enemy);
     }
     
     func melee_def_enh(#pAct: CharBase.Action, eAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
-        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct);
-        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct);
+        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
+            , specBefor: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds));
+        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct
+            , specBefor: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds));
         
         // TODO : ここで通信
         
@@ -1116,7 +1171,9 @@ class BattleScene: SKScene {
     func melee_jam_non(#pAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
-        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct);
+        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
+            , specBefor: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds));
         meleeResult.enemy_result.non_action = true;
         
         // TODO : ここで通信
@@ -1130,8 +1187,12 @@ class BattleScene: SKScene {
     func melee_jam_atk(#pAct: CharBase.Action, eAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
-        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct);
-        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct);
+        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
+            , specBefor: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds));
+        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct
+            , specBefor: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds));
         
         // TODO : ここで通信
         
@@ -1152,30 +1213,34 @@ class BattleScene: SKScene {
         // def < jam 防御失敗 + 防御効果全破壊
         
         var meleeResult = MeleeResultData();
-        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct);
         meleeResult.enemy_result.cancel_action = true;
-        
+        let eSpec = meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.def, proc: true);
+        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
+            , specBefor: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds)
+            , specBefor_target: eSpec);
+
         // TODO : ここで通信
         
         // 通信結果OK
         
-        // player行動->enemy行動キャンセル
-        melee_player(meleeResult.player_result, pAct: pAct) { () -> Void in
-            
-            self.melee_action_finish_player();
-            
-            self.meleeCancelAllAction(player: false, enemy: true, index: self.meleeProgress);
-            self.meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.def);
-            self.enemy_char.refleshStatus();
-            self.melee_action_finish_enemy();
-        }
+        // enemy行動キャンセル->player行動
+        self.meleeCancelAllAction(player: false, enemy: true, index: self.meleeProgress);
+        self.meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.def);
+        self.enemy_char.refleshStatus();
+        self.melee_action_finish_enemy();
+
+        melee_player(meleeResult.player_result, pAct: pAct, callback: melee_action_finish_player);
     }
     
     func melee_jam_jam(#pAct: CharBase.Action, eAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
-        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct);
-        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct);
+        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
+            , specBefor: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds));
+        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct
+            , specBefor: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds));
         
         // TODO : ここで通信
         
@@ -1193,22 +1258,22 @@ class BattleScene: SKScene {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result.cancel_action = true;
-        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct);
+        let eSpec = meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.jam);
+        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct
+            , specBefor: eSpec
+            , specBefor_target: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds));
         
         // TODO : ここで通信
         
         // 通信結果OK
         
-        // enemy行動->player行動キャンセル
-        melee_enemy(meleeResult.enemy_result, eAct: eAct) { () -> Void in
-            
-            self.melee_action_finish_enemy();
-            
-            self.meleeCancelAllAction(player: true, enemy: false, index: self.meleeProgress);
-            self.meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.jam);
-            self.enemy_char.refleshStatus();
-            self.melee_action_finish_player();
-        }
+        // player行動キャンセル->enemy行動
+        self.meleeCancelAllAction(player: true, enemy: false, index: self.meleeProgress);
+        self.meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.jam);
+        self.enemy_char.refleshStatus();
+        self.melee_action_finish_player();
+        
+        melee_enemy(meleeResult.enemy_result, eAct: eAct, callback: melee_action_finish_enemy);
     }
     
     //------------
@@ -1217,7 +1282,9 @@ class BattleScene: SKScene {
     func melee_enh_non(#pAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
-        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct);
+        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
+            , specBefor: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds));
         meleeResult.enemy_result.non_action = true;
         
         // TODO : ここで通信
@@ -1235,29 +1302,33 @@ class BattleScene: SKScene {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result.cancel_action = true;
-        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct);
+        let pSpec = meleeCancelAllStatus(self.player_char, cancelType: CharBtlAction.ActType.enh, proc: true);
+        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct
+            , specBefor: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds)
+            , specBefor_target: pSpec);
         
         // TODO : ここで通信
         
         // 通信結果OK
         
-        // enemy行動->player行動キャンセル
-        melee_enemy(meleeResult.enemy_result, eAct: eAct) { () -> Void in
-            
-            self.melee_action_finish_enemy();
-            
-            self.meleeCancelAllAction(player: true, enemy: false, index: self.meleeProgress);
-            self.meleeCancelAllStatus(self.player_char, cancelType: CharBtlAction.ActType.enh);
-            self.player_char.refleshStatus();
-            self.melee_action_finish_player();
-        }
+        // player行動キャンセル->enemy行動
+        self.meleeCancelAllAction(player: true, enemy: false, index: self.meleeProgress);
+        self.meleeCancelAllStatus(self.player_char, cancelType: CharBtlAction.ActType.enh);
+        self.player_char.refleshStatus();
+        self.melee_action_finish_player();
+
+        melee_enemy(meleeResult.enemy_result, eAct: eAct, callback: melee_action_finish_enemy);
     }
     
     func melee_enh_def(#pAct: CharBase.Action, eAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
-        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct);
-        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct);
+        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
+            , specBefor: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds));
+        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct
+            , specBefor: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds));
         
         // TODO : ここで通信
         
@@ -1274,30 +1345,34 @@ class BattleScene: SKScene {
         // jam < enh 妨害失敗 + 妨害追加効果全解除
         
         var meleeResult = MeleeResultData();
-        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct);
         meleeResult.enemy_result.cancel_action = true;
+        let pSpec = meleeCancelAllStatus(self.player_char, cancelType: CharBtlAction.ActType.jam, proc: true);
+        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
+            , specBefor: pSpec
+            , specBefor_target: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds));
         
         // TODO : ここで通信
         
         // 通信結果OK
         
-        // player行動->enemy行動キャンセル
-        melee_player(meleeResult.player_result, pAct: pAct) { () -> Void in
-            
-            self.melee_action_finish_player();
-            
-            self.meleeCancelAllAction(player: false, enemy: true, index: self.meleeProgress);
-            self.meleeCancelAllStatus(self.player_char, cancelType: CharBtlAction.ActType.jam);
-            self.player_char.refleshStatus();
-            self.melee_action_finish_enemy();
-        }
+        // enemy行動キャンセル->player行動
+        self.meleeCancelAllAction(player: false, enemy: true, index: self.meleeProgress);
+        self.meleeCancelAllStatus(self.player_char, cancelType: CharBtlAction.ActType.jam);
+        self.player_char.refleshStatus();
+        self.melee_action_finish_enemy();
+        
+        melee_player(meleeResult.player_result, pAct: pAct, callback: melee_action_finish_player);
     }
     
     func melee_enh_enh(#pAct: CharBase.Action, eAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
-        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct);
-        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct);
+        meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
+            , specBefor: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds));
+        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct
+            , specBefor: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds));
         
         // TODO : ここで通信
         
@@ -1315,7 +1390,9 @@ class BattleScene: SKScene {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result.non_action = true;
-        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct);
+        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct
+            , specBefor: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds));
         
         // TODO : ここで通信
         
@@ -1329,7 +1406,9 @@ class BattleScene: SKScene {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result.non_action = true;
-        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct);
+        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct
+            , specBefor: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds));
         
         // TODO : ここで通信
         
@@ -1343,7 +1422,9 @@ class BattleScene: SKScene {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result.non_action = true;
-        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct);
+        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct
+            , specBefor: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds));
         
         // TODO : ここで通信
         
@@ -1357,7 +1438,9 @@ class BattleScene: SKScene {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result.non_action = true;
-        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct);
+        meleeResult.enemy_result = melee_getResult(enemy_char, target: player_char, act: eAct
+            , specBefor: MeleeSpec(spec: enemy_char.spec, defs: enemy_char.defenceds)
+            , specBefor_target: MeleeSpec(spec: player_char.spec, defs: player_char.defenceds));
         
         // TODO : ここで通信
         
@@ -1372,28 +1455,55 @@ class BattleScene: SKScene {
         melee_action_finish_all();
     }
     
-    //------------
-    // skill
-    func melee_getResult(c: CharBase, target: CharBase, act:CharBase.Action
+    //--------------
+    // 混戦結果の計算
+    func melee_getResult(c: CharBase, target: CharBase, act:CharBase.Action, specBefor: MeleeSpec, specBefor_target: MeleeSpec
         , counter: Bool = false, counter_content: CharBtlAction.Def = CharBtlAction.Def())
         -> MeleeResult
     {
         var result = MeleeResult();
         if act.type == CharBase.ActionType.skl  {
-            result.skill = c.procAction_skl(act.action.skl, target: target);
+            var ret = c.procAction_skl(act.action.skl
+                , specBefor_executer: specBefor.spec, specBefor_target: specBefor_target.spec, specBase_target: target.spec_base
+                , targetDefences: specBefor_target.defs);
+            result.skill = ret.result;
+            result.specAfter_executer.spec = ret.specAfter_executer;
+            result.specAfter_executer.defs = specBefor.defs;
+            result.specAfter_target.spec = ret.specAfter_target;
+            result.specAfter_target.defs = ret.defsAfter_target;
         }
         else {
             switch act.action.type {
             case .atk:
-                result.attack = c.procAction_atk(act.action.atk, target: target, counter: counter, counter_content: counter_content);
+                var ret = c.procAction_atk(act.action.atk
+                    , _attack: specBefor.spec.ATK, targetSpecBefor: specBefor_target.spec, targetDefences: specBefor_target.defs
+                    , counter: counter, counter_content: counter_content);
+                result.attack = ret.result;
+                result.specAfter_executer = specBefor;
+                result.specAfter_target.spec = ret.specAfter;
+                result.specAfter_target.defs = ret.defsAfter;
             case .def:
-                result.defence = c.procAction_def(act.action.def);
+                var ret = c.procAction_def(act.action.def, specBefor: specBefor.spec);
+                result.defence = ret.result;
+                result.specAfter_executer.spec = ret.specAfter;
+                result.specAfter_executer.defs = specBefor.defs;
+                result.specAfter_target = specBefor_target;
             case .jam:
-                result.jamming = c.procAction_jam(act.action.jam, target: target);
+                var ret = c.procAction_jam(act.action.jam, specBase: target.spec_base, specBefor: specBefor_target.spec);
+                result.jamming = ret.result;
+                result.specAfter_executer = specBefor;
+                result.specAfter_target.spec = ret.specAfter;
+                result.specAfter_target.defs = specBefor_target.defs;
             case .enh:
-                result.enhance = c.procAction_enh(act.action.enh);
+                var ret = c.procAction_enh(act.action.enh, specBefor: specBefor.spec);
+                result.enhance = ret.result;
+                result.specAfter_executer.spec = ret.specAfter;
+                result.specAfter_executer.defs = specBefor.defs;
+                result.specAfter_target = specBefor_target;
             default:
                 result.non_action = true;
+                result.specAfter_executer = specBefor;
+                result.specAfter_target = specBefor_target;
                 break;
             }
         }
@@ -1942,18 +2052,38 @@ class BattleScene: SKScene {
             }
         }
     }
-    func meleeCancelAllStatus(target: CharBase, cancelType: CharBtlAction.ActType) {
+    func meleeCancelAllStatus(target: CharBase, cancelType: CharBtlAction.ActType, proc: Bool = false)
+        -> MeleeSpec
+    {
+        var ret = MeleeSpec(spec: target.spec, defs: target.defenceds);
         switch cancelType {
         case .atk:
             break;
         case .def:
-            target.allCancelDefenced();
-        case .enh:
-            target.allCancelEnhanced();
+            if proc {
+                ret.spec = target.procCancel_def();
+            }
+            else {
+                ret.spec = target.allCancelDefenced();
+            }
+            ret.defs = [];
         case .jam:
-            target.allCancelJammings();
+            if proc {
+                ret.spec = target.procCancel_jam();
+            }
+            else {
+                ret.spec = target.allCancelJammings();
+            }
+        case .enh:
+            if proc {
+                ret.spec = target.procCancel_enh();
+            }
+            else {
+                ret.spec = target.allCancelEnhanced();
+            }
         default: break;
         }
+        return ret;
     }
     
     

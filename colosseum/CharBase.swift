@@ -15,19 +15,17 @@ class CharBase : SKSpriteNode {
     
     var displayName: String = "";
     
-    var HP_base: Int = 3000;
-    var ATK_base: Int = 100;
-    var DEF_base: Int = 50;
-    var HIT_base: Int = 100;
-    var AVD_base: Int = 20;
-    
-    var HP: Int = 3000;
-    var ATK: Int = 100;
-    var DEF: Int = 50;
-    var HIT: Int = 100;
-    var AVD: Int = 20;
-    var ADD_ATK: Int = 0;
-    
+    struct Spec {
+        var HP: Int = 3000;
+        var ATK: Int = 100;
+        var DEF: Int = 50;
+        var HIT: Int = 100;
+        var AVD: Int = 20;
+        var ADD_ATK: Int = 0;
+    }
+    var spec_base = Spec();
+    var spec = Spec();
+
     func statusInit(
         #hp: Int,
         atk: Int,
@@ -36,18 +34,19 @@ class CharBase : SKSpriteNode {
         avd: Int,
         add_atk: Int)
     {
-        HP_base = hp;
-        ATK_base = atk;
-        DEF_base = def;
-        HIT_base = hit;
-        AVD_base = avd;
+        spec_base.HP = hp;
+        spec_base.ATK = atk;
+        spec_base.DEF = def;
+        spec_base.HIT = hit;
+        spec_base.AVD = avd;
+        spec_base.ADD_ATK = add_atk;
         
-        HP = hp;
-        ATK = atk;
-        DEF = def;
-        HIT = hit;
-        AVD = avd;
-        ADD_ATK = add_atk;
+        spec.HP = hp;
+        spec.ATK = atk;
+        spec.DEF = def;
+        spec.HIT = hit;
+        spec.AVD = avd;
+        spec.ADD_ATK = add_atk;
     }
     
     var gaugeLangeth: CGFloat = 200.0;
@@ -70,19 +69,26 @@ class CharBase : SKSpriteNode {
     var labelHIT: SKLabelNode!;
     var labelAVD: SKLabelNode!;
     var labelADDATK: SKLabelNode!;
-    func refleshStatus() {
+    func refleshStatus(_spec: Spec? = nil) {
+        let s: Spec;
+        if _spec == nil {
+            s = spec;
+        }
+        else {
+            s = _spec!;
+        }
         if let gauge = gaugeHP {
-            gaugeHP.updateProgress(CGFloat(HP) / CGFloat(HP_base) * 100);
+            gaugeHP.updateProgress(CGFloat(s.HP) / CGFloat(spec_base.HP) * 100);
         }
         if let label = labelHP {
-            labelHP.text = "HP:\(HP)";
-            if HP < HP_base / 5 {
+            labelHP.text = "HP:\(s.HP)";
+            if s.HP < spec_base.HP / 5 {
                 labelHP.fontColor = UIColor.redColor();
             }
-            else if HP < HP_base / 2 {
+            else if s.HP < spec_base.HP / 2 {
                 labelHP.fontColor = UIColor.yellowColor();
             }
-            else if HP < HP_base {
+            else if s.HP < spec_base.HP {
                 labelHP.fontColor = UIColor.blueColor();
             }
             else {
@@ -90,11 +96,11 @@ class CharBase : SKSpriteNode {
             }
         }
         if let label = labelATK {
-            labelATK.text = "ATK:\(ATK)";
-            if ATK < ATK_base {
+            labelATK.text = "ATK:\(s.ATK)";
+            if s.ATK < spec_base.ATK {
                 labelATK.fontColor = UIColor.blueColor();
             }
-            else if ATK > ATK_base {
+            else if s.ATK > spec_base.ATK {
                 labelATK.fontColor = UIColor.orangeColor();
             }
             else {
@@ -102,11 +108,11 @@ class CharBase : SKSpriteNode {
             }
         }
         if let label = labelDEF {
-            labelDEF.text = "DEF:\(DEF)+\(defenceds.count)";
-            if DEF < DEF_base {
+            labelDEF.text = "DEF:\(s.DEF)+\(calcDefences(defenceds))";
+            if s.DEF < spec_base.DEF {
                 labelDEF.fontColor = UIColor.blueColor();
             }
-            else if DEF > DEF_base {
+            else if s.DEF > spec_base.DEF {
                 labelDEF.fontColor = UIColor.orangeColor();
             }
             else {
@@ -114,11 +120,11 @@ class CharBase : SKSpriteNode {
             }
         }
         if let label = labelHIT {
-            labelHIT.text = "HIT:\(HIT)";
-            if HIT < HIT_base {
+            labelHIT.text = "HIT:\(s.HIT)";
+            if s.HIT < spec_base.HIT {
                 labelHIT.fontColor = UIColor.blueColor();
             }
-            else if HIT > HIT_base {
+            else if s.HIT > spec_base.HIT {
                 labelHIT.fontColor = UIColor.orangeColor();
             }
             else {
@@ -126,11 +132,11 @@ class CharBase : SKSpriteNode {
             }
         }
         if let label = labelAVD {
-            labelAVD.text = "AVD:\(AVD)";
-            if AVD < AVD_base {
+            labelAVD.text = "AVD:\(s.AVD)";
+            if s.AVD < spec_base.AVD {
                 labelAVD.fontColor = UIColor.blueColor();
             }
-            else if AVD > AVD_base {
+            else if s.AVD > spec_base.AVD {
                 labelAVD.fontColor = UIColor.orangeColor();
             }
             else {
@@ -138,8 +144,8 @@ class CharBase : SKSpriteNode {
             }
         }
         if let label = labelADDATK {
-            labelADDATK.text = "ADDATK:\(ADD_ATK)";
-            if ADD_ATK > 0 {
+            labelADDATK.text = "ADDATK:\(s.ADD_ATK)";
+            if s.ADD_ATK > 0 {
                 labelADDATK.fontColor = UIColor.orangeColor();
             }
             else {
@@ -191,32 +197,48 @@ class CharBase : SKSpriteNode {
         var damage: Int = 0;
         var consumeDefenced: Bool = false;
         var counter: Bool = false;
+        var specBefor = Spec();
+        var specAfter = Spec();
     }
     
-    func procAction_atk(atk: [CharBtlAction.Atk], target: CharBase
-        , counter: Bool = false, counter_content: CharBtlAction.Def = CharBtlAction.Def()) -> [Attacked]
+    func procAction_atk(atk: [CharBtlAction.Atk], _attack: Int? = nil, targetSpecBefor: Spec, targetDefences: [Defenced]
+        , counter: Bool = false, counter_content: CharBtlAction.Def = CharBtlAction.Def())
+        -> (result: [Attacked], specAfter: Spec, defsAfter: [Defenced])
     {
         var result: [Attacked] = [];
+        var specWork = targetSpecBefor;
+        var defsWork = targetDefences;
+        let attack: Int;
+        if _attack == nil {
+            attack = spec.ATK;
+        }
+        else {
+            attack = _attack!;
+        }
+        var totalAtkCount: Int = 0;
         for i in 0 ..< atk.count {
             var data = Attacked();
             data.content = atk[i];
-            data.consumeDefenced = (target.defenceds.count > 0) ? true : false;
+            data.consumeDefenced = (defsWork.count > 0) ? true : false;
             data.counter = counter;
             if counter {
                 // カウンターはミスなし
-                data.damage = (calcATK() * Int(counter_content.defCounterAttack) / 100) - target.calcDEF(consumeDefenceds: true);
+                data.damage = (attack * Int(counter_content.defCounterAttack) / 100) - (specWork.DEF + calcDefences(defsWork));
                 if data.damage <= 0 {
                     data.damage = 1;
                 }
+                if defsWork.count > 0 {
+                    defsWork.removeLast();
+                }
             }
             else {
-                data.damage = (calcATK() * Int(atk[i].atkPower) / 100) - target.calcDEF(consumeDefenceds: true);
+                data.damage = (attack * Int(atk[i].atkPower) / 100) - (specWork.DEF + calcDefences(defsWork));
                 if data.damage <= 0 {
                     data.damage = 1;
                 }
                 
                 // 命中計算
-                var hit = HIT - target.AVD;
+                var hit = spec.HIT - specWork.AVD;
                 hit = min(100, hit);
                 hit = max(1, hit);
                 let random = 1 + (arc4random() % 100);
@@ -224,40 +246,77 @@ class CharBase : SKSpriteNode {
                     // ミス
                     data.damage = 0;
                 }
-            }
-            result.append(data);
-        }
-        // 加算攻撃回数
-        for i in 0 ..< ADD_ATK {
-            var data = Attacked();
-            data.content = CharBtlAction.Atk();
-            data.content.atkPower = 100.0;
-            data.consumeDefenced = (target.defenceds.count > 0) ? true : false;
-            data.counter = counter;
-            data.damage = calcATK() - target.calcDEF(consumeDefenceds: true);
-            if data.damage <= 0 {
-                data.damage = 1;
+                else {
+                    if defsWork.count > 0 {
+                        defsWork.removeLast();
+                    }
+                }
             }
             
-            // 命中計算
-            var hit = HIT - target.AVD;
-            hit = min(100, hit);
-            hit = max(1, hit);
-            let random = 1 + (arc4random() % 100);
-            if random > UInt32(hit) {
-                // ミス
-                data.damage = 0;
+            data.specBefor = specWork;
+            data.specAfter = specWork;
+            data.specAfter.HP = data.specAfter.HP - data.damage;
+            if data.specAfter.HP < 0 {
+                data.specAfter.HP = 0;
             }
+            specWork = data.specAfter;
+            
+            totalAtkCount++;
+            
             result.append(data);
+            
+            
+            // 加算攻撃回数分を追加
+            
+            if counter {
+                // カウンターの場合はなし
+                continue;
+            }
+            
+            for i in 0 ..< spec.ADD_ATK {
+                var dataAdd = Attacked();
+                dataAdd.content = atk[i];
+                dataAdd.damage = data.damage;
+                dataAdd.specBefor = specWork;
+                dataAdd.specAfter = specWork;
+                dataAdd.consumeDefenced = (defsWork.count > 0) ? true : false;
+                dataAdd.counter = false;
+                
+                // 命中計算
+                var hit = spec.HIT - specWork.AVD;
+                hit = min(100, hit);
+                hit = max(1, hit);
+                let random = 1 + (arc4random() % 100);
+                if random > UInt32(hit) {
+                    // ミス
+                    dataAdd.damage = 0;
+                }
+                else {
+                    if defsWork.count > 0 {
+                        defsWork.removeLast();
+                    }
+                }
+                
+                dataAdd.specBefor = specWork;
+                specWork.HP = specWork.HP - dataAdd.damage;
+                if specWork.HP < 0 {
+                    specWork.HP = 0;
+                }
+                dataAdd.specAfter = specWork;
+                
+                totalAtkCount++;
+
+                result.append(data);
+            }
         }
         
-        return result;
+        return (result, specWork, defsWork);
     }
     func addDamage(atk: [Attacked]) {
         for data in atk {
-            HP = HP - data.damage;
-            if HP < 0 {
-                HP = 0;
+            spec.HP = spec.HP - data.damage;
+            if spec.HP < 0 {
+                spec.HP = 0;
             }
             
             if data.consumeDefenced {
@@ -276,14 +335,21 @@ class CharBase : SKSpriteNode {
         var content = CharBtlAction.Def();
         var addDef: Int = 0;
         var lastCount: Int = 0;
+        var specBefor = Spec();
+        var specAfter = Spec();
     }
     var defenceds: [Defenced] = [];
     
-    func procAction_def(def: [CharBtlAction.Def]) -> [Defenced] {
+    func procAction_def(def: [CharBtlAction.Def], specBefor: Spec)
+        -> (result: [Defenced], specAfter: Spec)
+    {
         var result: [Defenced] = [];
+        var specWork = specBefor;
         for i in 0 ..< def.count {
             var data = Defenced();
             data.content = def[i];
+            data.specBefor = specBefor;
+            data.specAfter = specBefor;
             data.lastCount = def[i].defCount
             
             // 強さ取得
@@ -292,7 +358,7 @@ class CharBase : SKSpriteNode {
             
             result.append(data);
         }
-        return result;
+        return (result, specWork);
     }
     func addDefenced(def: [Defenced]) {
         for data in def {
@@ -302,8 +368,27 @@ class CharBase : SKSpriteNode {
         // 以降、相手の攻撃を受けるタイミングで消費
         // ターンで消費しない
     }
-    func allCancelDefenced() {
+    func procCancel_def() -> Spec {
+        return spec;
+    }
+    func allCancelDefenced() -> Spec {
         defenceds = [];
+        return spec;
+    }
+    func calcDefences(defs: [Defenced]) -> Int {
+        var addDef: Int = 0;
+        // TODO:ここちょっと変えるかも
+        // 積み上がった防御すべてが有効になるように調整するかも
+        for d in defs {
+            addDef += d.addDef;
+        }
+        /*
+        if defs.count > 0 {
+            var defence = defs[defs.count-1];
+            addDef += defence.addDef;
+        }
+        */
+        return addDef;
     }
 
     struct Jamming {
@@ -318,17 +403,29 @@ class CharBase : SKSpriteNode {
         var poisonDamage: Int = 0;
         var paralysisAVD: Int = 0;
         var lastTrun: Int = 0;
+        var specBefor = Spec();
+        var specAfter = Spec();
     }
     var jammings: [Jamming] = [];
     
-    func procAction_jam(jam: [CharBtlAction.Jam], target: CharBase) -> [Jamming] {
+    func procAction_jam(jam: [CharBtlAction.Jam], specBase: Spec, specBefor: Spec)
+        -> (result: [Jamming], specAfter: Spec)
+    {
         var result: [Jamming] = [];
+        var specWork = specBefor;
         for i in 0 ..< jam.count {
             var data = Jamming();
+            data.specBefor = specBefor;
+            
             // HPベース比率からの割合　防御力無視ダメージ
-            data.damage = (target.HP_base * Int(jam[i].addDamage) / 100);
+            data.damage = (specBase.HP * Int(jam[i].addDamage) / 100);
             if data.damage <= 0 {
                 data.damage = 1;
+            }
+
+            specWork.HP = specWork.HP - data.damage;
+            if specWork.HP < 0 {
+                specWork.HP = 0;
             }
 
             data.content = jam[i];
@@ -363,9 +460,17 @@ class CharBase : SKSpriteNode {
             case .paralysis:
                 data.paralysisAVD = power_TypeConst;
             }
+            specWork.ATK += data.addATK;
+            specWork.DEF += data.addDEF;
+            specWork.HIT += data.addHIT;
+            specWork.AVD += data.addAVD;
+            specWork.ADD_ATK += data.addATKCNT;
+
+            data.specAfter = specWork;
+
             result.append(data);
         }
-        return result;
+        return (result, specWork);
     }
     func addJamming(jam: [Jamming]) {
         for data in jam {
@@ -373,32 +478,47 @@ class CharBase : SKSpriteNode {
 
             // ステータスに反映
             if data.content.execTiming == CharBtlAction.ExecTiming.jastNow {
-                HP += data.addHP;
-                ATK += data.addATK;
-                DEF += data.addDEF;
-                HIT += data.addHIT;
-                AVD += data.addAVD;
-                ADD_ATK += data.addATKCNT;
+                spec.HP += data.addHP;
+                spec.ATK += data.addATK;
+                spec.DEF += data.addDEF;
+                spec.HIT += data.addHIT;
+                spec.AVD += data.addAVD;
+                spec.ADD_ATK += data.addATKCNT;
                 
-                HP = HP - data.damage;
-                if HP < 0 {
-                    HP = 0;
+                spec.HP = spec.HP - data.damage;
+                if spec.HP < 0 {
+                    spec.HP = 0;
                 }
             }
         }
     }
-    func allCancelJammings() {
+    func procCancel_jam() -> Spec {
+        var s = spec;
         for jam in jammings {
             
             // ステータスに反映
-            HP -= jam.addHP;
-            ATK -= jam.addATK;
-            DEF -= jam.addDEF;
-            HIT -= jam.addHIT;
-            AVD -= jam.addAVD;
-            ADD_ATK -= jam.addATKCNT;
+            s.HP -= jam.addHP;
+            s.ATK -= jam.addATK;
+            s.DEF -= jam.addDEF;
+            s.HIT -= jam.addHIT;
+            s.AVD -= jam.addAVD;
+            s.ADD_ATK -= jam.addATKCNT;
+        }
+        return s;
+    }
+    func allCancelJammings() -> Spec {
+        for jam in jammings {
+            
+            // ステータスに反映
+            spec.HP -= jam.addHP;
+            spec.ATK -= jam.addATK;
+            spec.DEF -= jam.addDEF;
+            spec.HIT -= jam.addHIT;
+            spec.AVD -= jam.addAVD;
+            spec.ADD_ATK -= jam.addATKCNT;
         }
         jammings = [];
+        return spec;
     }
 
     struct Enhanced {
@@ -410,15 +530,21 @@ class CharBase : SKSpriteNode {
         var addAVD: Int = 0;
         var addATKCNT: Int = 0;
         var lastTrun: Int = 0;
+        var specBefor = Spec();
+        var specAfter = Spec();
     }
     var enhances: [Enhanced] = [];
     
-    func procAction_enh(enh: [CharBtlAction.Enh]) -> [Enhanced] {
+    func procAction_enh(enh: [CharBtlAction.Enh], specBefor: Spec)
+        -> (result: [Enhanced], specAfter: Spec)
+    {
         var result: [Enhanced] = [];
+        var specWork = specBefor;
         for i in 0 ..< enh.count {
             var data = Enhanced();
             data.content = enh[i];
             data.lastTrun = enh[i].turn;
+            data.specBefor = specWork;
             
             // 強さ取得
             let (power_TypeRatio: Int, power_TypeConst: Int) = calcPower(Int(enh[i].power), seedType: enh[i].seedType, char: self);
@@ -435,9 +561,17 @@ class CharBase : SKSpriteNode {
             case .atkcnt:
                 data.addATKCNT = power_TypeConst;
             }
+            specWork.ATK += data.addATK;
+            specWork.DEF += data.addDEF;
+            specWork.HIT += data.addHIT;
+            specWork.AVD += data.addAVD;
+            specWork.ADD_ATK += data.addATKCNT;
+            
+            data.specAfter = specWork;
+
             result.append(data);
         }
-        return result;
+        return (result, specWork);
     }
     func addEnhanced(enh: [Enhanced]) {
         for data in enh {
@@ -445,27 +579,42 @@ class CharBase : SKSpriteNode {
             
             // ステータスに反映
             if data.content.execTiming == CharBtlAction.ExecTiming.jastNow {
-                HP += data.addHP;
-                ATK += data.addATK;
-                DEF += data.addDEF;
-                HIT += data.addHIT;
-                AVD += data.addAVD;
-                ADD_ATK += data.addATKCNT;
+                spec.HP += data.addHP;
+                spec.ATK += data.addATK;
+                spec.DEF += data.addDEF;
+                spec.HIT += data.addHIT;
+                spec.AVD += data.addAVD;
+                spec.ADD_ATK += data.addATKCNT;
             }
         }
     }
-    func allCancelEnhanced() {
+    func procCancel_enh() -> Spec {
+        var s = spec;
         for enh in enhances {
             
             // ステータスに反映
-            HP -= enh.addHP;
-            ATK -= enh.addATK;
-            DEF -= enh.addDEF;
-            HIT -= enh.addHIT;
-            AVD -= enh.addAVD;
-            ADD_ATK -= enh.addATKCNT;
+            s.HP -= enh.addHP;
+            s.ATK -= enh.addATK;
+            s.DEF -= enh.addDEF;
+            s.HIT -= enh.addHIT;
+            s.AVD -= enh.addAVD;
+            s.ADD_ATK -= enh.addATKCNT;
+        }
+        return s;
+    }
+    func allCancelEnhanced() -> Spec {
+        for enh in enhances {
+            
+            // ステータスに反映
+            spec.HP -= enh.addHP;
+            spec.ATK -= enh.addATK;
+            spec.DEF -= enh.addDEF;
+            spec.HIT -= enh.addHIT;
+            spec.AVD -= enh.addAVD;
+            spec.ADD_ATK -= enh.addATKCNT;
         }
         enhances = [];
+        return spec;
     }
     
     struct Skilled {
@@ -474,31 +623,53 @@ class CharBase : SKSpriteNode {
         var def: [Defenced] = [];
         var jam: [Jamming] = [];
         var enh: [Enhanced] = [];
+        var specBefor_executer = Spec();
+        var specAfter_executer = Spec();
+        var specBefor_target = Spec();
+        var specAfter_target = Spec();
     }
     var skilleds: [Skilled] = [];
     
-    func procAction_skl(skl: [CharBtlAction.Skl], target: CharBase)
-        -> [Skilled]
+    func procAction_skl(skl: [CharBtlAction.Skl], specBefor_executer: Spec, specBefor_target: Spec, specBase_target: Spec, targetDefences: [Defenced])
+        -> (result: [Skilled], specAfter_executer: Spec, specAfter_target: Spec, defsAfter_target: [Defenced])
     {
         var result: [Skilled] = [];
+        var specWork_executer = specBefor_executer;
+        var specWork_target = specBefor_target;
+        var defsWork_target = targetDefences;
         for i in 0 ..< skl.count {
             var data = Skilled();
             data.type = skl[i].type;
+            data.specBefor_executer = specWork_executer;
+            data.specBefor_target = specWork_target;
+            
             switch skl[i].type {
             case .atk:
-                data.atk = procAction_atk(skl[i].atk, target: target);
+                var ret = procAction_atk(skl[i].atk, _attack: specWork_executer.ATK, targetSpecBefor: specWork_target, targetDefences: defsWork_target);
+                data.atk = ret.result;
+                specWork_target = ret.specAfter;
+                defsWork_target = ret.defsAfter;
             case .def:
-                data.def = procAction_def(skl[i].def);
+                var ret = procAction_def(skl[i].def, specBefor: specWork_executer);
+                data.def = ret.result;
+                specWork_executer = ret.specAfter;
             case .jam:
-                data.jam = procAction_jam(skl[i].jam, target: target);
+                var ret = procAction_jam(skl[i].jam, specBase: specBase_target, specBefor: specWork_target);
+                data.jam = ret.result;
+                specWork_target = ret.specAfter;
             case .enh:
-                data.enh = procAction_enh(skl[i].enh);
+                var ret = procAction_enh(skl[i].enh, specBefor: specWork_executer);
+                data.enh = ret.result;
+                specWork_executer = ret.specAfter;
             default:
                 break;
             }
+            data.specAfter_executer = specWork_executer;
+            data.specAfter_target = specWork_target;
+            
             result.append(data);
         }
-        return result;
+        return (result, specWork_executer, specWork_target, defsWork_target);
     }
     func addSkilled(skl: [Skilled]) {
         for data in skl {
@@ -532,19 +703,19 @@ class CharBase : SKSpriteNode {
         case .constant:
             power_TypeRatio = power_TypeConst;
         case .atkNow:
-            power_TypeRatio = (char.ATK * Int(power) / 100);
+            power_TypeRatio = (char.spec.ATK * Int(power) / 100);
         case .atkBase:
-            power_TypeRatio = (char.ATK_base * Int(power) / 100);
+            power_TypeRatio = (char.spec_base.ATK * Int(power) / 100);
         case .defNow:
-            power_TypeRatio = (char.DEF * Int(power) / 100);
+            power_TypeRatio = (char.spec.DEF * Int(power) / 100);
         case .defBase:
-            power_TypeRatio = (char.DEF_base * Int(power) / 100);
+            power_TypeRatio = (char.spec_base.DEF * Int(power) / 100);
         case .lasthp:
-            power_TypeRatio = (char.HP * Int(power) / 100);
+            power_TypeRatio = (char.spec.HP * Int(power) / 100);
         case .maxhp:
-            power_TypeRatio = (char.HP_base * Int(power) / 100);
+            power_TypeRatio = (char.spec_base.HP * Int(power) / 100);
         case .subhp:
-            power_TypeRatio = ((char.HP_base - char.HP) * Int(power) / 100);
+            power_TypeRatio = ((char.spec_base.HP - char.spec.HP) * Int(power) / 100);
         }
         return (power_TypeRatio, power_TypeConst);
     }
@@ -562,12 +733,12 @@ class CharBase : SKSpriteNode {
                 
                 // ステータスに反映
                 let jamming = jammings[i];
-                HP -= jamming.addHP;
-                ATK -= jamming.addATK;
-                DEF -= jamming.addDEF;
-                HIT -= jamming.addHIT;
-                AVD -= jamming.addAVD;
-                ADD_ATK -= jamming.addATKCNT;
+                spec.HP -= jamming.addHP;
+                spec.ATK -= jamming.addATK;
+                spec.DEF -= jamming.addDEF;
+                spec.HIT -= jamming.addHIT;
+                spec.AVD -= jamming.addAVD;
+                spec.ADD_ATK -= jamming.addATKCNT;
 
                 jammings.removeAtIndex(i);
             }
@@ -584,35 +755,18 @@ class CharBase : SKSpriteNode {
                 
                 // ステータスに反映
                 let enhance = enhances[i];
-                HP -= enhance.addHP;
-                ATK -= enhance.addATK;
-                DEF -= enhance.addDEF;
-                HIT -= enhance.addHIT;
-                AVD -= enhance.addAVD;
-                ADD_ATK -= enhance.addATKCNT;
+                spec.HP -= enhance.addHP;
+                spec.ATK -= enhance.addATK;
+                spec.DEF -= enhance.addDEF;
+                spec.HIT -= enhance.addHIT;
+                spec.AVD -= enhance.addAVD;
+                spec.ADD_ATK -= enhance.addATKCNT;
                 
                 enhances.removeAtIndex(i);
             }
         }
     }
     
-    func calcATK() -> Int {
-        // エンハンス時にステータスの値変更したのでそのまま使う
-        return ATK;
-    }
-    
-    func calcDEF(consumeDefenceds: Bool = true) -> Int {
-        // エンハンス時にステータスの値変更したのでそのまま使う
-        var def = DEF;
-        if consumeDefenceds {
-            if defenceds.count > 0 {
-                var defence = defenceds[defenceds.count-1];
-                def += defence.addDef;
-            }
-        }
-        return def;
-    }
-
     func posUpdate(pos: CGPoint) {
         self.position = pos;
         self.position_base = pos;
@@ -630,6 +784,6 @@ class CharBase : SKSpriteNode {
     }
     
     func isDead() -> Bool {
-        return (HP <= 0) ? true : false;
+        return (spec.HP <= 0) ? true : false;
     }
 }

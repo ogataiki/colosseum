@@ -109,16 +109,16 @@ class CharHardbodyFemale
         
         
         // 特技
-        // 現在攻撃力の5.0倍で1回攻撃
+        // 基本攻撃力の3.0倍で1回攻撃
         var atk_3 = CharBtlAction.Atk();
-        atk_3.atkPower = 500.0;
+        atk_3.atkPower = 300.0;
         var skl_1 = CharBtlAction.Skl();
         skl_1.type = CharBtlAction.ActType.atk;
         skl_1.atk.append(atk_3);
         
         var act_5 = CharBase.Action();
         act_5.type = CharBase.ActionType.skl;
-        act_5.name = "全力強撃";
+        act_5.name = "無慈悲強撃";
         act_5.action.type = CharBtlAction.ActType.atk;
         act_5.action.skl.append(skl_1);
         act_5.cost = act_5.action.sklCost;
