@@ -11,9 +11,7 @@ final class SceneManager
         case prologue = 0
         case home
         case char_select
-        case story_battle_befor
         case battle
-        case story_battle_after
         case battle_result
         case pvp_match
     }
@@ -61,12 +59,8 @@ final class SceneManager
             return HomeScene.unarchiveFromFile(sks) as? HomeScene;
         case Scenes.char_select:
             return CharSelectScene.unarchiveFromFile(sks) as? CharSelectScene;
-        case Scenes.story_battle_befor:
-            return StoryPreviewScene.unarchiveFromFile(sks) as? StoryPreviewScene;
         case Scenes.battle:
             return BattleScene.unarchiveFromFile(sks) as? BattleScene;
-        case Scenes.story_battle_after:
-            return StoryPreviewScene.unarchiveFromFile(sks) as? StoryPreviewScene;
         case Scenes.battle_result:
             return BattleResultScene.unarchiveFromFile(sks) as? BattleResultScene;
         case Scenes.pvp_match:

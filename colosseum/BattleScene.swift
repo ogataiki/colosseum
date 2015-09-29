@@ -5,14 +5,16 @@ class BattleScene: SKScene {
     var gameManager = GameManager.instance;
     
     enum SceneStatus: Int {
-        case stock = 1
+        case pretreat = 0
+        case stock
         case tactical
         case melee
         case finish
         
+        case animation_wait
         case debug = -1
     }
-    var scene_status = SceneStatus.stock;
+    var scene_status = SceneStatus.pretreat;
     func changeStatus(status: SceneStatus) {
         if scene_status == SceneStatus.debug {
             debug_status = status;
@@ -110,7 +112,12 @@ class BattleScene: SKScene {
         
         enemyInit();
         
-        gaugeInit();
+        changeStatus(SceneStatus.animation_wait);
+        enemyCutoutAnimation { () -> Void in
+            self.gaugeCutinAnimation { () -> Void in
+                self.changeStatus(SceneStatus.stock);
+            }
+        }
     }
     
     func gaugeInit() {
@@ -119,22 +126,45 @@ class BattleScene: SKScene {
         gauge.initGauge_lo(color: UIColor.redColor(), zPos:ZCtrl.gauge_lo.rawValue);
         gauge.resetProgress(0.0);
         gauge.changeAnchorPoint(CGPointMake(0.5, 0.5));
-        gauge.changePosition(self.view!.center);
+        gauge.changePosition(CGPointMake(self.size.width*0.25, self.size.height*0.5));
+        gauge.alpha = 0.0;
         self.addChild(gauge);
         
         rise_bar = SKSpriteNode(color: UIColor.blackColor(), size: CGSizeMake(36, 5));
         rise_bar.position = CGPointMake(gauge.position.x, gauge.position.y - gauge.size.height*0.5);
         rise_bar.zPosition = ZCtrl.gauge_rise_bar.rawValue;
-        rise_bar.alpha = 0.5;
+        rise_bar.alpha = 0.0;
         self.addChild(rise_bar);
         
         attack_count_lbl = SKLabelNode(text: "0");
         attack_count_lbl.position = CGPointMake(gauge.position.x, gauge.position.y - gauge.size.height*0.65);
+        attack_count_lbl.alpha = 0.0;
         self.addChild(attack_count_lbl);
         
         reach_frame = reach_base;
         rise_speed = rise_speed_base;
         gauge.updateProgress(100);
+    }
+    func gaugeCutinAnimation(callback: () -> Void) {
+        gaugeInit();
+        let move = SKAction.moveToX(gauge.position.x - self.size.width, duration: 0.0);
+        let move2 = SKAction.moveToX(gauge.position.x, duration: 0.3);
+        let endf = SKAction.runBlock { () -> Void in
+            self.rise_bar.alpha = 0.5;
+            self.attack_count_lbl.alpha = 1.0;
+            callback();
+        }
+        gauge.runAction(SKAction.sequence([move, move2, endf]));
+    }
+    func gaugeCutoutAnimation(callback: () -> Void) {
+        self.rise_bar.alpha = 0.0;
+        self.attack_count_lbl.alpha = 0.0;
+        let move = SKAction.moveToX(gauge.position.x - self.size.width, duration: 0.3);
+        let endf = SKAction.runBlock { () -> Void in
+            self.gaugeRemove();
+            callback();
+        }
+        gauge.runAction(SKAction.sequence([move, endf]));
     }
     func gaugeRemove() {
         if let ui = gauge {
@@ -408,6 +438,42 @@ class BattleScene: SKScene {
         
         enemy_char.refleshStatus();
     }
+    func enemyCutinAnimation(callback: () -> Void) {
+        enemy_char.gaugeHP.alpha = 0.0;
+        enemy_char.labelHP.alpha = 0.0;
+        enemy_char.labelATK.alpha = 0.0;
+        enemy_char.labelDEF.alpha = 0.0;
+        enemy_char.labelHIT.alpha = 0.0;
+        enemy_char.labelAVD.alpha = 0.0;
+        enemy_char.labelADDATK.alpha = 0.0;
+        let move = SKAction.moveToX(enemy_char.position_base.x - self.size.width, duration: 0.0);
+        let move2 = SKAction.moveToX(enemy_char.position_base.x, duration: 0.3);
+        let endf = SKAction.runBlock { () -> Void in
+            self.enemy_char.gaugeHP.alpha = 1.0;
+            self.enemy_char.labelHP.alpha = 1.0;
+            self.enemy_char.labelATK.alpha = 1.0;
+            self.enemy_char.labelDEF.alpha = 1.0;
+            self.enemy_char.labelHIT.alpha = 1.0;
+            self.enemy_char.labelAVD.alpha = 1.0;
+            self.enemy_char.labelADDATK.alpha = 1.0;
+            callback();
+        }
+        enemy_char.runAction(SKAction.sequence([move, move2, endf]));
+    }
+    func enemyCutoutAnimation(callback: () -> Void) {
+        enemy_char.gaugeHP.alpha = 0.0;
+        enemy_char.labelHP.alpha = 0.0;
+        enemy_char.labelATK.alpha = 0.0;
+        enemy_char.labelDEF.alpha = 0.0;
+        enemy_char.labelHIT.alpha = 0.0;
+        enemy_char.labelAVD.alpha = 0.0;
+        enemy_char.labelADDATK.alpha = 0.0;
+        let move = SKAction.moveToX(enemy_char.position_base.x - self.size.width, duration: 0.3);
+        let endf = SKAction.runBlock { () -> Void in
+            callback();
+        }
+        enemy_char.runAction(SKAction.sequence([move, endf]));
+    }
     
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
         /* Called when a touch begins */
@@ -416,12 +482,21 @@ class BattleScene: SKScene {
             let location = touch.locationInNode(self)
             
             switch(scene_status) {
+            
+            case .pretreat:
+                break;
                 
             case .stock:
                 
                 if reach_frame < rise_frame {
                     
-                    tacticalStart();
+                    // ui入れ替え
+                    changeStatus(SceneStatus.animation_wait);
+                    gaugeCutoutAnimation { () -> Void in
+                        self.enemyCutinAnimation({ () -> Void in
+                            self.tacticalStart();
+                        })
+                    }
                 }
                 else {
                     reach_frame = rise_frame;
@@ -447,6 +522,8 @@ class BattleScene: SKScene {
             case .finish:
                 SceneManager.changeScene(SceneManager.Scenes.home);
                 
+            case .animation_wait:
+                break;
             case .debug:
                 break;
             }
@@ -458,6 +535,8 @@ class BattleScene: SKScene {
         /* Called before each frame is rendered */
         
         switch(scene_status) {
+        case .pretreat:
+            break;
         case .stock:
             updateStock();
         case .tactical:
@@ -465,6 +544,8 @@ class BattleScene: SKScene {
         case .melee:
             updateMelee();
         case .finish:
+            break;
+        case .animation_wait:
             break;
         case .debug:
             break;
@@ -509,14 +590,11 @@ class BattleScene: SKScene {
     func tacticalStart() {
         
         changeStatus(SceneStatus.tactical);
-        
-        // ui入れ替え
-        gaugeRemove();
         tacticalUIInit();
-        
+
         tc_list = [];
         tc_lastStock = attack_list.count;
-        ui_playerLastStock.text = "lastStock:\(tc_lastStock)";
+        ui_playerLastStock.text = "lastStock:\(self.tc_lastStock)";
     }
     func tacticalAtk() {
         let cost = player_char.actions[CharBase.ActionType.atk.rawValue].action.atkCost;
@@ -783,12 +861,15 @@ class BattleScene: SKScene {
         else {
             
             // ゲージを初期化
-            gaugeInit();
-            
-            attack_list = [];
-            attack_count_lbl.text = "\(attack_list.count)"
-
-            changeStatus(SceneStatus.stock);
+            self.changeStatus(SceneStatus.animation_wait);
+            enemyCutoutAnimation({ () -> Void in
+                self.gaugeCutinAnimation { () -> Void in
+                    self.attack_list = [];
+                    self.attack_count_lbl.text = "\(self.attack_list.count)"
+                    
+                    self.changeStatus(SceneStatus.stock);
+                }
+            })
         }
     }
     

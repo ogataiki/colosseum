@@ -27,7 +27,6 @@
 		501FD5901BA1729200E99FCA /* SceneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501FD58F1BA1729200E99FCA /* SceneManager.swift */; };
 		501FD5921BA1742100E99FCA /* PrologueScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501FD5911BA1742100E99FCA /* PrologueScene.swift */; };
 		501FD5941BA1747D00E99FCA /* CharSelectScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501FD5931BA1747D00E99FCA /* CharSelectScene.swift */; };
-		501FD5961BA1752800E99FCA /* StoryPreviewScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501FD5951BA1752800E99FCA /* StoryPreviewScene.swift */; };
 		501FD5981BA175CF00E99FCA /* BattleScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501FD5971BA175CF00E99FCA /* BattleScene.swift */; };
 		501FD59A1BA175EF00E99FCA /* BattleResultScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501FD5991BA175EF00E99FCA /* BattleResultScene.swift */; };
 		501FD59C1BA1761C00E99FCA /* PvPMatchScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501FD59B1BA1761C00E99FCA /* PvPMatchScene.swift */; };
@@ -78,7 +77,6 @@
 		501FD58F1BA1729200E99FCA /* SceneManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SceneManager.swift; sourceTree = "<group>"; };
 		501FD5911BA1742100E99FCA /* PrologueScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrologueScene.swift; sourceTree = "<group>"; };
 		501FD5931BA1747D00E99FCA /* CharSelectScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharSelectScene.swift; sourceTree = "<group>"; };
-		501FD5951BA1752800E99FCA /* StoryPreviewScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoryPreviewScene.swift; sourceTree = "<group>"; };
 		501FD5971BA175CF00E99FCA /* BattleScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BattleScene.swift; sourceTree = "<group>"; };
 		501FD5991BA175EF00E99FCA /* BattleResultScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BattleResultScene.swift; sourceTree = "<group>"; };
 		501FD59B1BA1761C00E99FCA /* PvPMatchScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PvPMatchScene.swift; sourceTree = "<group>"; };
@@ -205,7 +203,6 @@
 				501FD5911BA1742100E99FCA /* PrologueScene.swift */,
 				501EF6201B9D086F00CD81B8 /* HomeScene.swift */,
 				501FD5931BA1747D00E99FCA /* CharSelectScene.swift */,
-				501FD5951BA1752800E99FCA /* StoryPreviewScene.swift */,
 				501FD5971BA175CF00E99FCA /* BattleScene.swift */,
 				501FD5991BA175EF00E99FCA /* BattleResultScene.swift */,
 				501FD59B1BA1761C00E99FCA /* PvPMatchScene.swift */,
@@ -380,7 +377,6 @@
 				501FD5941BA1747D00E99FCA /* CharSelectScene.swift in Sources */,
 				501FD59C1BA1761C00E99FCA /* PvPMatchScene.swift in Sources */,
 				501FD5891BA117CD00E99FCA /* GCHelper.swift in Sources */,
-				501FD5961BA1752800E99FCA /* StoryPreviewScene.swift in Sources */,
 				5001755E1B8E86BB00567C73 /* AppDelegate.swift in Sources */,
 				500175821B8E876A00567C73 /* Gauge.swift in Sources */,
 			);
