@@ -150,6 +150,7 @@ class BattleScene: SKScene {
         let move = SKAction.moveToX(gauge.position.x - self.size.width, duration: 0.0);
         let move2 = SKAction.moveToX(gauge.position.x, duration: 0.3);
         let endf = SKAction.runBlock { () -> Void in
+            self.gauge.alpha = 1.0;
             self.rise_bar.alpha = 0.5;
             self.attack_count_lbl.alpha = 1.0;
             callback();
@@ -180,6 +181,16 @@ class BattleScene: SKScene {
     
     func tacticalUIInit() {
         
+        let ui_positions: [CGPoint] = [
+            CGPointMake(self.size.width*0.3, self.size.height*0.5),
+            CGPointMake(self.size.width*0.7, self.size.height*0.5),
+            CGPointMake(self.size.width*0.7, self.size.height*0.65),
+            CGPointMake(self.size.width*0.3, self.size.height*0.65),
+            CGPointMake(self.size.width*0.5, self.size.height*0.775),
+            CGPointMake(self.size.width*0.25, self.size.height*0.9),
+            CGPointMake(self.size.width*0.75, self.size.height*0.9)
+        ];
+        
         ui_playerLastStock = SKLabelNode(text: "lastStock:\(attack_list.count)");
         ui_playerLastStock.position = CGPointMake(self.size.width*0.5, self.size.height*0.85);
         ui_playerLastStock.fontSize = 16;
@@ -193,7 +204,7 @@ class BattleScene: SKScene {
         // UI系のy座標は上下逆
         
         ui_tacticalAtk = UIButton(frame: CGRectMake(0,0, self.view!.frame.size.width*0.3, self.view!.frame.size.height*0.1));
-        ui_tacticalAtk.layer.position = CGPointMake(self.size.width*0.25, self.size.height*0.4);
+        ui_tacticalAtk.layer.position = ui_positions[0];
         ui_tacticalAtk.backgroundColor = UIColor.brownColor();
         ui_tacticalAtk.titleLabel!.lineBreakMode = NSLineBreakMode.ByWordWrapping;
         let actionAtk = player_char.actions[CharBase.ActionType.atk.rawValue];
@@ -206,7 +217,7 @@ class BattleScene: SKScene {
         self.view!.addSubview(ui_tacticalAtk);
         
         ui_tacticalDef = UIButton(frame: CGRectMake(0,0, ui_tacticalAtk.frame.size.width, ui_tacticalAtk.frame.size.height));
-        ui_tacticalDef.layer.position = CGPointMake(self.size.width*0.75, self.size.height*0.4);
+        ui_tacticalDef.layer.position = ui_positions[1];
         ui_tacticalDef.backgroundColor = UIColor.brownColor();
         ui_tacticalDef.titleLabel!.lineBreakMode = NSLineBreakMode.ByWordWrapping;
         let actionDef = player_char.actions[CharBase.ActionType.def.rawValue];
@@ -219,7 +230,7 @@ class BattleScene: SKScene {
         self.view!.addSubview(ui_tacticalDef);
         
         ui_tacticalJam = UIButton(frame: CGRectMake(0,0, ui_tacticalAtk.frame.size.width, ui_tacticalAtk.frame.size.height));
-        ui_tacticalJam.layer.position = CGPointMake(self.size.width*0.75, self.size.height*0.55);
+        ui_tacticalJam.layer.position = ui_positions[2];
         ui_tacticalJam.backgroundColor = UIColor.brownColor();
         ui_tacticalJam.titleLabel!.lineBreakMode = NSLineBreakMode.ByWordWrapping;
         let actionJam = player_char.actions[CharBase.ActionType.jam.rawValue];
@@ -232,7 +243,7 @@ class BattleScene: SKScene {
         self.view!.addSubview(ui_tacticalJam);
         
         ui_tacticalEnh = UIButton(frame: CGRectMake(0,0, ui_tacticalAtk.frame.size.width, ui_tacticalAtk.frame.size.height));
-        ui_tacticalEnh.layer.position = CGPointMake(self.size.width*0.25, self.size.height*0.55);
+        ui_tacticalEnh.layer.position = ui_positions[3];
         ui_tacticalEnh.backgroundColor = UIColor.brownColor();
         ui_tacticalEnh.titleLabel!.lineBreakMode = NSLineBreakMode.ByWordWrapping;
         let actionEnh = player_char.actions[CharBase.ActionType.enh.rawValue];
@@ -245,7 +256,7 @@ class BattleScene: SKScene {
         self.view!.addSubview(ui_tacticalEnh);
         
         ui_tacticalSkl = UIButton(frame: CGRectMake(0,0, self.size.width*0.6, ui_tacticalAtk.frame.size.height*0.8));
-        ui_tacticalSkl.layer.position = CGPointMake(self.size.width*0.5, self.size.height*0.7);
+        ui_tacticalSkl.layer.position = ui_positions[4];
         ui_tacticalSkl.backgroundColor = UIColor.brownColor();
         ui_tacticalSkl.titleLabel!.lineBreakMode = NSLineBreakMode.ByWordWrapping;
         let actionSkl = player_char.actions[CharBase.ActionType.skl.rawValue];
@@ -288,7 +299,7 @@ class BattleScene: SKScene {
         
         
         ui_tacticalEnter = UIButton(frame: CGRectMake(0,0, self.view!.frame.size.width*0.4, self.view!.frame.size.height*0.1));
-        ui_tacticalEnter.layer.position = CGPointMake(self.size.width*0.25, self.size.height*0.85);
+        ui_tacticalEnter.layer.position = ui_positions[5];
         ui_tacticalEnter.backgroundColor = UIColor.greenColor();
         ui_tacticalEnter.setTitle("enter", forState: UIControlState.Normal)
         ui_tacticalEnter.setTitleColor(UIColor.blackColor(), forState: UIControlState.Normal)
@@ -298,7 +309,7 @@ class BattleScene: SKScene {
         self.view!.addSubview(ui_tacticalEnter);
         
         ui_tacticalReset = UIButton(frame: CGRectMake(0,0, self.view!.frame.size.width*0.4, self.view!.frame.size.height*0.1));
-        ui_tacticalReset.layer.position = CGPointMake(self.size.width*0.75, self.size.height*0.85);
+        ui_tacticalReset.layer.position = ui_positions[6];
         ui_tacticalReset.backgroundColor = UIColor.orangeColor();
         ui_tacticalReset.setTitle("reset", forState: UIControlState.Normal)
         ui_tacticalReset.setTitleColor(UIColor.blackColor(), forState: UIControlState.Normal)
@@ -356,7 +367,7 @@ class BattleScene: SKScene {
     func playerInit() {
         
         player_char = CharManager.getChar(gameManager.player_character.rawValue);
-        player_char.posUpdate(CGPointMake(self.size.width*0.85, self.size.height*0.9));
+        player_char.posUpdate(CGPointMake(self.size.width*0.85, self.size.height*0.8));
         player_char.setPlayer(v: true);
         player_char.zPosUpdate(0);
         self.addChild(player_char.gaugeHP);
@@ -401,7 +412,7 @@ class BattleScene: SKScene {
     func enemyInit() {
         
         enemy_char = CharManager.getChar(gameManager.enemy_character.rawValue);
-        enemy_char.posUpdate(CGPointMake(self.size.width*0.15, self.size.height*0.9));
+        enemy_char.posUpdate(CGPointMake(self.size.width*0.15, self.size.height*0.8));
         enemy_char.setPlayer(v: false);
         enemy_char.zPosUpdate(0);
         self.addChild(enemy_char.gaugeHP);
@@ -1698,7 +1709,7 @@ class BattleScene: SKScene {
         , callback: () -> Void)
     {
         var cutin = SKSpriteNode(color: UIColor.greenColor(), size: CGSizeMake(self.size.width, self.size.height*0.2));
-        cutin.position = CGPointMake(self.size.width*0.5, self.size.height*0.5);
+        cutin.position = CGPointMake(self.size.width*0.5, self.size.height*0.3);
         self.addChild(cutin);
         
         var contentText1 = "\(advantageChar.displayName)の有利行動";
