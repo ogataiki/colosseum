@@ -148,14 +148,14 @@ class BattleScene: SKScene {
     func gaugeCutinAnimation(callback: () -> Void) {
         gaugeInit();
         let move = SKAction.moveToX(gauge.position.x - self.size.width, duration: 0.0);
+        let fade = SKAction.fadeAlphaTo(1.0, duration: 0.0);
         let move2 = SKAction.moveToX(gauge.position.x, duration: 0.3);
         let endf = SKAction.runBlock { () -> Void in
-            self.gauge.alpha = 1.0;
             self.rise_bar.alpha = 0.5;
             self.attack_count_lbl.alpha = 1.0;
             callback();
         }
-        gauge.runAction(SKAction.sequence([move, move2, endf]));
+        gauge.runAction(SKAction.sequence([move, fade, move2, endf]));
     }
     func gaugeCutoutAnimation(callback: () -> Void) {
         self.rise_bar.alpha = 0.0;
@@ -874,13 +874,13 @@ class BattleScene: SKScene {
             // ゲージを初期化
             self.changeStatus(SceneStatus.animation_wait);
             enemyCutoutAnimation({ () -> Void in
-                self.gaugeCutinAnimation { () -> Void in
-                    self.attack_list = [];
-                    self.attack_count_lbl.text = "\(self.attack_list.count)"
-                    
-                    self.changeStatus(SceneStatus.stock);
-                }
             })
+            gaugeCutinAnimation { () -> Void in
+                self.attack_list = [];
+                self.attack_count_lbl.text = "\(self.attack_list.count)"
+                
+                self.changeStatus(SceneStatus.stock);
+            }
         }
     }
     
