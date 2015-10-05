@@ -5,42 +5,52 @@ class HomeScene: SKScene, SpeechDelegate {
     enum SceneStatus: Int {
         case pretreat = -1
         case idle = 0
-        case runTutorialSpeech
-        case waitTapTutorialSpeech
+        case runSpeech
+        case waitTapSpeech
     }
     var scene_status = SceneStatus.pretreat;
 
-    
+    var story_mgr = StoryManager.instance;
     
     //---------------
     // チュートリアル用
     
-    var tutorialSpeech: [String] = [
-        "案内するぞい。",
-        "それがワシの仕事じゃ。",
-        "（面倒じゃ・・・）",
-        "とりあえず、",
-        "戦うといい。",
-        "それしかやることはない。"
-    ];
-    var tutorialNavi: SpeechCtrl!;
-    func tutorialNaviStart() {
-        tutorialNavi = SpeechCtrl(_scene: self
+    var navi: SpeechCtrl!;
+    var speechRunning = StoryManager.SpeechNum.non;
+    var speechs: [String] = [];
+    func naviStart(num: StoryManager.SpeechNum) {
+        if num == StoryManager.SpeechNum.navi_home {
+            speechs = [story_mgr.getSpeech_naviHome()];
+        }
+        else {
+            speechs = story_mgr.getSpeechs(num);
+        }
+        if speechs.count <= 0 {
+            return;
+        }
+        speechRunning = num;
+        navi = SpeechCtrl(_scene: self
             , _speaker_image: "NaviChar"
             , _speaker_position: CGPointMake(self.size.width*0.85+self.size.width, self.size.height*0.4)
             , _zPosition: 0
-            , _speechs: tutorialSpeech
+            , _speechs: speechs
             , _delegate: self);
-        tutorialNavi.run();
-        scene_status = .runTutorialSpeech;
+        navi.run();
+        scene_status = .runSpeech;
     }
     func callbackSpeechFinish(index: Int) {
         
-        if index >= tutorialSpeech.count {
+        if speechRunning == StoryManager.SpeechNum.navi_home {
             scene_status = .idle;
         }
         else {
-            scene_status = .waitTapTutorialSpeech;
+            if index+1 >= speechs.count {
+                story_mgr.finishSave(speechRunning.rawValue);
+                scene_status = .idle;
+            }
+            else {
+                scene_status = .waitTapSpeech;
+            }
         }
     }
     
@@ -51,7 +61,15 @@ class HomeScene: SKScene, SpeechDelegate {
         // これしないと孫要素の表示順がおかしくなる
         view.ignoresSiblingOrder = false;
         
-        tutorialNaviStart();
+        if false == story_mgr.finishLoad(StoryManager.SpeechNum.tutorial_navi_home_1.rawValue) {
+            naviStart(StoryManager.SpeechNum.tutorial_navi_home_1);
+        }
+        else if false == story_mgr.finishLoad(StoryManager.SpeechNum.tutorial_navi_home_2.rawValue) {
+            naviStart(StoryManager.SpeechNum.tutorial_navi_home_2);
+        }
+        else {
+            naviStart(StoryManager.SpeechNum.navi_home);
+        }
     }
     
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
@@ -64,15 +82,15 @@ class HomeScene: SKScene, SpeechDelegate {
             case .idle:
                 SceneManager.changeScene(SceneManager.Scenes.battle);
                 
-            case .runTutorialSpeech:
+            case .runSpeech:
                 fallthrough
-            case .waitTapTutorialSpeech:
-                let sts = tutorialNavi.tap();
+            case .waitTapSpeech:
+                let sts = navi.tap();
                 switch sts {
                 case .runSpeech:
-                    scene_status = .runTutorialSpeech;
+                    scene_status = .runSpeech;
                 case .waitTap:
-                    scene_status = .waitTapTutorialSpeech;
+                    scene_status = .waitTapSpeech;
                 case .idle:
                     scene_status = .idle;
                 default:

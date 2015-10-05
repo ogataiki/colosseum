@@ -122,6 +122,7 @@ class SpeechCtrl {
         case .runSpeech:
             speechList[speechIndex].skip();
             status = .waitTap;
+            delegate.callbackSpeechFinish(speechIndex);
             
         case .waitTap:
             let index = speechIndex;
