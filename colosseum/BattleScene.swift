@@ -1,15 +1,18 @@
 import SpriteKit
 
-class BattleScene: SKScene {
+class BattleScene: SKScene, SpeechDelegate {
     
     var gameManager = GameManager.instance;
     
     enum SceneStatus: Int {
         case pretreat = 0
+        case speech_start
+        case speech_end
         case stock
         case tactical
         case melee
         case finish
+        case end
         
         case animation_wait
         case debug = -1
@@ -112,12 +115,7 @@ class BattleScene: SKScene {
         
         enemyInit();
         
-        changeStatus(SceneStatus.animation_wait);
-        enemyCutoutAnimation { () -> Void in
-            self.gaugeCutinAnimation { () -> Void in
-                self.changeStatus(SceneStatus.stock);
-            }
-        }
+        speech_battleStart();
     }
     
     func gaugeInit() {
@@ -497,6 +495,12 @@ class BattleScene: SKScene {
             case .pretreat:
                 break;
                 
+            case .speech_start:
+                fallthrough;
+            case .speech_end:
+                speechCtrl.tap();
+                break;
+
             case .stock:
                 
                 if reach_frame < rise_frame {
@@ -531,6 +535,9 @@ class BattleScene: SKScene {
                 break;
                 
             case .finish:
+                break;
+                
+            case .end:
                 SceneManager.changeScene(SceneManager.Scenes.home);
                 
             case .animation_wait:
@@ -548,6 +555,10 @@ class BattleScene: SKScene {
         switch(scene_status) {
         case .pretreat:
             break;
+        case .speech_start:
+            break;
+        case .speech_end:
+            break;
         case .stock:
             updateStock();
         case .tactical:
@@ -555,6 +566,8 @@ class BattleScene: SKScene {
         case .melee:
             updateMelee();
         case .finish:
+            break;
+        case .end:
             break;
         case .animation_wait:
             break;
@@ -866,7 +879,8 @@ class BattleScene: SKScene {
         if player_char.isDead() || enemy_char.isDead() {
             changeStatus(SceneStatus.finish);
             battleFinish({ () -> Void in
-                
+                self.changeStatus(SceneStatus.speech_end);
+                self.speech_battleEnd(self.player_char.isDead());
             });
         }
         else {
@@ -2222,6 +2236,76 @@ class BattleScene: SKScene {
         return ( CGFloat(arc4random_uniform(UINT32_MAX)) / CGFloat(UINT32_MAX) ) * (Max - Min) + Min;
     }
     
+    
+    
+    
+    var speechs: [String] = [];
+    var speechCtrl: SpeechCtrl!;
+    var speechIndex: Int = 0;
+    func speech_battleStart() {
+        speechIndex = 0;
+        speechs = enemy_char.speech_battleStart;
+        if speechs.count <= 0 {
+            return;
+        }
+        speechCtrl = SpeechCtrl(_scene: self
+            , _speaker_position: CGPointMake(self.size.width*0.5, self.size.height*0.9)
+            , _zPosition: 0
+            , _speechs: speechs
+            , _delegate: self);
+        speechCtrl.run();
+        scene_status = .speech_start;
+    }
+    func speech_battleEnd(win: Bool) {
+        speechIndex = 0;
+        if win {
+            speechs = enemy_char.speech_battleEnd_win;
+        }
+        else {
+            speechs = enemy_char.speech_battleEnd_lose;
+        }
+        if speechs.count <= 0 {
+            return;
+        }
+        speechCtrl = SpeechCtrl(_scene: self
+            , _speaker_position: CGPointMake(self.size.width*0.5, self.size.height*0.9)
+            , _zPosition: 0
+            , _speechs: speechs
+            , _delegate: self);
+        speechCtrl.run();
+        scene_status = .speech_end;
+    }
+    func callbackSpeechFinish(index: Int) {
+        enemy_char.runAction(SKAction.sequence([
+            SKAction.waitForDuration(1.0)
+            , SKAction.runBlock({ () -> Void in
+                self.speechCtrl.tap();
+                self.speechNext(index);
+            })
+        ]));
+
+    }
+    func speechNext(index: Int) {
+        if index+1 >= speechs.count {
+            switch scene_status {
+            case .speech_start:
+                changeStatus(SceneStatus.animation_wait);
+                enemyCutoutAnimation { () -> Void in
+                    self.gaugeCutinAnimation { () -> Void in
+                        self.changeStatus(SceneStatus.stock);
+                    }
+                }
+                break;
+            case .speech_end:
+                changeStatus(SceneStatus.end);
+                break;
+            default:
+                break;
+            }
+        }
+        self.speechIndex++;
+    }
+
     
     
     //------

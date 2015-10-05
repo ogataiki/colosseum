@@ -17,7 +17,7 @@ class SpeechCtrl {
     var targetScene: SKScene;
     
     var speaker: SKSpriteNode!;
-    var speaker_image: String;
+    var speaker_image: String!;
     var speaker_position: CGPoint;
     
     var zPosition: CGFloat = 0.0;
@@ -32,7 +32,7 @@ class SpeechCtrl {
     var delegate: SpeechDelegate;
 
     init (_scene: SKScene
-        , _speaker_image: String = "NaviChar"
+        , _speaker_image: String? = nil
         , _speaker_position: CGPoint? = nil
         , _zPosition: CGFloat = 0.0
         , _speechs: [String] = []
@@ -55,10 +55,15 @@ class SpeechCtrl {
     func run() {
         speechIndex = 0;
         
-        speaker = SKSpriteNode(imageNamed: speaker_image);
-        speaker.position = speaker_position;
-        speaker.zPosition = zPosition;
-        targetScene.addChild(speaker);
+        if let speaker_name = speaker_image {
+            speaker = SKSpriteNode(imageNamed: speaker_image);
+            speaker.position = speaker_position;
+            speaker.zPosition = zPosition;
+            targetScene.addChild(speaker);
+        }
+        else {
+            speaker = nil;
+        }
 
         for var i = speechs.count-1; i >= 0; --i {
             let speech = SpeechBase(scene: targetScene
@@ -71,24 +76,29 @@ class SpeechCtrl {
                 , callback: speechCallback);
             speechList.insert(speech, atIndex: 0);
         }
-
-        var action: SKAction;
-        if let a = speaker_inAction {
-            action = SKAction.sequence([a
-                , SKAction.runBlock { () -> Void in
-                    self.speechStart(0);
-                }]);
+        
+        if let s = speaker {
+            var action: SKAction;
+            if let a = speaker_inAction {
+                action = SKAction.sequence([a
+                    , SKAction.runBlock { () -> Void in
+                        self.speechStart(0);
+                    }]);
+            }
+            else {
+                action = SKAction.sequence([
+                    SKAction.moveToX(targetScene.size.width*0.88, duration: 0.2)
+                    , SKAction.moveToX(targetScene.size.width*0.83, duration: 0.1)
+                    , SKAction.moveToX(targetScene.size.width*0.85, duration: 0.05)
+                    , SKAction.runBlock { () -> Void in
+                        self.speechStart(0);
+                    }]);
+            }
+            speaker.runAction(action);
         }
         else {
-            action = SKAction.sequence([
-                SKAction.moveToX(targetScene.size.width*0.88, duration: 0.2)
-                , SKAction.moveToX(targetScene.size.width*0.83, duration: 0.1)
-                , SKAction.moveToX(targetScene.size.width*0.85, duration: 0.05)
-                , SKAction.runBlock { () -> Void in
-                    self.speechStart(0);
-                }]);
+            self.speechStart(0);
         }
-        speaker.runAction(action);
     }
     
     
@@ -101,7 +111,12 @@ class SpeechCtrl {
         }
         
         speechIndex = index;
-        speechList[index].setPosition(CGPointMake(targetScene.size.width*0.5, speaker.position.y + speaker.size.height*0.6));
+        if let s = speaker {
+            speechList[index].setPosition(CGPointMake(targetScene.size.width*0.5, speaker.position.y + speaker.size.height*0.6));
+        }
+        else {
+            speechList[index].setPosition(speaker_position);
+        }
         speechList[index].run();
         
         status = .runSpeech;

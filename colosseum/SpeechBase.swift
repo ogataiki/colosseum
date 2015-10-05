@@ -9,7 +9,7 @@ class SpeechBase {
     
     var targetScene: SKScene;
     
-    var speechChar: SKSpriteNode;
+    var speechChar: SKSpriteNode!;
     
     var speech: String;
     var speechIndex: Int = 0;
@@ -27,7 +27,7 @@ class SpeechBase {
     var delayTime: CGFloat = 0.1;
     
     init (scene: SKScene
-        , speaker: SKSpriteNode
+        , speaker: SKSpriteNode? = nil
         , balloon: SKSpriteNode? = nil
         , text: String
         , index: Int = 0

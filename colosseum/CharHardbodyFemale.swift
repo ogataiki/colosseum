@@ -123,5 +123,25 @@ class CharHardbodyFemale
         act_5.action.skl.append(skl_1);
         act_5.cost = act_5.action.sklCost;
         data.actions.append(act_5);
+        
+        
+        
+        data.speech_battlePre = [
+            "私と戦うのはおすすめしないわ",
+            "止めもしないけれど"
+        ];
+        
+        data.speech_battleStart = [
+            "私は強いわよ",
+            "力でねじ伏せてあげるわ"
+        ];
+        
+        data.speech_battleEnd_win = [
+            "当然よね。私は強いもの"
+        ];
+        
+        data.speech_battleEnd_lose = [
+            "もういや。しにたい"
+        ];
     }
 }

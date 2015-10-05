@@ -75,7 +75,7 @@ class CharMob
         jam_1.seedType = CharBtlAction.SeedType.constant;
         jam_1.power = 1.0;
         jam_1.turn = 2;
-        jam_1.addDamage = 0.0;
+        jam_1.addDamage = 15.0;
         var act_3 = CharBase.Action();
         act_3.action.type = CharBtlAction.ActType.jam;
         act_3.action.jam.append(jam_1);
@@ -122,5 +122,21 @@ class CharMob
         act_5.cost = act_5.action.sklCost;
         data.actions.append(act_5);
         
+        
+        data.speech_battlePre = [];
+        
+        data.speech_battleStart = [
+            "新人？ウヒョー！カモだぜ！",
+            "俺の妨害にびびんじゃねーぞwww"
+        ];
+        
+        data.speech_battleEnd_win = [
+            "ザッコwwwマジwww"
+        ];
+
+        data.speech_battleEnd_lose = [
+            "オメー覚えとけよ"
+        ];
+
     }
 }

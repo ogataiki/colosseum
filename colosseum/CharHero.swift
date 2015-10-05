@@ -138,5 +138,14 @@ class CharHero
         act_5.cost = act_5.action.sklCost;
         data.actions.append(act_5);
         
+        
+        data.speech_battlePre = [];
+        
+        data.speech_battleStart = [];
+        
+        data.speech_battleEnd_win = [];
+
+        data.speech_battleEnd_lose = [];
+
     }
 }

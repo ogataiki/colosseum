@@ -14,6 +14,10 @@ class CharBase : SKSpriteNode {
     }
     
     var displayName: String = "";
+    var speech_battlePre: [String] = [];
+    var speech_battleStart: [String] = [];
+    var speech_battleEnd_win: [String] = [];
+    var speech_battleEnd_lose: [String] = [];
     
     struct Spec {
         var HP: Int = 3000;
