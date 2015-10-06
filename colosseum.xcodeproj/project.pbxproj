@@ -38,6 +38,7 @@
 		503885A61B96A704001CE8B3 /* sparkline.png in Resources */ = {isa = PBXBuildFile; fileRef = 503885A51B96A704001CE8B3 /* sparkline.png */; };
 		503972E51B9050A9009AB94F /* CharBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 503972E41B9050A9009AB94F /* CharBase.swift */; };
 		50483EE91B940EC2001638CE /* CharBtlAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50483EE81B940EC2001638CE /* CharBtlAction.swift */; };
+		50A30B851BC3490000643D43 /* CharFat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A30B841BC3490000643D43 /* CharFat.swift */; };
 		50ACE3AA1BA8EC5B000C8107 /* SpeechCtrl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50ACE3A91BA8EC5B000C8107 /* SpeechCtrl.swift */; };
 		50DC3D711BAA373E008BEE38 /* CharMob.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50DC3D701BAA373E008BEE38 /* CharMob.swift */; };
 /* End PBXBuildFile section */
@@ -88,6 +89,7 @@
 		503885A51B96A704001CE8B3 /* sparkline.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = sparkline.png; path = Particles/sparkline.png; sourceTree = "<group>"; };
 		503972E41B9050A9009AB94F /* CharBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharBase.swift; sourceTree = "<group>"; };
 		50483EE81B940EC2001638CE /* CharBtlAction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharBtlAction.swift; sourceTree = "<group>"; };
+		50A30B841BC3490000643D43 /* CharFat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharFat.swift; sourceTree = "<group>"; };
 		50ACE3A91BA8EC5B000C8107 /* SpeechCtrl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpeechCtrl.swift; sourceTree = "<group>"; };
 		50DC3D701BAA373E008BEE38 /* CharMob.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CharMob.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -191,6 +193,7 @@
 				50DC3D701BAA373E008BEE38 /* CharMob.swift */,
 				501FD58B1BA1197000E99FCA /* CharHero.swift */,
 				501FD58D1BA11B5B00E99FCA /* CharHardbodyFemale.swift */,
+				50A30B841BC3490000643D43 /* CharFat.swift */,
 			);
 			name = Characters;
 			sourceTree = "<group>";
@@ -360,6 +363,7 @@
 				501FD5921BA1742100E99FCA /* PrologueScene.swift in Sources */,
 				501EF6211B9D086F00CD81B8 /* HomeScene.swift in Sources */,
 				50483EE91B940EC2001638CE /* CharBtlAction.swift in Sources */,
+				50A30B851BC3490000643D43 /* CharFat.swift in Sources */,
 				501FD5981BA175CF00E99FCA /* BattleScene.swift in Sources */,
 				50121F5D1B901AA80071F8EC /* SKActionEx.swift in Sources */,
 				50090CB61BA24FE80043F0C9 /* SKSendText.swift in Sources */,
