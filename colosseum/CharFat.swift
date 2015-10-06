@@ -120,8 +120,8 @@ class CharFat
         
         
         data.speech_battlePre = [
-            "どうせ俺はデブだよ",
-            "だから彼女もできない"
+            "どうせ俺はデブだよ！",
+            "だから彼女もできない！"
         ];
         
         data.speech_battleStart = [
@@ -130,8 +130,8 @@ class CharFat
         ];
         
         data.speech_battleEnd_win = [
-            "デブに負けるとかwww",
-            "デブ以下カワイソウwww"
+            "オレなんかに負けるとかwww",
+            "カワイソウwwwフヒwww"
         ];
         
         data.speech_battleEnd_lose = [

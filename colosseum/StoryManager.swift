@@ -15,14 +15,16 @@ final class StoryManager
         case tutorial_navi_home_2 = 2
         
         case navi_home = 3
+    
+        case navi_char_select = 4
         
-        case tutorial_battle_pre_Mob = 10
-        case tutorial_battle_start_Mob = 11
-        case tutorial_battle_end_Mob = 12
+        case tutorial_battle_pre_Mob = 100
+        case tutorial_battle_start_Mob = 101
+        case tutorial_battle_end_Mob = 102
 
-        case battle_pre_HardbodyFemale = 100
-        case battle_start_HardbodyFemale = 101
-        case battle_end_HardbodyFemale = 102
+        case battle_pre = 200
+        case battle_start = 201
+        case battle_end = 202
     }
     
     func getSpeechs(num: SpeechNum) -> [String] {
@@ -68,19 +70,32 @@ final class StoryManager
         return "";
     }
     
+    let speech_naviCharSelect: [String] = [
+        "戦う相手を選ぶのじゃ",
+    ];
+    func getSpeech_naviCharSelect() -> String {
+        if speech_naviCharSelect.count > 0 {
+            return speech_naviCharSelect[Int(arc4random()) % speech_naviCharSelect.count];
+        }
+        return "";
+    }
+
+    
     var SpeechKeyDic: [Int : String] = [
         SpeechNum.tutorial_navi_home_1.rawValue         : "tutorial_navi_home_1",
         SpeechNum.tutorial_navi_home_2.rawValue         : "tutorial_navi_home_2",
         
         SpeechNum.navi_home.rawValue                    : "navi_home",
 
+        SpeechNum.navi_char_select.rawValue             : "navi_char_select",
+
         SpeechNum.tutorial_battle_pre_Mob.rawValue      : "tutorial_battle_pre_Mob",
         SpeechNum.tutorial_battle_start_Mob.rawValue    : "tutorial_battle_start_Mob",
         SpeechNum.tutorial_battle_end_Mob.rawValue      : "tutorial_battle_end_Mob",
 
-        SpeechNum.battle_pre_HardbodyFemale.rawValue    : "battle_pre_HardbodyFemale",
-        SpeechNum.battle_start_HardbodyFemale.rawValue  : "battle_start_HardbodyFemale",
-        SpeechNum.battle_end_HardbodyFemale.rawValue    : "battle_end_HardbodyFemale"
+        SpeechNum.battle_pre.rawValue                   : "battle_pre",
+        SpeechNum.battle_start.rawValue                 : "battle_start",
+        SpeechNum.battle_end.rawValue                   : "battle_end"
     ]
 
     func finishSave(num: Int) {

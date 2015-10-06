@@ -19,12 +19,38 @@ final class CharManager
         case elite = "Elite"
         case majority = "Majority"
     }
+    static func cnvStringToCharNames(name: String) -> CharManager.CharNames? {
+        switch name {
+        case CharManager.CharNames.hero.rawValue:
+            return CharManager.CharNames.hero;
+        case CharManager.CharNames.mob.rawValue:
+            return CharManager.CharNames.mob;
+        case CharManager.CharNames.hardbodyFemale.rawValue:
+            return CharManager.CharNames.hardbodyFemale;
+        case CharManager.CharNames.fat.rawValue:
+            return CharManager.CharNames.fat;
+        case CharManager.CharNames.poorHealth.rawValue:
+            return CharManager.CharNames.poorHealth;
+        case CharManager.CharNames.ugly.rawValue:
+            return CharManager.CharNames.ugly;
+        case CharManager.CharNames.tease.rawValue:
+            return CharManager.CharNames.tease;
+        case CharManager.CharNames.toxic.rawValue:
+            return CharManager.CharNames.toxic;
+        case CharManager.CharNames.elite.rawValue:
+            return CharManager.CharNames.elite;
+        case CharManager.CharNames.majority.rawValue:
+            return CharManager.CharNames.majority;
+        default:
+            return nil;
+        }
+    }
     static func getChar(name: String) -> CharBase {
         switch name {
         case CharNames.mob.rawValue:                return CharMob().data;
         case CharNames.hardbodyFemale.rawValue:     return CharHardbodyFemale().data;
         case CharNames.fat.rawValue:                return CharFat().data;
-        default: return CharHero().data;
+        default:                                    return CharHero().data;
         }
     }
     

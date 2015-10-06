@@ -28,6 +28,8 @@ class SpeechCtrl {
     var speechs: [String] = [];
     var speechList: [SpeechBase] = [];
     var speechIndex: Int = 0;
+    
+    var executed: Bool = false;
 
     var delegate: SpeechDelegate;
 
@@ -52,14 +54,17 @@ class SpeechCtrl {
         delegate = _delegate;
     }
         
-    func run() {
+    func run(existingSpeaker: Bool = false) {
         speechIndex = 0;
         
         if let speaker_name = speaker_image {
-            speaker = SKSpriteNode(imageNamed: speaker_image);
-            speaker.position = speaker_position;
-            speaker.zPosition = zPosition;
-            targetScene.addChild(speaker);
+            if existingSpeaker {}
+            else {
+                speaker = SKSpriteNode(imageNamed: speaker_image);
+                speaker.position = speaker_position;
+                speaker.zPosition = zPosition;
+                targetScene.addChild(speaker);
+            }            
         }
         else {
             speaker = nil;
@@ -77,7 +82,10 @@ class SpeechCtrl {
             speechList.insert(speech, atIndex: 0);
         }
         
-        if let s = speaker {
+        if existingSpeaker {
+            self.speechStart(0);
+        }
+        else if let s = speaker {
             var action: SKAction;
             if let a = speaker_inAction {
                 action = SKAction.sequence([a
@@ -109,6 +117,8 @@ class SpeechCtrl {
             speechEnd();
             return;
         }
+        
+        executed = true;
         
         speechIndex = index;
         if let s = speaker {
@@ -150,6 +160,26 @@ class SpeechCtrl {
         }
         
         return status;
+    }
+    
+    func reset(callback: () -> Void) {
+        if status == .runSpeech {
+            speechList[speechIndex].skip();
+        }
+        if executed {
+            speechList[speechIndex].remove({ () -> Void in
+                self.status = .idle;
+                self.speechIndex = 0;
+                self.executed = false;
+                callback();
+            })
+        }
+        else {
+            status = .idle;
+            speechIndex = 0;
+            self.executed = false;
+            callback();
+        }
     }
     
 }

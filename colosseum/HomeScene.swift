@@ -13,8 +13,7 @@ class HomeScene: SKScene, SpeechDelegate {
     var story_mgr = StoryManager.instance;
     
     //---------------
-    // チュートリアル用
-    
+    // ナビ
     var navi: SpeechCtrl!;
     var speechRunning = StoryManager.SpeechNum.non;
     var speechs: [String] = [];
@@ -80,7 +79,7 @@ class HomeScene: SKScene, SpeechDelegate {
             
             switch scene_status {
             case .idle:
-                SceneManager.changeScene(SceneManager.Scenes.battle);
+                SceneManager.changeScene(SceneManager.Scenes.char_select);
                 
             case .runSpeech:
                 fallthrough

@@ -9,4 +9,10 @@ final class GameManager
     var player_character = CharManager.CharNames.hero;
     var enemy_character = CharManager.CharNames.mob;
     
+    static func getBattleCharList() -> [CharBase] {
+        return [
+            CharManager.getChar(CharManager.CharNames.hardbodyFemale.rawValue),
+            CharManager.getChar(CharManager.CharNames.fat.rawValue),
+        ];
+    }
 }
