@@ -9,7 +9,9 @@ class HomeScene: SKScene, SpeechDelegate {
         case waitTapSpeech
     }
     var scene_status = SceneStatus.pretreat;
+    var next_scene = SceneManager.Scenes.char_select;
 
+    var game_mgr = GameManager.instance;
     var story_mgr = StoryManager.instance;
     
     //---------------
@@ -61,6 +63,8 @@ class HomeScene: SKScene, SpeechDelegate {
         view.ignoresSiblingOrder = false;
         
         if false == story_mgr.finishLoad(StoryManager.SpeechNum.tutorial_navi_home_1.rawValue) {
+            next_scene = SceneManager.Scenes.battle;
+            game_mgr.enemy_character = CharManager.CharNames.mob;
             naviStart(StoryManager.SpeechNum.tutorial_navi_home_1);
         }
         else if false == story_mgr.finishLoad(StoryManager.SpeechNum.tutorial_navi_home_2.rawValue) {
@@ -79,7 +83,7 @@ class HomeScene: SKScene, SpeechDelegate {
             
             switch scene_status {
             case .idle:
-                SceneManager.changeScene(SceneManager.Scenes.char_select);
+                SceneManager.changeScene(next_scene);
                 
             case .runSpeech:
                 fallthrough

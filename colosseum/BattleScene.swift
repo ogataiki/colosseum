@@ -96,6 +96,10 @@ class BattleScene: SKScene, SpeechDelegate {
     var tc_lastStock: Int = 0;
     var tc_list: [CharBase.ActionType] = [];
     
+    var log_list: [String] = [];
+    var log_label_list: [SKLabelNode] = [];
+    var log_back: SKSpriteNode!;
+    
     enum ZCtrl: CGFloat {
         case gauge_rise_bar = 101
         case gauge = 100
@@ -746,8 +750,8 @@ class BattleScene: SKScene, SpeechDelegate {
         
         meleeBuffer = [];
         let enemyActs = arc4random() % 6;
-        let roop = max(tc_list.count, Int(enemyActs));
-        for i in 0 ..< roop {
+        let loop = max(tc_list.count, Int(enemyActs));
+        for i in 0 ..< loop {
             
             let enemy_act: CharBase.ActionType;
             if i > Int(enemyActs) {enemy_act = CharBase.ActionType.non}
@@ -1781,93 +1785,93 @@ class BattleScene: SKScene, SpeechDelegate {
     
     func meleeAction_Atk(#attacker: CharBase, target: CharBase
         , content: [CharBase.Attacked] = []
+        , content_index: Int = 0
         , left: Bool = false
         , callback: () -> Void)
     {
-        if content.count == 0 {
+        if content_index >= content.count {
             callback();
             return;
         }
         var actions: [SKAction] = [];
         
-        for i in 0 ..< content.count {
-            let damage = content[i].damage;
-            let first = (i == 0) ? true : false;
-            let last = (i == content.count-1) ? true : false;
-            let basePos = attacker.position;
-            let movePos: CGPoint;
-            if left {
-                movePos = CGPointMake(target.position.x + target.size.width*0.4, target.position.y);
-            }
-            else {
-                movePos = CGPointMake(target.position.x - target.size.width*0.4, target.position.y);
-            }
-            let move = SKAction.moveTo(movePos, duration: 0.1);
-            actions.append(move);
-            
-            let attack_effect = SKAction.runBlock { () -> Void in
-                
-                for i2 in 0 ..< 2 {
-                    var startPos: CGPoint, endPos: CGPoint;
-                    if left {
-                        startPos = CGPointMake(target.position.x + target.size.width*0.6, target.position.y + target.size.height*0.6);
-                        endPos = CGPointMake(target.position.x - target.size.width*0.4, target.position.y - target.size.height*0.4);
-                    }
-                    else {
-                        startPos = CGPointMake(target.position.x - target.size.width*0.6, target.position.y + target.size.height*0.6);
-                        endPos = CGPointMake(target.position.x + target.size.width*0.4, target.position.y - target.size.height*0.4);
-                    }
-                    var atkEffect = SKSpriteNode(imageNamed: "Sparkline");
-                    atkEffect.blendMode = (i2 % 2 == 0) ? SKBlendMode.Add : SKBlendMode.Alpha;
-                    atkEffect.alpha = 0.6;
-                    atkEffect.position = startPos;
-                    atkEffect.zPosition = target.zPosition;
-                    atkEffect.setScale(0.0);
-                    self.addChild(atkEffect);
-                    
-                    let atkScale1 = SKAction.scaleTo(0.0, duration: 0.0);
-                    let radian = atan2(endPos.x - startPos.x, endPos.y - startPos.y);
-                    let atkRote = SKAction.rotateToAngle(radian*(-1), duration: 0.0);
-                    let atkMove = SKAction.moveTo(endPos, duration: 0.1);
-                    let atkScale2 = SKAction.group([SKAction.scaleXTo(0.7, duration: 0.05), SKAction.scaleYTo(1.0, duration: 0.1)]);
-                    let atkScale3 = SKAction.scaleXTo(0.0, duration: 0.05);
-                    let atkScaleSeq = SKAction.sequence([atkScale2, atkScale3]);
-                    let atkEFunc = SKAction.runBlock({ () -> Void in
-                        if i2 == 0 {
-                            if damage == 0 {
-                                self.meleeAction_Miss(target.name!, callback: { () -> Void in
-                                })
-                            }
-                            else {
-                                self.meleeAction_Damage(target.name!, damage: damage, callback: { () -> Void in
-                                    target.addDamage([content[i]]);
-                                    target.refleshStatus();
-                                })
-                            }
-                        }
-                        atkEffect.removeFromParent();
-                    })
-                    atkEffect.runAction(SKAction.sequence([atkScale1, atkRote, SKAction.group([atkMove, atkScaleSeq]), atkEFunc]));
-                }
-            }
-            actions.append(attack_effect);
-            
-            var waitTime = (last) ? 1.0 : 0.3;
-            let wait = SKAction.waitForDuration(waitTime);
-            actions.append(wait);
-            
-            let recoil = SKActionEx.jumpTo(startPoint: movePos
-                , targetPoint: basePos
-                , height: attacker.size.height
-                , duration: 0.5);
-            actions.append(recoil);
-            let attack_end = SKAction.runBlock { () -> Void in
-                if last {
-                    callback();
-                }
-            }
-            actions.append(attack_end);
+        let damage = content[content_index].damage;
+        let first = (content_index == 0) ? true : false;
+        let last = (content_index == content.count-1) ? true : false;
+        let basePos = attacker.position;
+        let movePos: CGPoint;
+        if left {
+            movePos = CGPointMake(target.position.x + target.size.width*0.4, target.position.y);
         }
+        else {
+            movePos = CGPointMake(target.position.x - target.size.width*0.4, target.position.y);
+        }
+        let move = SKAction.moveTo(movePos, duration: 0.1);
+        actions.append(move);
+        
+        let attack_effect = SKAction.runBlock { () -> Void in
+            
+            for i2 in 0 ..< 2 {
+                var startPos: CGPoint, endPos: CGPoint;
+                if left {
+                    startPos = CGPointMake(target.position.x + target.size.width*0.6, target.position.y + target.size.height*0.6);
+                    endPos = CGPointMake(target.position.x - target.size.width*0.4, target.position.y - target.size.height*0.4);
+                }
+                else {
+                    startPos = CGPointMake(target.position.x - target.size.width*0.6, target.position.y + target.size.height*0.6);
+                    endPos = CGPointMake(target.position.x + target.size.width*0.4, target.position.y - target.size.height*0.4);
+                }
+                var atkEffect = SKSpriteNode(imageNamed: "Sparkline");
+                atkEffect.blendMode = (i2 % 2 == 0) ? SKBlendMode.Add : SKBlendMode.Alpha;
+                atkEffect.alpha = 0.6;
+                atkEffect.position = startPos;
+                atkEffect.zPosition = target.zPosition;
+                atkEffect.setScale(0.0);
+                self.addChild(atkEffect);
+                
+                let atkScale1 = SKAction.scaleTo(0.0, duration: 0.0);
+                let radian = atan2(endPos.x - startPos.x, endPos.y - startPos.y);
+                let atkRote = SKAction.rotateToAngle(radian*(-1), duration: 0.0);
+                let atkMove = SKAction.moveTo(endPos, duration: 0.1);
+                let atkScale2 = SKAction.group([SKAction.scaleXTo(0.7, duration: 0.05), SKAction.scaleYTo(1.0, duration: 0.1)]);
+                let atkScale3 = SKAction.scaleXTo(0.0, duration: 0.05);
+                let atkScaleSeq = SKAction.sequence([atkScale2, atkScale3]);
+                let atkEFunc = SKAction.runBlock({ () -> Void in
+                    if i2 == 0 {
+                        if damage == 0 {
+                            self.meleeAction_Miss(target.name!, callback: { () -> Void in
+                            })
+                        }
+                        else {
+                            self.meleeAction_Damage(target.name!, damage: damage, callback: { () -> Void in
+                                target.addDamage([content[content_index]]);
+                                target.refleshStatus();
+                            })
+                        }
+                    }
+                    atkEffect.removeFromParent();
+                })
+                atkEffect.runAction(SKAction.sequence([atkScale1, atkRote, SKAction.group([atkMove, atkScaleSeq]), atkEFunc]));
+            }
+        }
+        actions.append(attack_effect);
+        
+        var waitTime = (last) ? 1.0 : 0.6;
+        let wait = SKAction.waitForDuration(waitTime);
+        actions.append(wait);
+        
+        let recoil = SKActionEx.jumpTo(startPoint: movePos
+            , targetPoint: basePos
+            , height: attacker.size.height
+            , duration: 0.5);
+        actions.append(recoil);
+        let attack_end = SKAction.runBlock { () -> Void in
+            self.meleeAction_Atk(attacker: attacker, target: target
+                , content: content, content_index: content_index+1
+                , left: left
+                , callback: callback);
+        }
+        actions.append(attack_end);
         
         attacker.runAction(SKAction.sequence(actions));
     }
