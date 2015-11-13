@@ -32,7 +32,7 @@ class CharMob
         // 行動設定
         
         // 行動0 : 行動なし(固定)
-        var non = CharBase.Action();
+        let non = CharBase.Action();
         non.action.type = CharBtlAction.ActType.non;
         data.actions.append(non);
         
@@ -127,9 +127,29 @@ class CharMob
         
         data.speech_battleStart = [
             "新人？ウヒョー！カモだぜ！",
-            "俺の妨害にびびんじゃねーぞwww"
+            "集中フェーズでは",
+            "集中してゲージのてっぺんで止める！",
+            "そんなことも知らねぇんだろwww",
+            "いただきまーす！www"
         ];
         
+        data.speech_battleTactical = [
+            CharBase.BattleSpeech_tactical(speech: []),
+            CharBase.BattleSpeech_tactical(speech: [
+                "戦略フェーズでは",
+                "集中フェーズで貯めた集中力を使って",
+                "行動を選択する！",
+                "そんなことも知らねぇんだろwww",
+                "マジお前かわいそうウケるwww"
+                ]),
+            CharBase.BattleSpeech_tactical(speech: [
+                "相手より有利な行動なら",
+                "相手の行動はキャンセルされる！",
+                "そんなことも知らねぇんだろwww",
+                "マジ、サンドバック乙www"
+                ])
+        ];
+                
         data.speech_battleEnd_win = [
             "ザッコwwwマジwww"
         ];

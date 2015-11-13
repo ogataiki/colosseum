@@ -33,7 +33,7 @@ class CharHardbodyFemale
         // 行動設定
         
         // 行動0 : 行動なし(固定)
-        var non = CharBase.Action();
+        let non = CharBase.Action();
         non.action.type = CharBtlAction.ActType.non;
         data.actions.append(non);
         

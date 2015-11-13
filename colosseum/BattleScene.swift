@@ -7,6 +7,7 @@ class BattleScene: SKScene, SpeechDelegate {
     enum SceneStatus: Int {
         case pretreat = 0
         case speech_start
+        case speech_tactical
         case speech_end
         case stock
         case tactical
@@ -26,6 +27,8 @@ class BattleScene: SKScene, SpeechDelegate {
             scene_status = status;
         }
     }
+    
+    var turn: Int = 0;
     
     var gauge: Gauge!;
     var reach_base: CGFloat = 200;
@@ -118,6 +121,8 @@ class BattleScene: SKScene, SpeechDelegate {
         playerInit();
         
         enemyInit();
+        
+        turn = 1;
         
         speech_battleStart();
     }
@@ -370,7 +375,7 @@ class BattleScene: SKScene, SpeechDelegate {
         
         player_char = CharManager.getChar(gameManager.player_character.rawValue);
         player_char.posUpdate(CGPointMake(self.size.width*0.85, self.size.height*0.8));
-        player_char.setPlayer(v: true);
+        player_char.setPlayer(true);
         player_char.zPosUpdate(0);
         self.addChild(player_char.gaugeHP);
         self.addChild(player_char);
@@ -415,7 +420,7 @@ class BattleScene: SKScene, SpeechDelegate {
         
         enemy_char = CharManager.getChar(gameManager.enemy_character.rawValue);
         enemy_char.posUpdate(CGPointMake(self.size.width*0.15, self.size.height*0.8));
-        enemy_char.setPlayer(v: false);
+        enemy_char.setPlayer(false);
         enemy_char.zPosUpdate(0);
         self.addChild(enemy_char.gaugeHP);
         self.addChild(enemy_char);
@@ -488,10 +493,10 @@ class BattleScene: SKScene, SpeechDelegate {
         enemy_char.runAction(SKAction.sequence([move, endf]));
     }
     
-    override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
+    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
         /* Called when a touch begins */
         
-        for touch in (touches as! Set<UITouch>) {
+        for touch in (touches ) {
             let location = touch.locationInNode(self)
             
             switch(scene_status) {
@@ -500,6 +505,8 @@ class BattleScene: SKScene, SpeechDelegate {
                 break;
                 
             case .speech_start:
+                fallthrough;
+            case .speech_tactical:
                 fallthrough;
             case .speech_end:
                 speechCtrl.tap();
@@ -561,6 +568,8 @@ class BattleScene: SKScene, SpeechDelegate {
             break;
         case .speech_start:
             break;
+        case .speech_tactical:
+            break;
         case .speech_end:
             break;
         case .stock:
@@ -587,7 +596,7 @@ class BattleScene: SKScene, SpeechDelegate {
             rise_reset_flg = false;
         }
         else {
-            var speed = rise_speed + (rise_frame / player_char.gaugeAcceleration);
+            let speed = rise_speed + (rise_frame / player_char.gaugeAcceleration);
             rise_frame += speed;
             
             if rise_frame > reach_base {
@@ -617,14 +626,20 @@ class BattleScene: SKScene, SpeechDelegate {
     
     func tacticalStart() {
         
-        changeStatus(SceneStatus.tactical);
         tacticalUIInit();
 
         tc_list = [];
         tc_lastStock = attack_list.count;
         ui_playerLastStock.text = "lastStock:\(self.tc_lastStock)";
+        
+        if speech_battleTactical(turn) == false {
+            changeStatus(SceneStatus.tactical);
+        }
     }
     func tacticalAtk() {
+        if scene_status != SceneStatus.tactical {
+            return;
+        }
         let cost = player_char.actions[CharBase.ActionType.atk.rawValue].action.atkCost;
         if tc_lastStock >= cost {
             tc_list.append(CharBase.ActionType.atk);
@@ -635,6 +650,9 @@ class BattleScene: SKScene, SpeechDelegate {
         }
     }
     func tacticalDef() {
+        if scene_status != SceneStatus.tactical {
+            return;
+        }
         let cost = player_char.actions[CharBase.ActionType.def.rawValue].action.defCost;
         if tc_lastStock >= cost {
             tc_list.append(CharBase.ActionType.def);
@@ -645,6 +663,9 @@ class BattleScene: SKScene, SpeechDelegate {
         }
     }
     func tacticalJam() {
+        if scene_status != SceneStatus.tactical {
+            return;
+        }
         let cost = player_char.actions[CharBase.ActionType.jam.rawValue].action.jamCost;
         if tc_lastStock >= cost {
             tc_list.append(CharBase.ActionType.jam);
@@ -655,6 +676,9 @@ class BattleScene: SKScene, SpeechDelegate {
         }
     }
     func tacticalEnh() {
+        if scene_status != SceneStatus.tactical {
+            return;
+        }
         let cost = player_char.actions[CharBase.ActionType.enh.rawValue].action.enhCost;
         if tc_lastStock >= cost {
             tc_list.append(CharBase.ActionType.enh);
@@ -665,6 +689,9 @@ class BattleScene: SKScene, SpeechDelegate {
         }
     }
     func tacticalSkl() {
+        if scene_status != SceneStatus.tactical {
+            return;
+        }
         let act = player_char.actions[CharBase.ActionType.skl.rawValue];
         let cost = act.action.sklCost;
         if tc_lastStock >= cost {
@@ -676,11 +703,17 @@ class BattleScene: SKScene, SpeechDelegate {
         }
     }
     func tacticalEnter() {
+        if scene_status != SceneStatus.tactical {
+            return;
+        }
         tacticalUIRemove();
         
         meleeStart();
     }
     func tacticalReset() {
+        if scene_status != SceneStatus.tactical {
+            return;
+        }
         tc_lastStock = attack_list.count;
         ui_playerLastStock.text = "lastStock:\(tc_lastStock)";
         
@@ -688,7 +721,7 @@ class BattleScene: SKScene, SpeechDelegate {
     }
     
     func tacticalStockExpendEffect(cost: Int, pos: CGPoint, size: CGSize) {
-        var expend = SKLabelNode(text: "-\(cost)");
+        let expend = SKLabelNode(text: "-\(cost)");
         expend.position = pos;
         expend.fontSize = 16;
         self.addChild(expend);
@@ -705,7 +738,7 @@ class BattleScene: SKScene, SpeechDelegate {
         expend.runAction(SKAction.sequence([group, endfunc]));
     }
     func tacticalStockExpendEffect_ui(cost: Int, frame: CGRect) {
-        var expend = UILabel(frame: CGRectMake(frame.origin.x + frame.size.width*0.5, frame.origin.y - frame.size.height*0.5
+        let expend = UILabel(frame: CGRectMake(frame.origin.x + frame.size.width*0.5, frame.origin.y - frame.size.height*0.5
             , frame.size.width, frame.size.height));
         expend.text = "-\(cost)";
         expend.textAlignment = NSTextAlignment.Center;
@@ -727,15 +760,15 @@ class BattleScene: SKScene, SpeechDelegate {
             for i in 0 ..< tc_list.count {
                 switch tc_list[i] {
                 case .atk:
-                    lbl.text += "atk,"
+                    lbl.text! += "atk,"
                 case .def:
-                    lbl.text += "def,"
+                    lbl.text! += "def,"
                 case .enh:
-                    lbl.text += "enh,"
+                    lbl.text! += "enh,"
                 case .jam:
-                    lbl.text += "jam,"
+                    lbl.text! += "jam,"
                 case .skl:
-                    lbl.text += "skl,"
+                    lbl.text! += "skl,"
                 default:
                     break;
                 }
@@ -763,7 +796,7 @@ class BattleScene: SKScene, SpeechDelegate {
             
             let player_act = (i < tc_list.count) ? tc_list[i] : CharBase.ActionType.non;
             
-            var data: MeleeData = MeleeData(player_action: player_act, enemy_action: enemy_act);
+            let data: MeleeData = MeleeData(player_action: player_act, enemy_action: enemy_act);
             meleeBuffer.append(data);
         }
         
@@ -803,7 +836,7 @@ class BattleScene: SKScene, SpeechDelegate {
             self.meleeNextActionExec(playerAction: playerAction, enemyAction: enemyAction);
         };
     }
-    func meleeNextActionExec(#playerAction: CharBase.Action, enemyAction: CharBase.Action) {
+    func meleeNextActionExec(playerAction playerAction: CharBase.Action, enemyAction: CharBase.Action) {
         switch CharBase.cnvActType(playerAction) {
         case .atk:
             switch CharBase.cnvActType(enemyAction) {
@@ -897,7 +930,16 @@ class BattleScene: SKScene, SpeechDelegate {
                 self.attack_list = [];
                 self.attack_count_lbl.text = "\(self.attack_list.count)"
                 
+                self.turn++;
                 self.changeStatus(SceneStatus.stock);
+            }
+        }
+    }
+    
+    func meleeLogUpdate() {
+        for var i = log_list.count-1; i >= 0; i-- {
+            if log_label_list.count <= i {
+                
             }
         }
     }
@@ -1029,7 +1071,7 @@ class BattleScene: SKScene, SpeechDelegate {
     //------------
     // player atk
     
-    func melee_atk_non(#pAct: CharBase.Action) {
+    func melee_atk_non(pAct pAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
@@ -1045,7 +1087,7 @@ class BattleScene: SKScene, SpeechDelegate {
         melee_player(meleeResult.player_result, pAct: pAct, callback: melee_action_finish_all);
     }
     
-    func melee_atk_atk(#pAct: CharBase.Action, eAct: CharBase.Action) {
+    func melee_atk_atk(pAct pAct: CharBase.Action, eAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
@@ -1064,7 +1106,7 @@ class BattleScene: SKScene, SpeechDelegate {
         melee_enemy(meleeResult.enemy_result, eAct: eAct, callback: melee_action_finish_enemy);
     }
     
-    func melee_atk_def(#pAct: CharBase.Action, eAct: CharBase.Action) {
+    func melee_atk_def(pAct pAct: CharBase.Action, eAct: CharBase.Action) {
         
         // player不利
         // atk < def 攻撃失敗 + 有利側カウンターアタック
@@ -1090,7 +1132,7 @@ class BattleScene: SKScene, SpeechDelegate {
         // 通信結果OK
         
         // 敵カウンター行動->敵行動
-        self.meleeCancelAllAction(player: true, enemy: false, index: self.meleeProgress);
+        self.meleeCancelAllAction(true, enemy: false, index: self.meleeProgress);
         self.melee_action_finish_player();
         
         self.meleeAction_ActTitleDisplay(player: "", enemy: "カウンター", callback: { () -> Void in
@@ -1104,7 +1146,7 @@ class BattleScene: SKScene, SpeechDelegate {
         })
     }
     
-    func melee_atk_jam(#pAct: CharBase.Action, eAct: CharBase.Action) {
+    func melee_atk_jam(pAct pAct: CharBase.Action, eAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
@@ -1126,7 +1168,7 @@ class BattleScene: SKScene, SpeechDelegate {
         }
     }
     
-    func melee_atk_enh(#pAct: CharBase.Action, eAct: CharBase.Action) {
+    func melee_atk_enh(pAct pAct: CharBase.Action, eAct: CharBase.Action) {
         
         // player有利
         // enh < atk 強化失敗 + 強化効果全解除
@@ -1143,7 +1185,7 @@ class BattleScene: SKScene, SpeechDelegate {
         // 通信結果OK
         
         // enemy行動キャンセル->player行動
-        self.meleeCancelAllAction(player: false, enemy: true, index: self.meleeProgress);
+        self.meleeCancelAllAction(false, enemy: true, index: self.meleeProgress);
         self.meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.enh);
         self.enemy_char.refleshStatus();
         self.melee_action_finish_enemy();
@@ -1154,7 +1196,7 @@ class BattleScene: SKScene, SpeechDelegate {
     //------------
     // player def
     
-    func melee_def_non(#pAct: CharBase.Action) {
+    func melee_def_non(pAct pAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
@@ -1170,7 +1212,7 @@ class BattleScene: SKScene, SpeechDelegate {
         melee_player(meleeResult.player_result, pAct: pAct, callback: melee_action_finish_all);
     }
     
-    func melee_def_atk(#pAct: CharBase.Action, eAct: CharBase.Action) {
+    func melee_def_atk(pAct pAct: CharBase.Action, eAct: CharBase.Action) {
         
         // player有利
         // atk < def 攻撃失敗 + 有利側カウンターアタック
@@ -1196,7 +1238,7 @@ class BattleScene: SKScene, SpeechDelegate {
         // 通信結果OK
         
         // playerカウンター行動->player行動
-        self.meleeCancelAllAction(player: false, enemy: true, index: self.meleeProgress);
+        self.meleeCancelAllAction(false, enemy: true, index: self.meleeProgress);
         self.enemy_char.refleshStatus();
         self.melee_action_finish_enemy();
         
@@ -1211,7 +1253,7 @@ class BattleScene: SKScene, SpeechDelegate {
         })
     }
     
-    func melee_def_def(#pAct: CharBase.Action, eAct: CharBase.Action) {
+    func melee_def_def(pAct pAct: CharBase.Action, eAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
@@ -1230,7 +1272,7 @@ class BattleScene: SKScene, SpeechDelegate {
         melee_enemy(meleeResult.enemy_result, eAct: eAct, callback: melee_action_finish_enemy);
     }
     
-    func melee_def_jam(#pAct: CharBase.Action, eAct: CharBase.Action) {
+    func melee_def_jam(pAct pAct: CharBase.Action, eAct: CharBase.Action) {
         
         // player不利
         // def < jam 防御失敗 + 防御効果全破壊
@@ -1248,7 +1290,7 @@ class BattleScene: SKScene, SpeechDelegate {
         // 通信結果OK
         
         // player行動キャンセル->enemy行動
-        self.meleeCancelAllAction(player: true, enemy: false, index: self.meleeProgress);
+        self.meleeCancelAllAction(true, enemy: false, index: self.meleeProgress);
         self.meleeCancelAllStatus(self.player_char, cancelType: CharBtlAction.ActType.def);
         self.player_char.refleshStatus();
         self.melee_action_finish_player();
@@ -1256,7 +1298,7 @@ class BattleScene: SKScene, SpeechDelegate {
         melee_enemy(meleeResult.enemy_result, eAct: eAct, callback: melee_action_finish_enemy);
     }
     
-    func melee_def_enh(#pAct: CharBase.Action, eAct: CharBase.Action) {
+    func melee_def_enh(pAct pAct: CharBase.Action, eAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
@@ -1278,7 +1320,7 @@ class BattleScene: SKScene, SpeechDelegate {
     //------------
     // player jam
     
-    func melee_jam_non(#pAct: CharBase.Action) {
+    func melee_jam_non(pAct pAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
@@ -1294,7 +1336,7 @@ class BattleScene: SKScene, SpeechDelegate {
         melee_player(meleeResult.player_result, pAct: pAct, callback: melee_action_finish_all);
     }
     
-    func melee_jam_atk(#pAct: CharBase.Action, eAct: CharBase.Action) {
+    func melee_jam_atk(pAct pAct: CharBase.Action, eAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
@@ -1317,7 +1359,7 @@ class BattleScene: SKScene, SpeechDelegate {
         });
     }
     
-    func melee_jam_def(#pAct: CharBase.Action, eAct: CharBase.Action) {
+    func melee_jam_def(pAct pAct: CharBase.Action, eAct: CharBase.Action) {
         
         // player有利
         // def < jam 防御失敗 + 防御効果全破壊
@@ -1334,7 +1376,7 @@ class BattleScene: SKScene, SpeechDelegate {
         // 通信結果OK
         
         // enemy行動キャンセル->player行動
-        self.meleeCancelAllAction(player: false, enemy: true, index: self.meleeProgress);
+        self.meleeCancelAllAction(false, enemy: true, index: self.meleeProgress);
         self.meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.def);
         self.enemy_char.refleshStatus();
         self.melee_action_finish_enemy();
@@ -1342,7 +1384,7 @@ class BattleScene: SKScene, SpeechDelegate {
         melee_player(meleeResult.player_result, pAct: pAct, callback: melee_action_finish_player);
     }
     
-    func melee_jam_jam(#pAct: CharBase.Action, eAct: CharBase.Action) {
+    func melee_jam_jam(pAct pAct: CharBase.Action, eAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
@@ -1361,7 +1403,7 @@ class BattleScene: SKScene, SpeechDelegate {
         melee_enemy(meleeResult.enemy_result, eAct: eAct, callback: melee_action_finish_enemy);
     }
     
-    func melee_jam_enh(#pAct: CharBase.Action, eAct: CharBase.Action) {
+    func melee_jam_enh(pAct pAct: CharBase.Action, eAct: CharBase.Action) {
         
         // player不利
         // jam < enh 妨害失敗 + 妨害追加効果全解除
@@ -1378,7 +1420,7 @@ class BattleScene: SKScene, SpeechDelegate {
         // 通信結果OK
         
         // player行動キャンセル->enemy行動
-        self.meleeCancelAllAction(player: true, enemy: false, index: self.meleeProgress);
+        self.meleeCancelAllAction(true, enemy: false, index: self.meleeProgress);
         self.meleeCancelAllStatus(self.enemy_char, cancelType: CharBtlAction.ActType.jam);
         self.enemy_char.refleshStatus();
         self.melee_action_finish_player();
@@ -1389,7 +1431,7 @@ class BattleScene: SKScene, SpeechDelegate {
     //------------
     // player enh
     
-    func melee_enh_non(#pAct: CharBase.Action) {
+    func melee_enh_non(pAct pAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
@@ -1405,7 +1447,7 @@ class BattleScene: SKScene, SpeechDelegate {
         melee_player(meleeResult.player_result, pAct: pAct, callback: melee_action_finish_all);
     }
     
-    func melee_enh_atk(#pAct: CharBase.Action, eAct: CharBase.Action) {
+    func melee_enh_atk(pAct pAct: CharBase.Action, eAct: CharBase.Action) {
         
         // player不利
         // enh < atk 強化失敗 + 強化効果全解除
@@ -1422,7 +1464,7 @@ class BattleScene: SKScene, SpeechDelegate {
         // 通信結果OK
         
         // player行動キャンセル->enemy行動
-        self.meleeCancelAllAction(player: true, enemy: false, index: self.meleeProgress);
+        self.meleeCancelAllAction(true, enemy: false, index: self.meleeProgress);
         self.meleeCancelAllStatus(self.player_char, cancelType: CharBtlAction.ActType.enh);
         self.player_char.refleshStatus();
         self.melee_action_finish_player();
@@ -1430,7 +1472,7 @@ class BattleScene: SKScene, SpeechDelegate {
         melee_enemy(meleeResult.enemy_result, eAct: eAct, callback: melee_action_finish_enemy);
     }
     
-    func melee_enh_def(#pAct: CharBase.Action, eAct: CharBase.Action) {
+    func melee_enh_def(pAct pAct: CharBase.Action, eAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
@@ -1449,7 +1491,7 @@ class BattleScene: SKScene, SpeechDelegate {
         melee_enemy(meleeResult.enemy_result, eAct: eAct, callback: melee_action_finish_enemy);
     }
     
-    func melee_enh_jam(#pAct: CharBase.Action, eAct: CharBase.Action) {
+    func melee_enh_jam(pAct pAct: CharBase.Action, eAct: CharBase.Action) {
         
         // player有利
         // jam < enh 妨害失敗 + 妨害追加効果全解除
@@ -1466,7 +1508,7 @@ class BattleScene: SKScene, SpeechDelegate {
         // 通信結果OK
         
         // enemy行動キャンセル->player行動
-        self.meleeCancelAllAction(player: false, enemy: true, index: self.meleeProgress);
+        self.meleeCancelAllAction(false, enemy: true, index: self.meleeProgress);
         self.meleeCancelAllStatus(self.player_char, cancelType: CharBtlAction.ActType.jam);
         self.player_char.refleshStatus();
         self.melee_action_finish_enemy();
@@ -1474,7 +1516,7 @@ class BattleScene: SKScene, SpeechDelegate {
         melee_player(meleeResult.player_result, pAct: pAct, callback: melee_action_finish_player);
     }
     
-    func melee_enh_enh(#pAct: CharBase.Action, eAct: CharBase.Action) {
+    func melee_enh_enh(pAct pAct: CharBase.Action, eAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result = melee_getResult(player_char, target: enemy_char, act: pAct
@@ -1496,7 +1538,7 @@ class BattleScene: SKScene, SpeechDelegate {
     //------------
     // player non
     
-    func melee_non_atk(#eAct: CharBase.Action) {
+    func melee_non_atk(eAct eAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result.non_action = true;
@@ -1512,7 +1554,7 @@ class BattleScene: SKScene, SpeechDelegate {
         melee_enemy(meleeResult.enemy_result, eAct: eAct, callback: melee_action_finish_all);
     }
     
-    func melee_non_def(#eAct: CharBase.Action) {
+    func melee_non_def(eAct eAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result.non_action = true;
@@ -1528,7 +1570,7 @@ class BattleScene: SKScene, SpeechDelegate {
         melee_enemy(meleeResult.enemy_result, eAct: eAct, callback: melee_action_finish_all);
     }
     
-    func melee_non_jam(#eAct: CharBase.Action) {
+    func melee_non_jam(eAct eAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result.non_action = true;
@@ -1544,7 +1586,7 @@ class BattleScene: SKScene, SpeechDelegate {
         melee_enemy(meleeResult.enemy_result, eAct: eAct, callback: melee_action_finish_all);
     }
     
-    func melee_non_enh(#eAct: CharBase.Action) {
+    func melee_non_enh(eAct eAct: CharBase.Action) {
         
         var meleeResult = MeleeResultData();
         meleeResult.player_result.non_action = true;
@@ -1573,7 +1615,7 @@ class BattleScene: SKScene, SpeechDelegate {
     {
         var result = MeleeResult();
         if act.type == CharBase.ActionType.skl  {
-            var ret = c.procAction_skl(act.action.skl
+            let ret = c.procAction_skl(act.action.skl
                 , specBefor_executer: specBefor.spec, specBefor_target: specBefor_target.spec, specBase_target: target.spec_base
                 , targetDefences: specBefor_target.defs);
             result.skill = ret.result;
@@ -1585,7 +1627,7 @@ class BattleScene: SKScene, SpeechDelegate {
         else {
             switch act.action.type {
             case .atk:
-                var ret = c.procAction_atk(act.action.atk
+                let ret = c.procAction_atk(act.action.atk
                     , _attack: specBefor.spec.ATK, targetSpecBefor: specBefor_target.spec, targetDefences: specBefor_target.defs
                     , counter: counter, counter_content: counter_content);
                 result.attack = ret.result;
@@ -1593,19 +1635,19 @@ class BattleScene: SKScene, SpeechDelegate {
                 result.specAfter_target.spec = ret.specAfter;
                 result.specAfter_target.defs = ret.defsAfter;
             case .def:
-                var ret = c.procAction_def(act.action.def, specBefor: specBefor.spec);
+                let ret = c.procAction_def(act.action.def, specBefor: specBefor.spec);
                 result.defence = ret.result;
                 result.specAfter_executer.spec = ret.specAfter;
                 result.specAfter_executer.defs = specBefor.defs;
                 result.specAfter_target = specBefor_target;
             case .jam:
-                var ret = c.procAction_jam(act.action.jam, specBase: target.spec_base, specBefor: specBefor_target.spec);
+                let ret = c.procAction_jam(act.action.jam, specBase: target.spec_base, specBefor: specBefor_target.spec);
                 result.jamming = ret.result;
                 result.specAfter_executer = specBefor;
                 result.specAfter_target.spec = ret.specAfter;
                 result.specAfter_target.defs = specBefor_target.defs;
             case .enh:
-                var ret = c.procAction_enh(act.action.enh, specBefor: specBefor.spec);
+                let ret = c.procAction_enh(act.action.enh, specBefor: specBefor.spec);
                 result.enhance = ret.result;
                 result.specAfter_executer.spec = ret.specAfter;
                 result.specAfter_executer.defs = specBefor.defs;
@@ -1621,7 +1663,7 @@ class BattleScene: SKScene, SpeechDelegate {
     }
     
     
-    func meleeAction_Pre(#pAct: CharBtlAction.ActType, eAct: CharBtlAction.ActType, callback: () -> Void)
+    func meleeAction_Pre(pAct pAct: CharBtlAction.ActType, eAct: CharBtlAction.ActType, callback: () -> Void)
     {
         if pAct != CharBtlAction.ActType.non {
             meleeAction_ActTitleDisplay(player: CharBtlAction.getActTypeName(pAct), enemy: "", callback: { () -> Void in
@@ -1653,7 +1695,7 @@ class BattleScene: SKScene, SpeechDelegate {
     
     var playerCutin: SKSpriteNode!;
     var enemyCutin: SKSpriteNode!;
-    func meleeAction_ActTitleDisplay(#player: String, enemy: String, callback: () -> Void) {
+    func meleeAction_ActTitleDisplay(player player: String, enemy: String, callback: () -> Void) {
         
         if player != "" {
             
@@ -1667,7 +1709,7 @@ class BattleScene: SKScene, SpeechDelegate {
             playerCutin.position = CGPointMake(self.size.width + playerCutin.size.width, self.size.height);
             self.addChild(playerCutin);
             
-            var pActLbl = SKLabelNode(text: player);
+            let pActLbl = SKLabelNode(text: player);
             pActLbl.position = CGPointMake(playerCutin.size.width*0.5*(-1), playerCutin.size.height*0.5*(-1));
             pActLbl.fontSize = 18;
             pActLbl.fontColor = UIColor.blackColor();
@@ -1690,7 +1732,7 @@ class BattleScene: SKScene, SpeechDelegate {
             enemyCutin.position = CGPointMake(0 - enemyCutin.size.width, self.size.height);
             self.addChild(enemyCutin);
             
-            var eActLbl = SKLabelNode(text: enemy);
+            let eActLbl = SKLabelNode(text: enemy);
             eActLbl.position = CGPointMake(enemyCutin.size.width*0.5, enemyCutin.size.height*0.5*(-1));
             eActLbl.fontSize = 18;
             eActLbl.fontColor = UIColor.blackColor();
@@ -1722,16 +1764,16 @@ class BattleScene: SKScene, SpeechDelegate {
         callback();
     }
     
-    func meleeAction_Break(#breakAct: CharBtlAction.ActType
+    func meleeAction_Break(breakAct breakAct: CharBtlAction.ActType
         , advantageChar: CharBase, breakChar: CharBase
         , callback: () -> Void)
     {
-        var cutin = SKSpriteNode(color: UIColor.greenColor(), size: CGSizeMake(self.size.width, self.size.height*0.2));
+        let cutin = SKSpriteNode(color: UIColor.greenColor(), size: CGSizeMake(self.size.width, self.size.height*0.2));
         cutin.position = CGPointMake(self.size.width*0.5, self.size.height*0.3);
         self.addChild(cutin);
         
-        var contentText1 = "\(advantageChar.displayName)の有利行動";
-        var contentText2 = "\(breakChar.displayName)は体勢を崩した！";
+        let contentText1 = "\(advantageChar.displayName)の有利行動";
+        let contentText2 = "\(breakChar.displayName)は体勢を崩した！";
         let contentText3: String;
         switch breakAct {
         case .atk:
@@ -1745,21 +1787,21 @@ class BattleScene: SKScene, SpeechDelegate {
         default:
             contentText3 = "";
         }
-        var contentLbl1 = SKLabelNode(text: contentText1);
+        let contentLbl1 = SKLabelNode(text: contentText1);
         contentLbl1.position = CGPointMake(0, cutin.size.height*0.25);
         contentLbl1.fontSize = 17;
         contentLbl1.fontColor = UIColor.blackColor();
         contentLbl1.verticalAlignmentMode = SKLabelVerticalAlignmentMode.Center;
         contentLbl1.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Center;
         cutin.addChild(contentLbl1);
-        var contentLbl2 = SKLabelNode(text: contentText2);
+        let contentLbl2 = SKLabelNode(text: contentText2);
         contentLbl2.position = CGPointMake(0, cutin.size.height*0.05*(-1));
         contentLbl2.fontSize = 16;
         contentLbl2.fontColor = UIColor.blackColor();
         contentLbl2.verticalAlignmentMode = SKLabelVerticalAlignmentMode.Center;
         contentLbl2.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Center;
         cutin.addChild(contentLbl2);
-        var contentLbl3 = SKLabelNode(text: contentText3);
+        let contentLbl3 = SKLabelNode(text: contentText3);
         contentLbl3.position = CGPointMake(0, cutin.size.height*0.2*(-1));
         contentLbl3.fontSize = 16;
         contentLbl3.fontColor = UIColor.blackColor();
@@ -1783,7 +1825,7 @@ class BattleScene: SKScene, SpeechDelegate {
         advantageChar.runAction(SKAction.sequence([jump, jump]));
     }
     
-    func meleeAction_Atk(#attacker: CharBase, target: CharBase
+    func meleeAction_Atk(attacker attacker: CharBase, target: CharBase
         , content: [CharBase.Attacked] = []
         , content_index: Int = 0
         , left: Bool = false
@@ -1801,10 +1843,20 @@ class BattleScene: SKScene, SpeechDelegate {
         let basePos = attacker.position;
         let movePos: CGPoint;
         if left {
-            movePos = CGPointMake(target.position.x + target.size.width*0.4, target.position.y);
+            if target.size.width < 0.0 {
+                movePos = CGPointMake(target.position.x - target.size.width*0.4, target.position.y);
+            }
+            else {
+                movePos = CGPointMake(target.position.x + target.size.width*0.4, target.position.y);
+            }
         }
         else {
-            movePos = CGPointMake(target.position.x - target.size.width*0.4, target.position.y);
+            if target.size.width < 0.0 {
+                movePos = CGPointMake(target.position.x + target.size.width*0.4, target.position.y);
+            }
+            else {
+                movePos = CGPointMake(target.position.x - target.size.width*0.4, target.position.y);
+            }
         }
         let move = SKAction.moveTo(movePos, duration: 0.1);
         actions.append(move);
@@ -1814,14 +1866,26 @@ class BattleScene: SKScene, SpeechDelegate {
             for i2 in 0 ..< 2 {
                 var startPos: CGPoint, endPos: CGPoint;
                 if left {
-                    startPos = CGPointMake(target.position.x + target.size.width*0.6, target.position.y + target.size.height*0.6);
-                    endPos = CGPointMake(target.position.x - target.size.width*0.4, target.position.y - target.size.height*0.4);
+                    if target.size.width < 0.0 {
+                        startPos = CGPointMake(target.position.x - target.size.width*0.6, target.position.y + target.size.height*0.6);
+                        endPos = CGPointMake(target.position.x + target.size.width*0.4, target.position.y - target.size.height*0.4);
+                    }
+                    else {
+                        startPos = CGPointMake(target.position.x + target.size.width*0.6, target.position.y + target.size.height*0.6);
+                        endPos = CGPointMake(target.position.x - target.size.width*0.4, target.position.y - target.size.height*0.4);
+                    }
                 }
                 else {
-                    startPos = CGPointMake(target.position.x - target.size.width*0.6, target.position.y + target.size.height*0.6);
-                    endPos = CGPointMake(target.position.x + target.size.width*0.4, target.position.y - target.size.height*0.4);
+                    if target.size.width < 0.0 {
+                        startPos = CGPointMake(target.position.x + target.size.width*0.6, target.position.y + target.size.height*0.6);
+                        endPos = CGPointMake(target.position.x - target.size.width*0.4, target.position.y - target.size.height*0.4);
+                    }
+                    else {
+                        startPos = CGPointMake(target.position.x - target.size.width*0.6, target.position.y + target.size.height*0.6);
+                        endPos = CGPointMake(target.position.x + target.size.width*0.4, target.position.y - target.size.height*0.4);
+                    }
                 }
-                var atkEffect = SKSpriteNode(imageNamed: "Sparkline");
+                let atkEffect = SKSpriteNode(imageNamed: "Sparkline");
                 atkEffect.blendMode = (i2 % 2 == 0) ? SKBlendMode.Add : SKBlendMode.Alpha;
                 atkEffect.alpha = 0.6;
                 atkEffect.position = startPos;
@@ -1856,7 +1920,7 @@ class BattleScene: SKScene, SpeechDelegate {
         }
         actions.append(attack_effect);
         
-        var waitTime = (last) ? 1.0 : 0.6;
+        let waitTime = (last) ? 1.2 : 0.8;
         let wait = SKAction.waitForDuration(waitTime);
         actions.append(wait);
         
@@ -1936,18 +2000,37 @@ class BattleScene: SKScene, SpeechDelegate {
         }
     }
     
-    func meleeAction_Def(#target: CharBase
+    func meleeAction_Def(target target: CharBase
         , content: [CharBase.Defenced]
         , left: Bool = false
         , callback: () -> Void)
     {
         for i in 0 ..< 10 {
             let delay = SKAction.waitForDuration(NSTimeInterval(createRandom(Min: 0.0, Max: 0.3)));
-            let move = SKAction.moveToX(target.position.x + ((left) ? target.size.width*0.6*(-1) : target.size.width*0.6), duration: 0.5);
+            print("left:\(left), target.pos:\(target.position), target.size:\(target.size)");
+            let pos: CGFloat;
+            if left {
+                if target.size.width < 0.0 {
+                    pos = target.position.x + (target.size.width*0.6);
+                }
+                else {
+                    pos = target.position.x - (target.size.width*0.6);
+                }
+            }
+            else {
+                if target.size.width < 0.0 {
+                    pos = target.position.x - (target.size.width*0.6);
+                }
+                else {
+                    pos = target.position.x + (target.size.width*0.6);
+                }
+            }
+            print("pos:\(pos)");
+            let move = SKAction.moveToX(pos, duration: 0.5);
             let scale = SKAction.scaleYTo(0.9, duration: 0.5);
             let group = SKAction.group([move, scale]);
             for j in 0 ..< 2 {
-                var line = SKSpriteNode(imageNamed: "Sparkline");
+                let line = SKSpriteNode(imageNamed: "Sparkline");
                 line.blendMode = (j % 2 == 0) ? SKBlendMode.Add : SKBlendMode.Alpha;
                 line.position.x = target.position.x;
                 line.position.y = target.position.y;
@@ -1982,12 +2065,12 @@ class BattleScene: SKScene, SpeechDelegate {
             ]));
     }
     
-    func meleeAction_Jam(#target: CharBase
+    func meleeAction_Jam(target target: CharBase
         , content: [CharBase.Jamming]
         , callback: () -> Void)
     {
         for i in 0 ..< 30 {
-            var line = SKSpriteNode(imageNamed: "Sparkline");
+            let line = SKSpriteNode(imageNamed: "Sparkline");
             line.blendMode = (arc4random() % 2 == 0) ? SKBlendMode.Add : SKBlendMode.Alpha;
             line.position.x = createRandom(Min: target.position.x - target.size.width*0.5, Max: target.position.x + target.size.width*0.5)
             line.position.y = target.position.y + target.size.height*0.4;
@@ -1998,13 +2081,13 @@ class BattleScene: SKScene, SpeechDelegate {
             line.colorBlendFactor = 1.0;
             self.addChild(line);
             
-            var delay = SKAction.waitForDuration(NSTimeInterval(createRandom(Min: 0.0, Max: 0.3)));
-            var scaleX = SKAction.scaleXTo(0.0, duration: 0.4);
+            let delay = SKAction.waitForDuration(NSTimeInterval(createRandom(Min: 0.0, Max: 0.3)));
+            let scaleX = SKAction.scaleXTo(0.0, duration: 0.4);
             scaleX.timingMode = SKActionTimingMode.EaseInEaseOut;
-            var scaleY = SKAction.scaleYTo(1.1, duration: 0.8);
+            let scaleY = SKAction.scaleYTo(1.1, duration: 0.8);
             scaleY.timingMode = SKActionTimingMode.EaseOut;
-            var move = SKAction.moveToY(target.position.y - target.size.height*0.3, duration: 0.4)
-            var scaleGroup = SKAction.group([scaleX, scaleY, move]);
+            let move = SKAction.moveToY(target.position.y - target.size.height*0.3, duration: 0.4)
+            let scaleGroup = SKAction.group([scaleX, scaleY, move]);
             let endfunc = SKAction.runBlock { () -> Void in
                 line.removeFromParent();
             }
@@ -2029,12 +2112,12 @@ class BattleScene: SKScene, SpeechDelegate {
             ]));
     }
     
-    func meleeAction_Enh(#target: CharBase
+    func meleeAction_Enh(target target: CharBase
         , content: [CharBase.Enhanced]
         , callback: () -> Void)
     {
         for i in 0 ..< 30 {
-            var line = SKSpriteNode(imageNamed: "Sparkline");
+            let line = SKSpriteNode(imageNamed: "Sparkline");
             line.blendMode = SKBlendMode.Add;
             line.position.x = createRandom(Min: target.position.x - target.size.width*0.5, Max: target.position.x + target.size.width*0.5)
             line.position.y = target.position.y - target.size.height*0.5;
@@ -2044,13 +2127,13 @@ class BattleScene: SKScene, SpeechDelegate {
             line.colorBlendFactor = 1.0;
             self.addChild(line);
             
-            var delay = SKAction.waitForDuration(NSTimeInterval(createRandom(Min: 0.0, Max: 0.3)));
-            var scaleX = SKAction.scaleXTo(0.0, duration: 0.4);
+            let delay = SKAction.waitForDuration(NSTimeInterval(createRandom(Min: 0.0, Max: 0.3)));
+            let scaleX = SKAction.scaleXTo(0.0, duration: 0.4);
             scaleX.timingMode = SKActionTimingMode.EaseInEaseOut;
-            var scaleY = SKAction.scaleYTo(1.1, duration: 0.8);
+            let scaleY = SKAction.scaleYTo(1.1, duration: 0.8);
             scaleY.timingMode = SKActionTimingMode.EaseOut;
-            var move = SKAction.moveToY(target.position.y + target.size.height*0.3, duration: 0.8)
-            var scaleGroup = SKAction.group([scaleX, scaleY, move]);
+            let move = SKAction.moveToY(target.position.y + target.size.height*0.3, duration: 0.8)
+            let scaleGroup = SKAction.group([scaleX, scaleY, move]);
             let endfunc = SKAction.runBlock { () -> Void in
                 line.removeFromParent();
             }
@@ -2076,7 +2159,7 @@ class BattleScene: SKScene, SpeechDelegate {
         
     }
     
-    func meleeAction_Skl(#executer: CharBase, target: CharBase
+    func meleeAction_Skl(executer executer: CharBase, target: CharBase
         , content: [CharBase.Skilled]
         , index: Int = 0
         , left: Bool = false
@@ -2200,7 +2283,7 @@ class BattleScene: SKScene, SpeechDelegate {
     
     // バトル終了   
     func battleFinish(callback: () -> Void) {
-        var cutin = SKSpriteNode(color: UIColor.orangeColor(), size: CGSizeMake(self.size.width, self.size.height*0.2));
+        let cutin = SKSpriteNode(color: UIColor.orangeColor(), size: CGSizeMake(self.size.width, self.size.height*0.2));
         cutin.position = CGPointMake(self.size.width*0.5, self.size.height*0.3);
         self.addChild(cutin);
         
@@ -2213,7 +2296,7 @@ class BattleScene: SKScene, SpeechDelegate {
         }
         contentText += "は戦闘不能";
         
-        var contentLbl = SKLabelNode(text: contentText);
+        let contentLbl = SKLabelNode(text: contentText);
         contentLbl.position = CGPointMake(0, 0);
         contentLbl.fontSize = 17;
         contentLbl.fontColor = UIColor.blackColor();
@@ -2235,7 +2318,7 @@ class BattleScene: SKScene, SpeechDelegate {
     }
     
     // 乱数生成
-    func createRandom(#Min : CGFloat, Max : CGFloat) -> CGFloat {
+    func createRandom(Min Min : CGFloat, Max : CGFloat) -> CGFloat {
         
         return ( CGFloat(arc4random_uniform(UINT32_MAX)) / CGFloat(UINT32_MAX) ) * (Max - Min) + Min;
     }
@@ -2259,6 +2342,24 @@ class BattleScene: SKScene, SpeechDelegate {
             , _delegate: self);
         speechCtrl.run();
         scene_status = .speech_start;
+    }
+    func speech_battleTactical(turn: Int) -> Bool {
+        if turn >= enemy_char.speech_battleTactical.count {
+            return false;
+        }
+        speechIndex = 0;
+        speechs = enemy_char.speech_battleTactical[turn].speech;
+        if speechs.count <= 0 {
+            return false;
+        }
+        speechCtrl = SpeechCtrl(_scene: self
+            , _speaker_position: CGPointMake(self.size.width*0.5, self.size.height*0.9)
+            , _zPosition: 0
+            , _speechs: speechs
+            , _delegate: self);
+        speechCtrl.run();
+        scene_status = .speech_tactical;
+        return true;
     }
     func speech_battleEnd(win: Bool) {
         speechIndex = 0;
@@ -2299,6 +2400,9 @@ class BattleScene: SKScene, SpeechDelegate {
                         self.changeStatus(SceneStatus.stock);
                     }
                 }
+                break;
+            case .speech_tactical:
+                changeStatus(SceneStatus.tactical);
                 break;
             case .speech_end:
                 changeStatus(SceneStatus.end);

@@ -17,9 +17,9 @@ final class SceneManager
     }
     var scene_buffer: [Scenes] = [];
     private func moveScene(next: Scenes) -> Bool {
-        if let view = skView {
+        if let _ = skView {
             let tr = SKTransition.crossFadeWithDuration(0.5);
-            if var scene = SceneManager.getSceneInstance(next) {
+            if let scene = SceneManager.getSceneInstance(next) {
                 scene.scaleMode = .AspectFill;
                 scene.size = skView.frame.size;
                 skView.presentScene(scene, transition: tr);
@@ -47,7 +47,7 @@ final class SceneManager
         }
     }
     static func changeScene(next: Scenes) {
-        popScene(change: false);
+        popScene(false);
         pushScene(next);
     }
     static func getSceneInstance(scene: Scenes) -> SKScene? {

@@ -4,13 +4,13 @@ import SpriteKit
 
 class SKActionEx {
     
-    static func jumpTo(#sprite: SKSpriteNode, targetPoint: CGPoint, height: CGFloat, duration: NSTimeInterval) -> SKAction {
+    static func jumpTo(sprite sprite: SKSpriteNode, targetPoint: CGPoint, height: CGFloat, duration: NSTimeInterval) -> SKAction {
         
         return jumpTo(startPoint: sprite.position, targetPoint: targetPoint, height: height, duration: duration);
     }
-    static func jumpTo(#startPoint: CGPoint, targetPoint: CGPoint, height: CGFloat, duration: NSTimeInterval) -> SKAction {
+    static func jumpTo(startPoint startPoint: CGPoint, targetPoint: CGPoint, height: CGFloat, duration: NSTimeInterval) -> SKAction {
         
-        var bezierPath: UIBezierPath = UIBezierPath()
+        let bezierPath: UIBezierPath = UIBezierPath()
         bezierPath.moveToPoint(startPoint)
         var controlPoint: CGPoint = CGPoint()
         controlPoint.x = startPoint.x + (targetPoint.x - startPoint.x)/2

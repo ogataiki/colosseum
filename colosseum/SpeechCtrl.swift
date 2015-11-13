@@ -57,7 +57,7 @@ class SpeechCtrl {
     func run(existingSpeaker: Bool = false) {
         speechIndex = 0;
         
-        if let speaker_name = speaker_image {
+        if let _ = speaker_image {
             if existingSpeaker {}
             else {
                 speaker = SKSpriteNode(imageNamed: speaker_image);
@@ -85,7 +85,7 @@ class SpeechCtrl {
         if existingSpeaker {
             self.speechStart(0);
         }
-        else if let s = speaker {
+        else if let _ = speaker {
             var action: SKAction;
             if let a = speaker_inAction {
                 action = SKAction.sequence([a
@@ -121,7 +121,7 @@ class SpeechCtrl {
         executed = true;
         
         speechIndex = index;
-        if let s = speaker {
+        if let _ = speaker {
             speechList[index].setPosition(CGPointMake(targetScene.size.width*0.5, speaker.position.y + speaker.size.height*0.6));
         }
         else {

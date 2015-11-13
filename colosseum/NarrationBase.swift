@@ -61,7 +61,7 @@ class NarrationBase {
         
         status = .runText;
         
-        if let b = back {
+        if let _ = back {
             back.runAction(SKAction.sequence([
                 SKAction.fadeAlphaTo(backAlpha, duration: 0.25)
                 , SKAction.runBlock({ () -> Void in
@@ -94,7 +94,7 @@ class NarrationBase {
 
     func skip() {
         if status == .runText {
-            if let t = text {
+            if let _ = text {
                 text.changeState( .skip );
                 status = .idle;
             }
@@ -102,7 +102,7 @@ class NarrationBase {
     }
     
     func remove(callback: () -> Void) {
-        if let b = back {
+        if let _ = back {
             back.runAction(SKAction.sequence([
                 SKAction.fadeAlphaTo(0.0, duration: 0.15)
                 , SKAction.runBlock({ () -> Void in
@@ -110,7 +110,7 @@ class NarrationBase {
                 })
             ]));
         }
-        if let t = text {
+        if let _ = text {
             text.runAction(SKAction.sequence([
                 SKAction.fadeAlphaTo(0.0, duration: 0.15)
                 , SKAction.runBlock({ () -> Void in
@@ -125,10 +125,10 @@ class NarrationBase {
         }
     }
     func removeProc() {
-        if let b = back {
+        if let _ = back {
             back.removeFromParent();
         }
-        if let t = text {
+        if let _ = text {
             text.removeFromParent();
         }
     }

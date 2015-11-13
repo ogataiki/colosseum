@@ -65,7 +65,7 @@ class SpeechBase {
         
         status = .runText;
         
-        if let b = speechBalloon {
+        if let _ = speechBalloon {
             speechBalloon.runAction(SKAction.sequence([
                 SKAction.scaleYTo(1.0, duration: 0.1)
                 , SKAction.runBlock({ () -> Void in
@@ -78,7 +78,7 @@ class SpeechBase {
     func runProc() {
 
         let color: UIColor;
-        if let b = speechBalloon {
+        if let _ = speechBalloon {
             color = UIColor.clearColor();
         }
         else {
@@ -111,7 +111,7 @@ class SpeechBase {
     
     func skip() {
         if status == .runText {
-            if let t = text {
+            if let _ = text {
                 text.changeState( .skip );
                 status = .idle;
             }
@@ -119,7 +119,7 @@ class SpeechBase {
     }
     
     func remove(callback: () -> Void) {
-        if let b = speechBalloon {
+        if let _ = speechBalloon {
             speechBalloon.runAction(SKAction.sequence([
                 SKAction.scaleYTo(0.0, duration: 0.1)
                 , SKAction.runBlock({ () -> Void in
@@ -127,7 +127,7 @@ class SpeechBase {
                 })
             ]));
         }
-        if let t = text {
+        if let _ = text {
             text.runAction(SKAction.sequence([
                 SKAction.scaleYTo(0.0, duration: 0.1)
                 , SKAction.runBlock({ () -> Void in
@@ -142,17 +142,17 @@ class SpeechBase {
         }
     }
     func removeProc() {
-        if let b = speechBalloon {
+        if let _ = speechBalloon {
             speechBalloon.removeFromParent();
         }
-        if let t = text {
+        if let _ = text {
             text.removeFromParent();
         }
     }
     
     func setPosition(position: CGPoint) {
         center = position;
-        if let b = speechBalloon {
+        if let _ = speechBalloon {
             speechBalloon.position = position;
         }
     }

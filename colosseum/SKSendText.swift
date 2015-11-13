@@ -103,7 +103,7 @@ class SKSendText : SKSpriteNode {
         // テキストの保管と文字数の取得
         var text: String = text
         m_text = text
-        m_count = count(text)
+        m_count = text.characters.count
         if m_count == 0 { return };
         var strcount: CGFloat = 0.0
         var x: UInt = 0              // 横に何文字目か
@@ -127,7 +127,7 @@ class SKSendText : SKSpriteNode {
             x++
             
             // ラベルノードの生成
-            var content = Content(x: x, y: y, label: SKLabelNode(text: "\(chara)"));
+            let content = Content(x: x, y: y, label: SKLabelNode(text: "\(chara)"));
             content.label.fontSize = m_fontSize;
             content.label.alpha = 0.0;
             content.label.fontColor = m_color;
@@ -189,7 +189,7 @@ class SKSendText : SKSpriteNode {
         // テキストの保管と文字数の取得
         var text: String = text
         
-        m_count = count(text)
+        m_count = text.characters.count
         if m_count == 0 { return }  // 空なら描画せず終了
         
         var x: UInt = 0              // 横に何文字目か
@@ -211,7 +211,7 @@ class SKSendText : SKSpriteNode {
             }
             x++
             
-            var label: SKLabelNode = SKLabelNode(text: "\(chara)")
+            let label: SKLabelNode = SKLabelNode(text: "\(chara)")
             label.fontSize = m_fontSize
             let xPos = m_posX! + (CGFloat(x-1) * m_fontSize);
             let yPos = m_posY! - (CGFloat(y) * m_fontSize);
@@ -220,7 +220,7 @@ class SKSendText : SKSpriteNode {
             
             self.addChild(label)
             
-            var content = Content(x: x, y: y, label: label);
+            let content = Content(x: x, y: y, label: label);
             m_labelArray.append(content)
         }
         m_totalHeight = y;

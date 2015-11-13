@@ -16,7 +16,7 @@ class GaugeBase: SKCropNode
         super.init()
         
         gaugeSprite = SKSpriteNode(color: color, size: size);
-        initGauge(anchor: anchor);
+        initGauge(anchor);
         addChild(gaugeSprite)
     }
     
@@ -24,7 +24,7 @@ class GaugeBase: SKCropNode
         super.init()
 
         gaugeSprite = SKSpriteNode(imageNamed: imageNamed);
-        initGauge(anchor: anchor);
+        initGauge(anchor);
         addChild(gaugeSprite)
     }
     
@@ -41,7 +41,7 @@ class GaugeBase: SKCropNode
         self.maskNode = maskSprite;
     }
     
-    func updateScale(#x: CGFloat, y: CGFloat)
+    func updateScale(x x: CGFloat, y: CGFloat)
     {
         self.maskNode?.xScale = x;
         self.maskNode?.yScale = y;
@@ -63,7 +63,7 @@ class Gauge: SKSpriteNode
     var gauge: GaugeBase!;
     var gauge_lo: GaugeBase!;
         
-    func initGauge(#color: UIColor, direction: Direction, zPos: CGFloat) {
+    func initGauge(color color: UIColor, direction: Direction, zPos: CGFloat) {
     
         self.direction = direction;
         
@@ -73,7 +73,7 @@ class Gauge: SKSpriteNode
         addChild(gauge)
     }
     
-    func initGauge(#imageNamed: String, direction: Direction, zPos: CGFloat) {
+    func initGauge(imageNamed imageNamed: String, direction: Direction, zPos: CGFloat) {
         
         self.direction = direction;
         
@@ -83,7 +83,7 @@ class Gauge: SKSpriteNode
         addChild(gauge)
     }
     
-    func initGauge_lo(#color: UIColor, zPos: CGFloat) {
+    func initGauge_lo(color color: UIColor, zPos: CGFloat) {
         
         gauge_lo = GaugeBase(color: color, size: self.size, anchor: CGPointMake(1.0, 1.0));
         updateGaugePosition();
@@ -91,7 +91,7 @@ class Gauge: SKSpriteNode
         addChild(gauge_lo)
     }
 
-    func initGauge_lo(#imageNamed: String, zPos: CGFloat) {
+    func initGauge_lo(imageNamed imageNamed: String, zPos: CGFloat) {
         
         gauge_lo = GaugeBase(imageNamed: imageNamed, anchor: CGPointMake(1.0, 1.0));
         updateGaugePosition();

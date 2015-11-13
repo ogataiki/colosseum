@@ -11,6 +11,7 @@ final class GameManager
     
     static func getBattleCharList() -> [CharBase] {
         return [
+            CharManager.getChar(CharManager.CharNames.mob.rawValue),
             CharManager.getChar(CharManager.CharNames.hardbodyFemale.rawValue),
             CharManager.getChar(CharManager.CharNames.fat.rawValue),
         ];

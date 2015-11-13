@@ -102,10 +102,10 @@ class CharSelectScene: SKScene, SpeechDelegate, UITableViewDelegate, UITableView
     }
     
 
-    override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
+    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
         /* Called when a touch begins */
         
-        for touch in (touches as! Set<UITouch>) {
+        for touch in (touches ) {
             let location = touch.locationInNode(self)
             
         }
@@ -133,7 +133,7 @@ class CharSelectScene: SKScene, SpeechDelegate, UITableViewDelegate, UITableView
         selected_name = char_list[indexPath.row].name!;
         navi.reset { () -> Void in
             self.navi.speechs = ["「\(self.char_list[indexPath.row].displayName)」にするかね？"];
-            self.navi.run(existingSpeaker: true);
+            self.navi.run(true);
             
             self.enterBtn.hidden = false;
             self.cancelBtn.hidden = false;

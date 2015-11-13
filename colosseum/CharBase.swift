@@ -19,6 +19,11 @@ class CharBase : SKSpriteNode {
     var speech_battleEnd_win: [String] = [];
     var speech_battleEnd_lose: [String] = [];
     
+    struct BattleSpeech_tactical {
+        var speech: [String] = [];
+    }
+    var speech_battleTactical: [BattleSpeech_tactical] = [];
+    
     struct Spec {
         var HP: Int = 3000;
         var ATK: Int = 100;
@@ -31,7 +36,7 @@ class CharBase : SKSpriteNode {
     var spec = Spec();
 
     func statusInit(
-        #hp: Int,
+        hp hp: Int,
         atk: Int,
         def: Int,
         hit: Int,
@@ -81,10 +86,10 @@ class CharBase : SKSpriteNode {
         else {
             s = _spec!;
         }
-        if let gauge = gaugeHP {
+        if let _ = gaugeHP {
             gaugeHP.updateProgress(CGFloat(s.HP) / CGFloat(spec_base.HP) * 100);
         }
-        if let label = labelHP {
+        if let _ = labelHP {
             labelHP.text = "HP:\(s.HP)";
             if s.HP < spec_base.HP / 5 {
                 labelHP.fontColor = UIColor.redColor();
@@ -99,7 +104,7 @@ class CharBase : SKSpriteNode {
                 labelHP.fontColor = UIColor.whiteColor();
             }
         }
-        if let label = labelATK {
+        if let _ = labelATK {
             labelATK.text = "ATK:\(s.ATK)";
             if s.ATK < spec_base.ATK {
                 labelATK.fontColor = UIColor.blueColor();
@@ -111,7 +116,7 @@ class CharBase : SKSpriteNode {
                 labelATK.fontColor = UIColor.whiteColor();
             }
         }
-        if let label = labelDEF {
+        if let _ = labelDEF {
             labelDEF.text = "DEF:\(s.DEF)+\(calcDefences(defenceds))";
             if s.DEF < spec_base.DEF {
                 labelDEF.fontColor = UIColor.blueColor();
@@ -123,7 +128,7 @@ class CharBase : SKSpriteNode {
                 labelDEF.fontColor = UIColor.whiteColor();
             }
         }
-        if let label = labelHIT {
+        if let _ = labelHIT {
             labelHIT.text = "HIT:\(s.HIT)";
             if s.HIT < spec_base.HIT {
                 labelHIT.fontColor = UIColor.blueColor();
@@ -135,7 +140,7 @@ class CharBase : SKSpriteNode {
                 labelHIT.fontColor = UIColor.whiteColor();
             }
         }
-        if let label = labelAVD {
+        if let _ = labelAVD {
             labelAVD.text = "AVD:\(s.AVD)";
             if s.AVD < spec_base.AVD {
                 labelAVD.fontColor = UIColor.blueColor();
@@ -147,7 +152,7 @@ class CharBase : SKSpriteNode {
                 labelAVD.fontColor = UIColor.whiteColor();
             }
         }
-        if let label = labelADDATK {
+        if let _ = labelADDATK {
             labelADDATK.text = "ADDATK:\(s.ADD_ATK)";
             if s.ADD_ATK > 0 {
                 labelADDATK.fontColor = UIColor.orangeColor();
@@ -348,7 +353,7 @@ class CharBase : SKSpriteNode {
         -> (result: [Defenced], specAfter: Spec)
     {
         var result: [Defenced] = [];
-        var specWork = specBefor;
+        let specWork = specBefor;
         for i in 0 ..< def.count {
             var data = Defenced();
             data.content = def[i];
@@ -357,7 +362,7 @@ class CharBase : SKSpriteNode {
             data.lastCount = def[i].defCount
             
             // 強さ取得
-            let (power_TypeRatio: Int, power_TypeConst: Int) = calcPower(Int(def[i].defPower), seedType: def[i].seedType, char: self);
+            let (power_TypeRatio, power_TypeConst): (Int, Int) = calcPower(Int(def[i].defPower), seedType: def[i].seedType, char: self);
             data.addDef = power_TypeRatio;
             
             result.append(data);
@@ -436,7 +441,7 @@ class CharBase : SKSpriteNode {
             data.lastTrun = jam[i].turn;
             
             // 強さ取得
-            let (power_TypeRatio: Int, power_TypeConst: Int) = calcPower(Int(jam[i].power), seedType: jam[i].seedType, char: self);
+            let (power_TypeRatio, power_TypeConst): (Int, Int) = calcPower(Int(jam[i].power), seedType: jam[i].seedType, char: self);
             
             switch jam[i].type {
             case .enhAtk:
@@ -551,7 +556,7 @@ class CharBase : SKSpriteNode {
             data.specBefor = specWork;
             
             // 強さ取得
-            let (power_TypeRatio: Int, power_TypeConst: Int) = calcPower(Int(enh[i].power), seedType: enh[i].seedType, char: self);
+            let (power_TypeRatio, power_TypeConst): (Int, Int) = calcPower(Int(enh[i].power), seedType: enh[i].seedType, char: self);
             
             switch enh[i].type {
             case .atk:
@@ -649,20 +654,20 @@ class CharBase : SKSpriteNode {
             
             switch skl[i].type {
             case .atk:
-                var ret = procAction_atk(skl[i].atk, _attack: specWork_executer.ATK, targetSpecBefor: specWork_target, targetDefences: defsWork_target);
+                let ret = procAction_atk(skl[i].atk, _attack: specWork_executer.ATK, targetSpecBefor: specWork_target, targetDefences: defsWork_target);
                 data.atk = ret.result;
                 specWork_target = ret.specAfter;
                 defsWork_target = ret.defsAfter;
             case .def:
-                var ret = procAction_def(skl[i].def, specBefor: specWork_executer);
+                let ret = procAction_def(skl[i].def, specBefor: specWork_executer);
                 data.def = ret.result;
                 specWork_executer = ret.specAfter;
             case .jam:
-                var ret = procAction_jam(skl[i].jam, specBase: specBase_target, specBefor: specWork_target);
+                let ret = procAction_jam(skl[i].jam, specBase: specBase_target, specBefor: specWork_target);
                 data.jam = ret.result;
                 specWork_target = ret.specAfter;
             case .enh:
-                var ret = procAction_enh(skl[i].enh, specBefor: specWork_executer);
+                let ret = procAction_enh(skl[i].enh, specBefor: specWork_executer);
                 data.enh = ret.result;
                 specWork_executer = ret.specAfter;
             default:
@@ -774,13 +779,13 @@ class CharBase : SKSpriteNode {
     func posUpdate(pos: CGPoint) {
         self.position = pos;
         self.position_base = pos;
-        if let gauge = gaugeHP {
+        if let _ = gaugeHP {
             gaugeHP.changePosition(CGPointMake(pos.x, pos.y - self.size.height*0.6));
         }
     }
     
     func zPosUpdate(z: CGFloat) {
-        if let gauge = gaugeHP {
+        if let _ = gaugeHP {
             gaugeHP.gauge.zPosition = z+2;
             gaugeHP.gauge_lo.zPosition = z+1;
         }
